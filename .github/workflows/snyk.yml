@@ -21,7 +21,6 @@ jobs:
 
   snyk-scan:
     runs-on: ubuntu-20.04
-    needs: build
     permissions:
       id-token: write
       contents: write
@@ -48,7 +47,7 @@ jobs:
           # or you can signup for free at https://snyk.io/login
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
-          scan_all_images.sh
+          ./scan_all_images.sh
 
 
   
