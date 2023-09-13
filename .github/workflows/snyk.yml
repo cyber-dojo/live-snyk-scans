@@ -3,9 +3,7 @@ name: Run Periodic Snyk Scan
 on:
   #schedule:
     # -cron: !How often do we want to run this?!
-  push:
-    paths:
-      - '**.sh'
+  push
 
 
 env: 

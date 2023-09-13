@@ -46,7 +46,6 @@ send_to_kosli()
             #--dry-run
 }
 
-
 kosli_fetch_snapshot
 
 for i in ${!flows[@]}; do 
