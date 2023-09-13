@@ -1,7 +1,7 @@
 name: Run Periodic Snyk Scan
 
 on:
-  schedule:
+  #schedule:
     # -cron: !How often do we want to run this?!
   push:
     paths:
