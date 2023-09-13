@@ -19,50 +19,56 @@ kosli_fetch_snapshot()
 
 kosli_get_build()
 {
-    kosli get artifact "$FLOW@$FINGERPRINT" -o json > build.json
-    build=($(jq -r '.build_url' build.json))
-    rm "build.json"
-    echo $build
+    kosli get artifact "$flow@$fingerprint" -o json > artifact.json
+    build=($(jq -r '.build_url' artifact.json))
+    current_compliance=($(jq -r '.state' artifact.json))
+    rm "artifact.json"
+    
 }
 
 run_snyk_scan()
 {
-    snyk container test ${NAME}:${TAG} \
-            --json-file-output="$FLOW.json"
+    snyk container test ${name}:${tag} \
+            --json-file-output="$flow.json"
 
-    return 0
+    new_compliance="$?"
 }
 
 send_to_kosli()
 {
-    kosli report evidence artifact snyk "$ARTIFACT" \
-            --build-url "$BUILD" \
-            --flow "$FLOW" \
+    kosli report evidence artifact snyk "$artifact" \
+            --build-url "$build" \
+            --flow "$flow" \
             --name snyk-scan \
-            --scan-results "$FLOW.json" \
-            --fingerprint "$FINGERPRINT" \
-            #--dry-run
+            --scan-results "$flow.json" \
+            --fingerprint "$fingerprint" \
 }
 
 kosli_fetch_snapshot
 
 for i in ${!flows[@]}; do 
-    FLOW=${flows[$i]}
-    NAME="cyberdojo/${FLOW}"
-    TAG=${gits[$i]:0:7}
-    FINGERPRINT=${fingerprints[$i]}
-    ARTIFACT=${artifacts[$i]}
+    flow=${flows[$i]}
+    name="cyberdojo/${flow}"
+    tag=${gits[$i]:0:7}
+    fingerprint=${fingerprints[$i]}
+    artifact=${artifacts[$i]}
 
-    BUILD=$(kosli_get_build)
+    kosli_get_build
+
 
     #Only run for the creator service right now
-    if [ $FLOW == "creator" ]; then
+    if [ $flow == "creator" ]; then
 
         run_snyk_scan
-        send_to_kosli
-        rm "$FLOW.json"
+
+        if [ "$current_compliance" == "COMPLIANT" ] && [ "$new_compliance" == "1" ]; then
+            send_to_kosli
+        fi
+
+        rm "$flow.json"
 
     fi
+
 done
 
             
