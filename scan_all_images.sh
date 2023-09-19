@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -Eeu
+
 # Currently we are not permanently saving any json files - either the snapshot/artifact from Kosli or the 
 # snyk jsons. Not sure if we want to have these saved somewhere.
 
@@ -17,22 +19,27 @@ kosli_fetch_snapshot()
     rm "snapshot.json"
 }
 
+run_snyk_scan()
+{
+    set +e
+
+    snyk container test ${name}:${tag} \
+            --json-file-output="$flow.json" \
+            --policy-path=".snyk_$flow"
+    new_compliance="$?"
+
+    set -e
+}
+
 kosli_get_build()
 {
     kosli get artifact "$flow@$fingerprint" -o json > artifact.json
     build=($(jq -r '.build_url' artifact.json))
     current_compliance=($(jq -r '.state' artifact.json))
     rm "artifact.json"
-    
 }
 
-run_snyk_scan()
-{
-    snyk container test ${name}:${tag} \
-            --json-file-output="$flow.json"
 
-    new_compliance="$?"
-}
 
 send_to_kosli()
 {
@@ -44,9 +51,9 @@ send_to_kosli()
             --fingerprint "$fingerprint" \
 }
 
-kosli_fetch_snapshot
-
-for i in ${!flows[@]}; do 
+scan_images()
+{
+    for i in ${!flows[@]}; do 
     flow=${flows[$i]}
     name="cyberdojo/${flow}"
     tag=${gits[$i]:0:7}
@@ -55,20 +62,21 @@ for i in ${!flows[@]}; do
 
     kosli_get_build
 
-
     #Only run for the creator service right now
     if [ $flow == "creator" ]; then
 
         run_snyk_scan
+        send_to_kosli
 
         if [ "$current_compliance" == "COMPLIANT" ] && [ "$new_compliance" == "1" ]; then
             send_to_kosli
         fi
 
         rm "$flow.json"
-
     fi
 
-done
+    done
+}
 
-            
+kosli_fetch_snapshot
+scan_images
