@@ -16,14 +16,39 @@ kosli_fetch_snapshot()
     fingerprints=($(jq -r '.[].fingerprint' snapshot.json))
     artifacts=($(jq -r '.[].artifact' snapshot.json))
 
+
     rm "snapshot.json"
+}
+
+#To get info from the flows which do not have runtime environments
+kosli_fetch_all_flows()
+{
+    kosli list flows -o json > flows.json
+
+    flows_nr=($(jq -r '.[].name' flows.json))
+
+    rm "flows.json"
+}
+
+kosli_get_latest_artifact()
+{
+    kosli list artifacts -f ${flow} -o json > arts.json
+
+    fingerprint=($(jq -r '.[0].fingerprint' arts.json))
+    artifact=($(jq -r '.[0].filename' arts.json))
+    git=($(jq -r '.[0].git_commit' arts.json))
+    build=($(jq -r '.[0].build_url' arts.json))
+    current_compliance=($(jq -r '.[0].state' arts.json))
+
+    rm "arts.json"
+    
 }
 
 run_snyk_scan()
 {
     set +e
 
-    snyk container test ${name}:${tag} \
+    snyk container test ${artifact} \
             --json-file-output="$flow.json" \
             --policy-path=".snyk_$flow"
     new_compliance="$?"
@@ -43,40 +68,64 @@ kosli_get_build()
 
 send_to_kosli()
 {
-    kosli report evidence artifact snyk "$artifact" \
-            --build-url "$build" \
-            --flow "$flow" \
-            --name snyk-scan \
-            --scan-results "$flow.json" \
-            --fingerprint "$fingerprint" \
+    if [[ "$current_compliance" == "COMPLIANT" ]] && [[ "$new_compliance" == "1" ]]; then
+        kosli report evidence artifact snyk "$artifact" \
+                --build-url "$build" \
+                --flow "$flow" \
+                --name snyk-scan \
+                --scan-results "$flow.json" \
+                --fingerprint "$fingerprint" 
+    fi
 }
 
-scan_images()
+scan_images_in_prod()
 {
     for i in ${!flows[@]}; do 
-    flow=${flows[$i]}
-    name="cyberdojo/${flow}"
-    tag=${gits[$i]:0:7}
-    fingerprint=${fingerprints[$i]}
-    artifact=${artifacts[$i]}
+        flow=${flows[$i]}
+        name="cyberdojo/${flow}"
+        tag=${gits[$i]:0:7}
+        fingerprint=${fingerprints[$i]}
+        artifact=$name:$tag
 
-    kosli_get_build
 
-    #Only run for the creator service right now
-    if [ $flow == "creator" ]; then
+        kosli_get_build
 
-        run_snyk_scan
-        send_to_kosli
+        #Only run for the creator service right now
+        if [[ $flow == "creator" ]]; then
 
-        if [ "$current_compliance" == "COMPLIANT" ] && [ "$new_compliance" == "1" ]; then
+            run_snyk_scan
             send_to_kosli
+
+            rm "$flow.json"
         fi
 
-        rm "$flow.json"
-    fi
+    done
+
+}
+
+scan_non_runtime_images()
+{
+    kosli_fetch_all_flows
+
+    for i in ${!flows_nr[@]}; do
+        flow=${flows_nr[$i]}
+        if [[ ! "${flows[*]}" =~ "$flow" ]]; then
+
+            kosli_get_latest_artifact
+            
+            if [[ ! "$artifact" == "null" ]] && [[ ! "$flow" == "repler" ]]; then
+                echo $flow
+                run_snyk_scan
+                send_to_kosli
+                rm "$flow.json"
+            fi
+        fi
 
     done
 }
 
+
 kosli_fetch_snapshot
-scan_images
+scan_images_in_prod
+
+scan_non_runtime_images
