@@ -1,8 +1,8 @@
 name: Run Periodic Snyk Scan
 
 on:
-  #schedule:
-    # -cron: '5 * * * *'
+  schedule:
+    -cron: '* 9 * * *'
   push
 
 
@@ -14,8 +14,6 @@ env:
   KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
 
