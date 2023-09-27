@@ -1,9 +1,12 @@
 name: Run Periodic Snyk Scan
 
 on:
+  push:
+    branches:
+      -main
   schedule:
     -cron: '* 9 * * *'
-  push
+  
 
 
 env: 
