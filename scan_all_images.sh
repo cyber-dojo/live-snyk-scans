@@ -82,8 +82,7 @@ send_to_kosli()
                 --flow "$flow" \
                 --name snyk-scan \
                 --scan-results "$flow.json" \
-                --fingerprint "$fingerprint" \
-                --dry-run
+                --fingerprint "$fingerprint" 
     fi
 }
 
