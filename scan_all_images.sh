@@ -45,7 +45,7 @@ kosli_fetch_snapshot()
 
 get_snyk_policy_file()
 {
-    cURL https://raw.githubusercontent.com/cyber-dojo/$flow/main/.snyk  > .snyk
+    curl https://raw.githubusercontent.com/cyber-dojo/$flow/main/.snyk  > .snyk
 
 }
 
@@ -82,7 +82,8 @@ send_to_kosli()
                 --flow "$flow" \
                 --name snyk-scan \
                 --scan-results "$flow.json" \
-                --fingerprint "$fingerprint" 
+                --fingerprint "$fingerprint" \
+                --dry-run
     fi
 }
 
@@ -100,6 +101,7 @@ scan_images_in_prod()
         if [[ ! $flow == "nginx" ]]; then
 
             run_snyk_scan
+            kosli_get_build
             send_to_kosli
 
             rm "$flow.json"
