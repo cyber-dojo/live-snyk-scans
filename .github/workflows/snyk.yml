@@ -1,6 +1,7 @@
 name: Run Periodic Snyk Scan
 
-on: [push, schedule]
+on: 
+  push:
   schedule:
     -cron: '* 9 * * *'
 
