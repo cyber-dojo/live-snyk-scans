@@ -55,16 +55,18 @@ run_snyk_scan()
 
     set +e
 
-    # if [[ $flow == "nginx" ]]; then
-    #     snyk container test $image \
-    #         --json-file-output="$flow.json" \
-    #         --policy-path=".snyk" \
-    #         --severity-threshold=medium
-    # fi
-
-    snyk container test $image \
+    # Lots of low-severity CVEs in the nginx base image, which can't be ignored in the .snyk file, so
+    # we're ignoring them here.
+    if [[ $flow == "nginx" ]]; then
+        snyk container test $image \
             --json-file-output="$flow.json" \
-            --policy-path=".snyk"
+            --severity-threshold=medium \
+            --policy-path=".snyk"       
+    else 
+        snyk container test $image \
+                --json-file-output="$flow.json" \
+                --policy-path=".snyk"
+    fi
     
     new_compliance="$?"
     set -e
@@ -103,24 +105,13 @@ scan_images_in_prod()
         artifact=$name:$tag
         image=$name@sha256:$fingerprint
 
-        # run_snyk_scan
-        # kosli_get_build
-        # send_to_kosli
+        run_snyk_scan
+        kosli_get_build
+        send_to_kosli
 
-        # rm "$flow.json"
-
-        #Skip nginx for the time being
-        if [[ ! $flow == "nginx" ]]; then
-
-            run_snyk_scan
-            kosli_get_build
-            send_to_kosli
-
-            rm "$flow.json"
-        fi
+        rm "$flow.json"
 
     done
-
 }
 
 # scan_non_runtime_images()
