@@ -55,6 +55,13 @@ run_snyk_scan()
 
     set +e
 
+    # if [[ $flow == "nginx" ]]; then
+    #     snyk container test $image \
+    #         --json-file-output="$flow.json" \
+    #         --policy-path=".snyk" \
+    #         --severity-threshold=medium
+    # fi
+
     snyk container test $image \
             --json-file-output="$flow.json" \
             --policy-path=".snyk"
@@ -95,6 +102,12 @@ scan_images_in_prod()
         fingerprint=${fingerprints[$i]}
         artifact=$name:$tag
         image=$name@sha256:$fingerprint
+
+        # run_snyk_scan
+        # kosli_get_build
+        # send_to_kosli
+
+        # rm "$flow.json"
 
         #Skip nginx for the time being
         if [[ ! $flow == "nginx" ]]; then
