@@ -1,0 +1,39 @@
+name: Run Daily Snyk Scan of live Docker images
+
+on: 
+  push:
+  schedule: # At 09:00 every morning
+    - cron: '0 9 * * *'
+
+
+env: 
+  KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            "2.6.7"
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+
+      - name: Run Snyk
+        run:
+          ./snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli.sh
+
+
+  
