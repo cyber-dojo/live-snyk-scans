@@ -2,10 +2,10 @@
 set -Eeu
 
 export KOSLI_ORG=cyber-dojo
-#export KOSLI_HOST=https://app.kosli.com
-#export CYBER_DOJO_ENVIRONMENT=aws-prod
-export KOSLI_HOST=https://staging.app.kosli.com
-export CYBER_DOJO_ENVIRONMENT=aws-beta
+export KOSLI_HOST=https://app.kosli.com
+export CYBER_DOJO_ENVIRONMENT=aws-prod
+#export KOSLI_HOST=https://staging.app.kosli.com
+#export CYBER_DOJO_ENVIRONMENT=aws-beta
 
 # Global variables
 FLOW=
