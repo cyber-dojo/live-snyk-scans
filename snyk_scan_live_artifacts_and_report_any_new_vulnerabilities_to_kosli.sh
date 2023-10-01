@@ -89,7 +89,7 @@ run_snyk_scan()
     set +e
     snyk container test "${image_name}" \
         --json-file-output="${snyk_output_json_filename}" \
-        ${severity_threshold  } \
+        ${severity_threshold} \
         --policy-path="${snyk_policy_filename}"
     SNYK_EXIT_CODE=$?
     set -e
