@@ -1,4 +1,4 @@
-name: Run Daily Snyk Scan of live Docker images
+name: Daily Snyk scan of live artifacts
 
 on: 
   push:
@@ -26,7 +26,7 @@ jobs:
         uses: kosli-dev/setup-cli-action@v2
         with:
           version:
-            "2.6.7"
+            "2.6.8"
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master
