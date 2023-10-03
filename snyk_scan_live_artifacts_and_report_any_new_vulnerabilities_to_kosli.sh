@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -Eeu
 
+root_dir() {   git rev-parse --show-toplevel; }
+source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
+
 export KOSLI_ORG=cyber-dojo
 export KOSLI_HOST="${1:-https://app.kosli.com}"
 export CYBER_DOJO_ENVIRONMENT="${2:-aws-prod}"
-#export KOSLI_HOST="${1:-https://staging.app.kosli.com}"
-#export CYBER_DOJO_ENVIRONMENT="${2:-aws-beta}"
 
 # Global variables
 FLOW=
@@ -95,4 +96,5 @@ run_snyk_scan()
     set -e
 }
 
+exit_non_zero_unless_installed kosli snyk jq
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli
