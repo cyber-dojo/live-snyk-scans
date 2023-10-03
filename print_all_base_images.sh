@@ -3,13 +3,12 @@ set -Eeu
 
 root_dir() {   git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
+exit_non_zero_unless_installed kosli docker
 
 export KOSLI_API_TOKEN=4e5899bea7af0c86dde4eb48fe54ab9debcccd76  # fake
 export KOSLI_ORG=cyber-dojo
 export KOSLI_HOST="${1:-https://app.kosli.com}"
 export CYBER_DOJO_ENVIRONMENT="${2:-aws-prod}"
-
-exit_non_zero_unless_installed kosli docker
 
 snapshot_json_filename=snapshot.json
 
