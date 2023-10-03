@@ -42,8 +42,13 @@ report_any_new_snyk_vulnerability_to_kosli()
     local -r artifact_json_filename=artifact.json
     local -r snyk_output_json_filename=snyk.json
 
+    if [ "${FLOW}" == "" ]; then
+      return  # The artifact has no provenance
+    fi
+
     # Get the artifact's current compliance from its Kosli flow.
-    # Note: The compliance state of an artifact is not in the snapshot json.
+    # Note: The compliance state of an artifact with provenance is
+    #       not currently in the snapshot json.
     kosli get artifact "${FLOW}@${FINGERPRINT}" --output=json > "${artifact_json_filename}"
     current_compliance=($(jq -r '.state' ${artifact_json_filename}))
 
