@@ -9,7 +9,7 @@ def shell(*commands)
   stdout = utf8_clean(stdout)
   stderr = utf8_clean(stderr)
   exit_status = r.exitstatus
-  unless success?(exit_status) && stderr.empty?
+  unless success?(exit_status)
     diagnostic = {
       stdout: stdout,
       stderr: stderr,
