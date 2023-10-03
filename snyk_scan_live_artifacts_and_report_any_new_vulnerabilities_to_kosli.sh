@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeu
 
-root_dir() {   git rev-parse --show-toplevel; }
+root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
 export KOSLI_ORG=cyber-dojo
@@ -60,7 +60,7 @@ report_any_new_snyk_vulnerability_to_kosli()
     #   3: failure, no supported projects detected
 
     echo "current-compliance==${current_compliance}"
-    echo "snyk_exit_code=${SNYK_EXIT_CODE}"
+    echo "snyk_exit_code==${SNYK_EXIT_CODE}"
     if [[ "${current_compliance}" == "COMPLIANT" ]] && [[ "${SNYK_EXIT_CODE}" == "1" ]]
     then
         kosli report evidence artifact snyk "${NAME}" \
