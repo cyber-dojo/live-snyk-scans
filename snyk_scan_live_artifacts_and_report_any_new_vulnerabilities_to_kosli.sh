@@ -13,7 +13,6 @@ FLOW=
 GIT_COMMIT=
 FINGERPRINT=
 NAME=
-SNYK_EXIT_CODE=
 
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
@@ -46,29 +45,13 @@ report_any_new_snyk_vulnerability_to_kosli()
       return  # The artifact has no provenance
     fi
 
-    # Get the artifact's current compliance from its Kosli flow.
-    # Note: The compliance state of an artifact with provenance is
-    #       not currently in the snapshot json.
-    kosli get artifact "${FLOW}@${FINGERPRINT}" --output=json > "${artifact_json_filename}"
-    current_compliance=($(jq -r '.state' ${artifact_json_filename}))
-
     run_snyk_scan "${snyk_output_json_filename}"
-    # Snyk exit codes:
-    #   0: success (scan completed), no vulnerabilities found
-    #   1: action_needed (scan completed), vulnerabilities found
-    #   2: failure, try to re-run command
-    #   3: failure, no supported projects detected
 
-    echo "current-compliance==${current_compliance}"
-    echo "snyk_exit_code==${SNYK_EXIT_CODE}"
-    if [[ "${current_compliance}" == "COMPLIANT" ]] && [[ "${SNYK_EXIT_CODE}" == "1" ]]
-    then
-        kosli report evidence artifact snyk "${NAME}" \
-            --fingerprint="${FINGERPRINT}"  \
-            --flow="${FLOW}"                \
-            --name=snyk-scan                \
-            --scan-results="${snyk_output_json_filename}"
-    fi
+    kosli report evidence artifact snyk "${NAME}" \
+        --fingerprint="${FINGERPRINT}"  \
+        --flow="${FLOW}"                \
+        --name=snyk-scan                \
+        --scan-results="${snyk_output_json_filename}"
 }
 
 run_snyk_scan()
@@ -97,7 +80,6 @@ run_snyk_scan()
         --json-file-output="${snyk_output_json_filename}" \
         ${severity_threshold} \
         --policy-path="${snyk_policy_filename}"
-    SNYK_EXIT_CODE=$?
     set -e
 }
 
