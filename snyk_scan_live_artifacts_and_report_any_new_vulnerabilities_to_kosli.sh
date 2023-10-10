@@ -4,6 +4,7 @@ set -Eeu
 root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
+# KOSLI_API_TOKEN is set in CI
 export KOSLI_ORG=cyber-dojo
 export KOSLI_HOST="${1:-https://app.kosli.com}"
 export CYBER_DOJO_ENVIRONMENT="${2:-aws-prod}"
@@ -21,10 +22,10 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
     kosli get snapshot "${CYBER_DOJO_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
     # Save artifact info in array variables.
     # Note: Assumes all artifacts have provenance.
-    flows=($(jq -r '.[].flow' ${snapshot_json_filename}))
-    git_commits=($(jq -r '.[].git_commit' ${snapshot_json_filename}))
-    fingerprints=($(jq -r '.[].fingerprint' ${snapshot_json_filename}))
-    names=($(jq -r '.[].artifact' ${snapshot_json_filename}))
+    flows=($(jq -r '.artifacts[].flow_name' ${snapshot_json_filename}))
+    git_commits=($(jq -r '.artifacts[].git_commit' ${snapshot_json_filename}))
+    fingerprints=($(jq -r '.artifacts[].fingerprint' ${snapshot_json_filename}))
+    names=($(jq -r '.artifacts[].name' ${snapshot_json_filename}))
     # Process info, one artifact at a time
     for i in ${!flows[@]}
     do
@@ -32,6 +33,7 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
         GIT_COMMIT="${git_commits[$i]}"
         FINGERPRINT="${fingerprints[$i]}"
         NAME="${names[$i]}"
+
         report_any_new_snyk_vulnerability_to_kosli
     done
 }
