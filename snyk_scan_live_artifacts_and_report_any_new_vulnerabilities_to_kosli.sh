@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeu
-set -x
+
 root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
@@ -30,7 +30,7 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
           GIT_COMMIT=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
           FINGERPRINT=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
           IMAGE_NAME=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
-          #report_any_new_snyk_vulnerability_to_kosli
+          report_any_new_snyk_vulnerability_to_kosli
        fi
     done
 }
