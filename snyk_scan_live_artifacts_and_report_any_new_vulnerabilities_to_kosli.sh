@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeu
-
+set -x
 root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
@@ -13,30 +13,24 @@ export CYBER_DOJO_ENVIRONMENT="${2:-aws-prod}"
 FLOW=
 GIT_COMMIT=
 FINGERPRINT=
-NAME=
+IMAGE_NAME=
 
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
     local -r snapshot_json_filename=snapshot.json
     # Use Kosli CLI to get info on what artifacts are currently running in production
     kosli get snapshot "${CYBER_DOJO_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
-    # Save artifact info in array variables.
-    # Note: Assumes all artifacts have provenance.
-    flows=($(jq -r '.artifacts[].flow_name' ${snapshot_json_filename}))
-    git_commits=($(jq -r '.artifacts[].git_commit' ${snapshot_json_filename}))
-    fingerprints=($(jq -r '.artifacts[].fingerprint' ${snapshot_json_filename}))
-    names=($(jq -r '.artifacts[].name' ${snapshot_json_filename}))
-    annotation_types=($(jq -r '.artifacts[].annotation.type' ${snapshot_json_filename}))
     # Process info, one artifact at a time
-    for i in ${!flows[@]}
+    artifacts_length=$(jq '.artifacts | length' ${snapshot_json_filename})
+    for i in $(seq 0 $(( ${artifacts_length} - 1 )));
     do
-        annotation_type="${annotation_types[$i]}"
+        annotation_type=$(jq -r ".artifacts[$i].annotation.type" ${snapshot_json_filename})
         if [ "${annotation_type}" != "exited" ]; then
-          FLOW="${flows[$i]}"
-          GIT_COMMIT="${git_commits[$i]}"
-          FINGERPRINT="${fingerprints[$i]}"
-          NAME="${names[$i]}"
-          report_any_new_snyk_vulnerability_to_kosli
+          FLOW=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})
+          GIT_COMMIT=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
+          FINGERPRINT=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
+          IMAGE_NAME=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
+          #report_any_new_snyk_vulnerability_to_kosli
        fi
     done
 }
@@ -52,7 +46,7 @@ report_any_new_snyk_vulnerability_to_kosli()
 
     run_snyk_scan "${snyk_output_json_filename}"
 
-    kosli report evidence artifact snyk "${NAME}" \
+    kosli report evidence artifact snyk "${IMAGE_NAME}" \
         --fingerprint="${FINGERPRINT}"  \
         --flow="${FLOW}"                \
         --name=snyk-scan                \
