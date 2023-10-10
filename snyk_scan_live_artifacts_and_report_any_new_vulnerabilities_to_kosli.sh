@@ -26,15 +26,18 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
     git_commits=($(jq -r '.artifacts[].git_commit' ${snapshot_json_filename}))
     fingerprints=($(jq -r '.artifacts[].fingerprint' ${snapshot_json_filename}))
     names=($(jq -r '.artifacts[].name' ${snapshot_json_filename}))
+    annotation_types=($(jq -r '.artifacts[].annotation.type' ${snapshot_json_filename}))
     # Process info, one artifact at a time
     for i in ${!flows[@]}
     do
-        FLOW="${flows[$i]}"
-        GIT_COMMIT="${git_commits[$i]}"
-        FINGERPRINT="${fingerprints[$i]}"
-        NAME="${names[$i]}"
-
-        report_any_new_snyk_vulnerability_to_kosli
+        annotation_type="${annotation_types[$i]}"
+        if [ "${annotation_type}" != "exited" ]; then
+          FLOW="${flows[$i]}"
+          GIT_COMMIT="${git_commits[$i]}"
+          FINGERPRINT="${fingerprints[$i]}"
+          NAME="${names[$i]}"
+          report_any_new_snyk_vulnerability_to_kosli
+       fi
     done
 }
 
