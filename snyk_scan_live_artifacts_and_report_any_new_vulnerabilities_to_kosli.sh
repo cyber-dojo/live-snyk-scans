@@ -37,7 +37,6 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 
 report_any_new_snyk_vulnerability_to_kosli()
 {
-    local -r artifact_json_filename=artifact.json
     local -r snyk_output_json_filename=snyk.json
 
     if [ "${FLOW}" == "" ]; then
