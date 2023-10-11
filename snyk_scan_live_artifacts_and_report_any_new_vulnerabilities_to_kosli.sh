@@ -64,19 +64,10 @@ run_snyk_scan()
     # Ensure we get the .snyk file for the given artifact's git commit.
     curl "https://raw.githubusercontent.com/cyber-dojo/${FLOW}/${GIT_COMMIT}/.snyk"  > "${snyk_policy_filename}"
 
-    # The nginx base image has many low-severity vulnerabilities, which
-    # can't be easily ignored in the .snyk file, so we're ignoring them
-    # by bumping nginx to medium threshold.
-    if [[ "${FLOW}" == "nginx" ]]; then
-      severity_threshold=--severity-threshold=medium
-    else
-      severity_threshold=
-    fi
-
     set +e
     snyk container test "${image_name}" \
         --json-file-output="${snyk_output_json_filename}" \
-        ${severity_threshold} \
+        --severity-threshold=medium \
         --policy-path="${snyk_policy_filename}"
     set -e
 }
