@@ -13,10 +13,10 @@ end
 
 def top_level_image_names()
   names = []
-  $snapshot.each do |image|
-    artifact = image["artifact"]              # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
-    tagged_name = artifact.split('/')[-1]     # eg differ:44e6c27
-    names.append("cyberdojo/#{tagged_name}")  # eg cyberdojo/differ:44e6c27
+  $snapshot["artifacts"].each do |artifact|
+    artifact_name = artifact["name"]           # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+    tagged_name = artifact_name.split('/')[-1] # eg differ:44e6c27
+    names.append("cyberdojo/#{tagged_name}")   # eg cyberdojo/differ:44e6c27
   end
   names
 end
