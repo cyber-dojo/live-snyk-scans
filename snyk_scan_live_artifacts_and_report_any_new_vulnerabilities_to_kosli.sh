@@ -45,7 +45,7 @@ report_any_new_snyk_vulnerability_to_kosli()
 
     run_snyk_scan "${snyk_output_json_filename}"
 
-    kosli report evidence artifact snyk "${IMAGE_NAME}" \
+    kosli report evidence artifact snyk \
         --fingerprint="${FINGERPRINT}"  \
         --flow="${FLOW}"                \
         --name=snyk-scan                \
