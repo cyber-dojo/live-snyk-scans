@@ -9,7 +9,7 @@ on:
 env: 
   KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  AWS_ACCOUNT_ID: 274425519734
+  AWS_ACCOUNT_ID: 244531986313
   AWS_REGION: eu-central-1
 
 jobs:
