@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -Eeu
 
+# Script to print hierarchy of base image names for all cyber-dojo services.
+# Useful when tracking down the origin of new snyk vulnerabilities.
+# Example output is in docs/base_images.json
+
 root_dir() {   git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 exit_non_zero_unless_installed kosli docker

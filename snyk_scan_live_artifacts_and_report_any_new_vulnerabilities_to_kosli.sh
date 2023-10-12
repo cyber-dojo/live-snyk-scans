@@ -19,6 +19,7 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
     local -r snapshot_json_filename=snapshot.json
     # Use Kosli CLI to get info on what artifacts are currently running in production
+    # (docs/snapshot.json contains an example json file)
     kosli get snapshot "${CYBER_DOJO_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
     # Process info, one artifact at a time
     artifacts_length=$(jq '.artifacts | length' ${snapshot_json_filename})
