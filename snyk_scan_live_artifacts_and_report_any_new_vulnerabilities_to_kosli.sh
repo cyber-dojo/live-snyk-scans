@@ -57,7 +57,7 @@ run_snyk_scan()
 {
     local -r snyk_output_json_filename="${1}"
     # Use fingerprint in image name for absolute certainty of image's identity.
-    local -r image_name="cyberdojo/${FLOW}@sha256:${FINGERPRINT}"
+    local -r image_name="${IMAGE_NAME}@sha256:${FINGERPRINT}"
     local -r snyk_policy_filename=.snyk
 
     # All cyber-dojo microservice repos hold a .snyk policy file.
