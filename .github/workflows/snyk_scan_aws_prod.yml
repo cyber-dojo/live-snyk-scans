@@ -1,4 +1,4 @@
-name: Daily Snyk scan of live artifacts
+name: Daily Snyk scan of aws-prod
 
 on:
   workflow_dispatch:

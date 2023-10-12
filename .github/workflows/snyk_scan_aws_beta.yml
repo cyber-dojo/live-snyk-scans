@@ -1,4 +1,4 @@
-name: Daily Snyk scan of live artifacts
+name: Daily Snyk scan of aws-beta
 
 on:
   workflow_dispatch:
