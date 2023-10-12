@@ -7,7 +7,7 @@ source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 # KOSLI_API_TOKEN is set in CI
 export KOSLI_ORG=cyber-dojo
 export KOSLI_HOST="${1}"
-export CYBER_DOJO_ENVIRONMENT="${2}"
+export KOSLI_ENVIRONMENT="${2}"
 
 # Global variables
 FLOW=             # eg differ
@@ -20,7 +20,7 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
     local -r snapshot_json_filename=snapshot.json
     # Use Kosli CLI to get info on what artifacts are currently running in production
     # (docs/snapshot.json contains an example json file)
-    kosli get snapshot "${CYBER_DOJO_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
+    kosli get snapshot "${KOSLI_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
     # Process info, one artifact at a time
     artifacts_length=$(jq '.artifacts | length' ${snapshot_json_filename})
     for i in $(seq 0 $(( ${artifacts_length} - 1 )));

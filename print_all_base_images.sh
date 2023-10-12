@@ -12,11 +12,11 @@ exit_non_zero_unless_installed kosli docker
 export KOSLI_API_TOKEN=4e5899bea7af0c86dde4eb48fe54ab9debcccd76  # fake
 export KOSLI_ORG=cyber-dojo
 export KOSLI_HOST="${1:-https://app.kosli.com}"
-export CYBER_DOJO_ENVIRONMENT="${2:-aws-prod}"
+export KOSLI_ENVIRONMENT="${2:-aws-prod}"
 
 snapshot_json_filename=snapshot.json
 
-kosli get snapshot "${CYBER_DOJO_ENVIRONMENT}" --output=json > "$(root_dir)/tmp/${snapshot_json_filename}"
+kosli get snapshot "${KOSLI_ENVIRONMENT}" --output=json > "$(root_dir)/tmp/${snapshot_json_filename}"
 
 docker run \
   --rm \
