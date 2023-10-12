@@ -6,8 +6,8 @@ source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
 # KOSLI_API_TOKEN is set in CI
 export KOSLI_ORG=cyber-dojo
-export KOSLI_HOST="${1:-https://app.kosli.com}"
-export CYBER_DOJO_ENVIRONMENT="${2:-aws-prod}"
+export KOSLI_HOST="${1}"
+export CYBER_DOJO_ENVIRONMENT="${2}"
 
 # Global variables
 FLOW=             # eg differ
