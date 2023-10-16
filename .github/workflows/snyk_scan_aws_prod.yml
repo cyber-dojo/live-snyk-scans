@@ -2,8 +2,8 @@ name: Daily Snyk scan of aws-prod
 
 on:
   workflow_dispatch:
-  schedule: # At 09:00 every morning
-    - cron: '0 9 * * *'
+  schedule: # At 09:00 every Saturday
+    - cron: '0 9 * * SAT'
 
 env:
   KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
