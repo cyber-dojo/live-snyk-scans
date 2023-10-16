@@ -1,4 +1,4 @@
-name: Daily Snyk scan of aws-prod
+name: Weekly Snyk scan of aws-prod
 
 on:
   workflow_dispatch:

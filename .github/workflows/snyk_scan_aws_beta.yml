@@ -1,4 +1,4 @@
-name: Daily Snyk scan of aws-beta
+name: Weekly Snyk scan of aws-beta
 
 on:
   workflow_dispatch:
