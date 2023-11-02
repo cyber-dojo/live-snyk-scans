@@ -13,7 +13,7 @@ export KOSLI_HOST="${2:-https://app.kosli.com}"
 FLOW=             # eg differ
 GIT_COMMIT=       # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
 FINGERPRINT=      # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
-IMAGE_NAME=       # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+ARTIFACT_NAME=    # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
 
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
@@ -30,7 +30,7 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
           FLOW=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})
           GIT_COMMIT=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
           FINGERPRINT=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
-          IMAGE_NAME=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
+          ARTIFACT_NAME=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
           report_any_new_snyk_vulnerability_to_kosli
        fi
     done
@@ -57,7 +57,7 @@ run_snyk_scan()
 {
     local -r snyk_output_json_filename="${1}"
     # Use fingerprint in image name for absolute certainty of image's identity.
-    local -r image_name="${IMAGE_NAME}@sha256:${FINGERPRINT}"
+    local -r image_name="${ARTIFACT_NAME}@sha256:${FINGERPRINT}"
     local -r snyk_policy_filename=.snyk
 
     # All cyber-dojo microservice repos hold a .snyk policy file.
