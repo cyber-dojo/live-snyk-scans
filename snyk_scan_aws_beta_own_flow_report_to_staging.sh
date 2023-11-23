@@ -52,9 +52,9 @@ report_any_new_snyk_vulnerability_to_kosli()
       --template=artifact,snyk-scan
 
     image_name=cyberdojo/${FLOW}:${GIT_COMMIT:0:7}
-    docker pull ${image_name}
+
     kosli report artifact ${image_name} \
-      --artifact-type=docker \
+      --fingerprint=${FINGERPRINT} \
       --flow="${KOSLI_FLOW}"
 
     kosli report evidence artifact snyk \
