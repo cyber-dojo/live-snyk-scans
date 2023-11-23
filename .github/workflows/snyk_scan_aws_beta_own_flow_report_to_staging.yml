@@ -1,0 +1,42 @@
+name: Snyk scan of aws-beta reporting to https://staging.app.kosli.com in its own Flow
+
+on:
+  push:
+    branches:
+      - main
+
+#on:
+#  workflow_dispatch:
+#  schedule: # At 09:00 every Saturday
+#    - cron: '0 9 * * SAT'
+
+env:
+  KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version:
+            "2.6.12"
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+
+      - name: Run Snyk
+        run:
+          ./snyk_scan_aws_beta_own_flow_report_to_staging.sh aws-beta
+
+
+
