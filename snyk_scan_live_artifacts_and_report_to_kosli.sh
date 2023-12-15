@@ -5,9 +5,9 @@ root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
 # KOSLI_API_TOKEN is set in CI
-export KOSLI_ORG=cyber-dojo
-export KOSLI_ENVIRONMENT="${1}"
-export KOSLI_HOST="${2:-https://staging.app.kosli.com}"
+export KOSLI_HOST="${1}"
+export KOSLI_ORG="${2}"
+export KOSLI_ENVIRONMENT="${3}"
 
 # Global variables
 FLOW=             # eg differ
