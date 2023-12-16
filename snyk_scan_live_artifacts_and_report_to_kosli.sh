@@ -31,34 +31,21 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
           GIT_COMMIT=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
           FINGERPRINT=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
           ARTIFACT_NAME=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
-          report_any_new_snyk_vulnerability_to_kosli
+          report_snyk_vulnerabilities_to_kosli
        fi
     done
 }
 
-report_any_new_snyk_vulnerability_to_kosli()
+report_snyk_vulnerabilities_to_kosli()
 {
     local -r snyk_output_json_filename=snyk.json
+    # Use fingerprint in image name for absolute certainty of image's identity.
+    local -r image_name="${ARTIFACT_NAME}@sha256:${FINGERPRINT}"
+    local -r snyk_policy_filename=.snyk
 
     if [ "${FLOW}" == "" ]; then
       return  # The artifact has no provenance
     fi
-
-    run_snyk_scan "${snyk_output_json_filename}"
-
-    kosli report evidence artifact snyk \
-        --fingerprint="${FINGERPRINT}"  \
-        --flow="${FLOW}"                \
-        --name=snyk-scan                \
-        --scan-results="${snyk_output_json_filename}"
-}
-
-run_snyk_scan()
-{
-    local -r snyk_output_json_filename="${1}"
-    # Use fingerprint in image name for absolute certainty of image's identity.
-    local -r image_name="${ARTIFACT_NAME}@sha256:${FINGERPRINT}"
-    local -r snyk_policy_filename=.snyk
 
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
@@ -71,6 +58,12 @@ run_snyk_scan()
         --severity-threshold=medium \
         --policy-path="${snyk_policy_filename}"
     set -e
+
+    kosli report evidence artifact snyk \
+        --fingerprint="${FINGERPRINT}"  \
+        --flow="${FLOW}"                \
+        --name=snyk-scan                \
+        --scan-results="${snyk_output_json_filename}"
 }
 
 exit_non_zero_unless_installed kosli snyk jq
