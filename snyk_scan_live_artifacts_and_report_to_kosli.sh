@@ -9,12 +9,6 @@ export KOSLI_HOST="${1}"
 export KOSLI_ORG="${2}"
 export KOSLI_ENVIRONMENT="${3}"
 
-# Global variables
-FLOW=             # eg differ
-GIT_COMMIT=       # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
-FINGERPRINT=      # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
-ARTIFACT_NAME=    # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
-
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
     local -r snapshot_json_filename=snapshot.json
@@ -28,30 +22,35 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
     do
         annotation_type=$(jq -r ".artifacts[$i].annotation.type" ${snapshot_json_filename})
         if [ "${annotation_type}" != "exited" ]; then
-          FLOW=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})
-          GIT_COMMIT=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
-          FINGERPRINT=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
-          ARTIFACT_NAME=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
-          report_snyk_vulnerabilities_to_kosli
+          flow=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})
+          git_commit=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
+          fingerprint=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
+          artifact_name=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
+          report_snyk_vulnerabilities_to_kosli "${flow}" "${git_commit}" "${fingerprint}" "${artifact_name}"
        fi
     done
 }
 
 report_snyk_vulnerabilities_to_kosli()
 {
+    local -r flow="${1}"           # eg differ
+    local -r git_commit="${2}"     # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r fingerprint="${3}"    # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
+    local -r artifact_name="${4}"  # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+
     local -r snyk_output_json_filename=snyk.json
     # Use fingerprint in image name for absolute certainty of image's identity.
-    local -r image_name="${ARTIFACT_NAME}@sha256:${FINGERPRINT}"
+    local -r image_name="${artifact_name}@sha256:${fingerprint}"
     local -r snyk_policy_filename=.snyk
 
-    if [ "${FLOW}" == "" ]; then
+    if [ "${flow}" == "" ]; then
       return  # The artifact has no provenance
     fi
 
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
-    curl "https://raw.githubusercontent.com/cyber-dojo/${FLOW}/${GIT_COMMIT}/.snyk"  > "${snyk_policy_filename}"
+    curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk"  > "${snyk_policy_filename}"
 
     set +e
     snyk container test "${image_name}" \
@@ -61,8 +60,8 @@ report_snyk_vulnerabilities_to_kosli()
     set -e
 
     kosli report evidence artifact snyk \
-      --fingerprint="${FINGERPRINT}" \
-      --flow="${FLOW}"               \
+      --fingerprint="${fingerprint}" \
+      --flow="${flow}"               \
       --name=snyk-scan               \
       --scan-results="${snyk_output_json_filename}"
 
@@ -77,14 +76,14 @@ report_snyk_vulnerabilities_to_kosli()
 #        --flow=regular-snyk-scan
 #
 #      kosli report evidence artifact snyk \
-#        --fingerprint="${FINGERPRINT}" \
+#        --fingerprint="${fingerprint}" \
 #        --flow=regular-snyk-scan       \
 #        --name=snyk-scan               \
 #        --scan-results="${snyk_output_json_filename}"
 #    else
 #      kosli report evidence artifact snyk \
-#        --fingerprint="${FINGERPRINT}" \
-#        --flow="${FLOW}"               \
+#        --fingerprint="${fingerprint}" \
+#        --flow="${flow}"               \
 #        --name=snyk-scan               \
 #        --scan-results="${snyk_output_json_filename}"
 #    fi
