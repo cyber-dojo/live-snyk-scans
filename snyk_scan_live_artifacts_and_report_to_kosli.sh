@@ -18,6 +18,7 @@ ARTIFACT_NAME=    # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
     local -r snapshot_json_filename=snapshot.json
+
     # Use Kosli CLI to get info on what artifacts are currently running in production
     # (docs/snapshot.json contains an example json file)
     kosli get snapshot "${KOSLI_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
@@ -59,28 +60,34 @@ report_snyk_vulnerabilities_to_kosli()
         --policy-path="${snyk_policy_filename}"
     set -e
 
-    if [ "${FLOW}" = "dashboard" ]; then
-      # try out saving to a dedicated flow
-      kosli create flow regular-snyk-scan \
-        --description="Scan of deployed Artifacts running in their Environment" \
-        --template=artifact,snyk-scan
+    kosli report evidence artifact snyk \
+      --fingerprint="${FINGERPRINT}" \
+      --flow="${FLOW}"               \
+      --name=snyk-scan               \
+      --scan-results="${snyk_output_json_filename}"
 
-      kosli report artifact "${image_name}" \
-        --artifact-type=docker \
-        --flow=regular-snyk-scan
-
-      kosli report evidence artifact snyk \
-        --fingerprint="${FINGERPRINT}" \
-        --flow=regular-snyk-scan       \
-        --name=snyk-scan               \
-        --scan-results="${snyk_output_json_filename}"
-    else
-      kosli report evidence artifact snyk \
-        --fingerprint="${FINGERPRINT}" \
-        --flow="${FLOW}"               \
-        --name=snyk-scan               \
-        --scan-results="${snyk_output_json_filename}"
-    fi
+#    if [ "${FLOW}" = "dashboard" ]; then
+#      # try out saving to a dedicated flow
+#      kosli create flow regular-snyk-scan \
+#        --description="Scan of deployed Artifacts running in their Environment" \
+#        --template=artifact,snyk-scan
+#
+#      kosli report artifact "${image_name}" \
+#        --artifact-type=docker \
+#        --flow=regular-snyk-scan
+#
+#      kosli report evidence artifact snyk \
+#        --fingerprint="${FINGERPRINT}" \
+#        --flow=regular-snyk-scan       \
+#        --name=snyk-scan               \
+#        --scan-results="${snyk_output_json_filename}"
+#    else
+#      kosli report evidence artifact snyk \
+#        --fingerprint="${FINGERPRINT}" \
+#        --flow="${FLOW}"               \
+#        --name=snyk-scan               \
+#        --scan-results="${snyk_output_json_filename}"
+#    fi
 }
 
 exit_non_zero_unless_installed kosli snyk jq
