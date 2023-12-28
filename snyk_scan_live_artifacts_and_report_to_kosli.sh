@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -Eeu
 
-set -x
 root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
@@ -72,6 +71,11 @@ report_snyk_vulnerabilities_to_kosli()
       --fingerprint="${fingerprint}" \
       --name=snyk-scan \
       --scan-results="${snyk_output_json_filename}"
+
+    kosli expect deployment \
+      --fingerprint="${fingerprint}" \
+      --description="Deployed in ${{ inputs.KOSLI_ENVIRONMENT }}" \
+      --environment="${KOSLI_ENVIRONMENT}"
 }
 
 exit_non_zero_unless_installed kosli snyk jq
