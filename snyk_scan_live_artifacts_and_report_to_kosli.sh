@@ -74,7 +74,7 @@ report_snyk_vulnerabilities_to_kosli()
 
     kosli expect deployment \
       --fingerprint="${fingerprint}" \
-      --description="Deployed in ${{ inputs.KOSLI_ENVIRONMENT }}" \
+      --description="Deployed in ${KOSLI_ENVIRONMENT}" \
       --environment="${KOSLI_ENVIRONMENT}"
 }
 
