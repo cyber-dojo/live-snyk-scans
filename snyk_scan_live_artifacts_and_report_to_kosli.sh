@@ -98,10 +98,10 @@ report_snyk_vulnerabilities_to_kosli()
     }
     docker pull "${image_name}"
 
-    kosli_create_flow
-    kosli_report_artifact
-    kosli_attest_snyk
-    kosli_expect_deployment
+    kosli_create_flow       --host="${KOSLI_HOST_PROD}"    --api-token="${KOSLI_API_TOKEN_PROD}"
+    kosli_report_artifact   --host="${KOSLI_HOST_PROD}"    --api-token="${KOSLI_API_TOKEN_PROD}"
+    kosli_attest_snyk       --host="${KOSLI_HOST_PROD}"    --api-token="${KOSLI_API_TOKEN_PROD}"
+    kosli_expect_deployment --host="${KOSLI_HOST_PROD}"    --api-token="${KOSLI_API_TOKEN_PROD}"
 
     kosli_create_flow       --host="${KOSLI_HOST_STAGING}" --api-token="${KOSLI_API_TOKEN_STAGING}"
     kosli_report_artifact   --host="${KOSLI_HOST_STAGING}" --api-token="${KOSLI_API_TOKEN_STAGING}"
