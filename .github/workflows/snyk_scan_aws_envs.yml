@@ -53,5 +53,26 @@ jobs:
 
       - name: Run Snyk
         run: |
-          KOSLI_ENVIRONMENT=aws-prod
-          ./snyk_scan_live_artifacts_and_report_to_kosli.sh "${KOSLI_ENVIRONMENT}"
+          # What https://app.kosli.com says is running in aws-prod
+          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
+            aws-prod \
+            "${KOSLI_HOST_PROD}" \
+            "${KOSLI_API_TOKEN_PROD}"
+
+          # What https://app.kosli.com says is running in aws-beta
+          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
+            aws-beta \
+            "${KOSLI_HOST_PROD}" \
+            "${KOSLI_API_TOKEN_PROD}"
+
+          # What https://staging.app.kosli.com says is running in aws-prod
+          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
+            aws-prod \
+            "${KOSLI_HOST_STAGING}" \
+            "${KOSLI_API_TOKEN_STAGING}"
+
+          # What https://staging.app.kosli.com says is running in aws-beta
+          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
+            aws-beta \
+            "${KOSLI_HOST_STAGING}" \
+            "${KOSLI_API_TOKEN_STAGING}"
