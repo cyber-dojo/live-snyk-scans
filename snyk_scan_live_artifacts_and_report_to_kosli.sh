@@ -58,7 +58,7 @@ report_snyk_vulnerabilities_to_kosli()
     curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk"  > "${snyk_policy_filename}"
 
     set +e
-    snyk container test "${image_name}" \
+    snyk container test "${image_name}@sha256:${fingerprint}" \
         --json-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium \
         --policy-path="${snyk_policy_filename}" \
