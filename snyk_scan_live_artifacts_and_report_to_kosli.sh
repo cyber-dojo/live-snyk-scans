@@ -45,6 +45,10 @@ report_snyk_vulnerabilities_to_kosli()
       return
     fi
 
+    if [ "${flow}" != "differ" ]; then
+      return  # Do only one service till all working
+    fi
+
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
 
@@ -57,7 +61,8 @@ report_snyk_vulnerabilities_to_kosli()
     snyk container test "${image_name}" \
         --json-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium \
-        --policy-path="${snyk_policy_filename}"
+        --policy-path="${snyk_policy_filename}" \
+        -d
     set -e
 
     kosli create flow "${KOSLI_FLOW}" \
