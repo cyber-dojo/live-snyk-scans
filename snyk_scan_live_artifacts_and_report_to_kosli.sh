@@ -6,9 +6,13 @@ source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
 export KOSLI_ENVIRONMENT="${1}"
 export KOSLI_FLOW=regular-snyk-scan
-# KOSLI_HOST      # Set in CI
-# KOSLI_ORG       # Set in CI
-# KOSLI_API_TOKEN # Set in CI
+# Set in CI
+# KOSLI_HOST
+# KOSLI_HOST_STAGING
+# KOSLI_ORG
+# KOSLI_API_TOKEN
+# KOSLI_API_TOKEN_STAGING
+
 
 snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 {
@@ -46,9 +50,9 @@ report_snyk_vulnerabilities_to_kosli()
       return  # The artifact has no provenance
     fi
 
-    if [ "${flow}" != "runner" ]; then
-      return  # On aws-prod, first try with just one flow
-    fi
+    #    if [ "${flow}" != "runner" ]; then
+    #      return  # On aws-prod, first try with just one flow
+    #    fi
 
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
@@ -63,24 +67,46 @@ report_snyk_vulnerabilities_to_kosli()
         --policy-path="${snyk_policy_filename}"
     set -e
 
-    kosli create flow "${KOSLI_FLOW}" \
-      --description="Scan of deployed Artifacts running in their Environment" \
-      --template=artifact,snyk-scan
-
+    kosli_create_flow()
+    {
+      kosli create flow "${KOSLI_FLOW}" \
+        --description="Scan of deployed Artifacts running in their Environment" \
+        --template=artifact,snyk-scan \
+        "$@"
+    }
+    kosli_report_artifact()
+    {
+      kosli report artifact "${image_name}" \
+        --artifact-type=docker \
+        "$@"
+    }
+    kosli_attest_snyk()
+    {
+      kosli report evidence artifact snyk \
+        --fingerprint="${fingerprint}" \
+        --name=snyk-scan \
+        --scan-results="${snyk_output_json_filename}" \
+        "$@"
+    }
+    kosli_expect_deployment()
+    {
+      kosli expect deployment \
+        --fingerprint="${fingerprint}" \
+        --description="Deployed in ${KOSLI_ENVIRONMENT}" \
+        --environment="${KOSLI_ENVIRONMENT}" \
+        "$@"
+    }
     docker pull "${image_name}"
 
-    kosli report artifact "${image_name}" \
-      --artifact-type=docker
+    kosli_create_flow
+    kosli_report_artifact
+    kosli_attest_snyk
+    kosli_expect_deployment
 
-    kosli report evidence artifact snyk \
-      --fingerprint="${fingerprint}" \
-      --name=snyk-scan \
-      --scan-results="${snyk_output_json_filename}"
-
-    kosli expect deployment \
-      --fingerprint="${fingerprint}" \
-      --description="Deployed in ${KOSLI_ENVIRONMENT}" \
-      --environment="${KOSLI_ENVIRONMENT}"
+    kosli_create_flow       --host="${KOSLI_HOST_STAGING}" --api-token="${KOSLI_API_TOKEN_STAGING}"
+    kosli_report_artifact   --host="${KOSLI_HOST_STAGING}" --api-token="${KOSLI_API_TOKEN_STAGING}"
+    kosli_attest_snyk       --host="${KOSLI_HOST_STAGING}" --api-token="${KOSLI_API_TOKEN_STAGING}"
+    kosli_expect_deployment --host="${KOSLI_HOST_STAGING}" --api-token="${KOSLI_API_TOKEN_STAGING}"
 }
 
 exit_non_zero_unless_installed kosli snyk jq

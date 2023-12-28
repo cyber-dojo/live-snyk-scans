@@ -1,6 +1,9 @@
-name: Weekly Snyk scan of aws-prod
+name: Regular Snyk scan of aws-prod
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule: # At 09:00 every Saturday
     - cron: '0 9 * * SAT'
