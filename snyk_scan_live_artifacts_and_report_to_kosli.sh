@@ -5,9 +5,9 @@ root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
 export KOSLI_FLOW=regular-snyk-scan
-export KOSLI_ENVIRONMENT="${1}"
-export KOSLI_HOST="${2}"
-export KOSLI_API_TOKEN="${3}"
+export KOSLI_HOST="${1}"
+export KOSLI_API_TOKEN="${2}"
+export KOSLI_ENVIRONMENT="${3}"
 # KOSLI_ORG # Set in CI
 
 
@@ -35,13 +35,13 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 
 report_snyk_vulnerabilities_to_kosli()
 {
-    local -r flow="${1}"        # eg differ
-    local -r git_commit="${2}"  # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
-    local -r image_name="${3}"  # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
-    local -r fingerprint="${4}" # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
+    local -r flow="${1}"          # eg differ
+    local -r git_commit="${2}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r artifact_name="${3}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+    local -r fingerprint="${4}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
 
     if [ "${flow}" == "" ]; then
-      echo "Artifact ${image_name} in Environment ${KOSLI_ENVIRONMENT} has no provenance in ${KOSLI_HOST}"
+      echo "Artifact ${artifact_name} in Environment ${KOSLI_ENVIRONMENT} has no provenance in ${KOSLI_HOST}"
       return
     fi
 
@@ -58,7 +58,7 @@ report_snyk_vulnerabilities_to_kosli()
     curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk"  > "${snyk_policy_filename}"
 
     set +e
-    snyk container test "${image_name}@sha256:${fingerprint}" \
+    snyk container test "${artifact_name}@sha256:${fingerprint}" \
         --json-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium \
         --policy-path="${snyk_policy_filename}" \
@@ -69,15 +69,15 @@ report_snyk_vulnerabilities_to_kosli()
       --description="Scan of deployed Artifacts running in their Environment" \
       --template=artifact,snyk-scan
 
-    kosli report artifact "${image_name}" \
+    kosli report artifact "${artifact_name}" \
       --fingerprint="${fingerprint}"
 
-    kosli report evidence artifact snyk "${image_name}" \
+    kosli report evidence artifact snyk "${artifact_name}" \
       --fingerprint="${fingerprint}" \
       --name=snyk-scan \
       --scan-results="${snyk_output_json_filename}"
 
-    kosli expect deployment "${image_name}" \
+    kosli expect deployment "${artifact_name}" \
       --fingerprint="${fingerprint}" \
       --description="Deployed in ${KOSLI_ENVIRONMENT}" \
       --environment="${KOSLI_ENVIRONMENT}"

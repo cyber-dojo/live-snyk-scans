@@ -55,24 +55,24 @@ jobs:
         run: |
           # What https://app.kosli.com says is running in aws-prod
           ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-            aws-prod \
-            "${KOSLI_HOST_PROD}" \
-            "${KOSLI_API_TOKEN_PROD}"
+             "${KOSLI_HOST_PROD}" \
+             "${KOSLI_API_TOKEN_PROD}" \
+             aws-prod
 
 #          # What https://app.kosli.com says is running in aws-beta
 #          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-#            aws-beta \
-#            "${KOSLI_HOST_PROD}" \
-#            "${KOSLI_API_TOKEN_PROD}"
+#             "${KOSLI_HOST_PROD}" \
+#             "${KOSLI_API_TOKEN_PROD}" \
+#             aws-beta
 #
 #          # What https://staging.app.kosli.com says is running in aws-prod
 #          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-#            aws-prod \
-#            "${KOSLI_HOST_STAGING}" \
-#            "${KOSLI_API_TOKEN_STAGING}"
+#             "${KOSLI_HOST_STAGING}" \
+#             "${KOSLI_API_TOKEN_STAGING}" \
+#             aws-prod
 #
 #          # What https://staging.app.kosli.com says is running in aws-beta
 #          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-#            aws-beta \
-#            "${KOSLI_HOST_STAGING}" \
-#            "${KOSLI_API_TOKEN_STAGING}"
+#             "${KOSLI_HOST_STAGING}" \
+#             "${KOSLI_API_TOKEN_STAGING}" \
+#             aws-beta
