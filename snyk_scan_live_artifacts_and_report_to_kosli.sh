@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -Eeu
 
+set -x
 root_dir() { git rev-parse --show-toplevel; }
 source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
 
