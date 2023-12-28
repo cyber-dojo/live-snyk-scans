@@ -1,4 +1,4 @@
-name: Regular Snyk scans of aws-beta and aws-prod
+name: Regular Snyk scan of aws-beta
 
 on:
   push:
@@ -15,7 +15,7 @@ env:
   KOSLI_API_TOKEN_STAGING: ${{ secrets.KOSLI_API_TOKEN_STAGING }}
   KOSLI_API_TOKEN_PROD: ${{ secrets.KOSLI_API_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID_BETA }}
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID_BETA }} # <<<<<<<
   AWS_REGION: ${{ vars.AWS_REGION }}
 
 jobs:
@@ -53,26 +53,14 @@ jobs:
 
       - name: Run Snyk
         run: |
-          # What https://app.kosli.com says is running in aws-prod
+          # What https://app.kosli.com says is running in aws-beta
           ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
              "${KOSLI_HOST_PROD}" \
              "${KOSLI_API_TOKEN_PROD}" \
-             aws-prod
+             aws-beta
 
-#          # What https://app.kosli.com says is running in aws-beta
-#          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-#             "${KOSLI_HOST_PROD}" \
-#             "${KOSLI_API_TOKEN_PROD}" \
-#             aws-beta
-#
-#          # What https://staging.app.kosli.com says is running in aws-prod
-#          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-#             "${KOSLI_HOST_STAGING}" \
-#             "${KOSLI_API_TOKEN_STAGING}" \
-#             aws-prod
-#
-#          # What https://staging.app.kosli.com says is running in aws-beta
-#          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-#             "${KOSLI_HOST_STAGING}" \
-#             "${KOSLI_API_TOKEN_STAGING}" \
-#             aws-beta
+          # What https://staging.app.kosli.com says is running in aws-beta
+          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
+             "${KOSLI_HOST_STAGING}" \
+             "${KOSLI_API_TOKEN_STAGING}" \
+             aws-beta

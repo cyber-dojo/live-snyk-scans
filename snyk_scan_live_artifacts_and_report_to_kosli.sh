@@ -45,7 +45,7 @@ report_snyk_vulnerabilities_to_kosli()
       return
     fi
 
-    if [ "${flow}" != "differ" ]; then
+    if [ "${flow}" != "languages-start-points" ]; then
       return  # Do only one service till all working
     fi
 
