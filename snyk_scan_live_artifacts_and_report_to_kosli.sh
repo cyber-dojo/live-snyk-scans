@@ -61,8 +61,7 @@ report_snyk_vulnerabilities_to_kosli()
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
         --json-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium \
-        --policy-path="${snyk_policy_filename}" \
-        -d
+        --policy-path="${snyk_policy_filename}"
     set -e
 
     kosli create flow "${KOSLI_FLOW}" \
