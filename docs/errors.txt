@@ -9,3 +9,22 @@ Error: Error: No such image: ***.dkr.ecr.eu-central-1.amazonaws.com/runner:d3fe3
      ***.dkr.ecr.eu-central-1.amazonaws.com/runner:d3fe336
   without the trailing
      @sha:${fingerprint}
+
+
+In a successful run you get this in the CI log (for each Artifact in the snapshot):
+
+  92f7b10: Pulling from saver
+  Digest: sha256:c8fcf49ff4dfe59185109494c6c028f67ee5f6bc2a6de285091686e1ed6027a4
+  Status: Downloaded newer image for ***.dkr.ecr.eu-central-1.amazonaws.com/saver:92f7b10
+  ***.dkr.ecr.eu-central-1.amazonaws.com/saver:92f7b10
+  Warning:  failed to resolve git reference 9f6b8007baf0af96729f2ab7f4e8312cebcdcba2
+
+The named git commit is from the snyk_scans repo itself:
+
+  commit 9f6b8007baf0af96729f2ab7f4e8312cebcdcba2
+  Author: JonJagger <jon@kosli.com>
+  Date:   Thu Dec 28 10:03:35 2023 +0000
+  The commit does not exist in the git repository.
+  This may be caused by insufficient git clone depth.
+
+I think this is because of insufficient git clone depth
