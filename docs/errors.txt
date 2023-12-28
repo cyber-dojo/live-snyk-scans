@@ -1,0 +1,11 @@
+
+https://github.com/cyber-dojo/snyk_scans/actions/runs/7347288136/job/20003459005
+Error: Error: No such image: ***.dkr.ecr.eu-central-1.amazonaws.com/runner:d3fe336
+- Dont repeat Error:
+- What is the actual error?
+  In this case I think it is because the snyk-scan ran on
+     ***.dkr.ecr.eu-central-1.amazonaws.com/runner:d3fe336@sha:${fingerprint}
+  but the name of the image, in the kosli commands is
+     ***.dkr.ecr.eu-central-1.amazonaws.com/runner:d3fe336
+  without the trailing
+     @sha:${fingerprint}

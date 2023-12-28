@@ -63,6 +63,8 @@ report_snyk_vulnerabilities_to_kosli()
       --description="Scan of deployed Artifacts running in their Environment" \
       --template=artifact,snyk-scan
 
+    docker pull "${image_name}"
+
     kosli report artifact "${image_name}" \
       --artifact-type=docker
 
