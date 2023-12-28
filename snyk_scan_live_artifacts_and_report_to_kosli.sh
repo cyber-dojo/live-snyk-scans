@@ -46,6 +46,10 @@ report_snyk_vulnerabilities_to_kosli()
       return  # The artifact has no provenance
     fi
 
+    if [ "${flow}" != "runner" ]; then
+      return  # On aws-prod, first try with just one flow
+    fi
+
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
