@@ -50,7 +50,7 @@ jobs:
       - name: Run Snyk
         run:
           KOSLI_ENVIRONMENT=aws-beta
-          ./snyk_scan_live_artifacts_and_report_to_kosli.sh "${KOSLI_ENVIRONMENT}
+          ./snyk_scan_live_artifacts_and_report_to_kosli.sh "${KOSLI_ENVIRONMENT}"
 
 
 
