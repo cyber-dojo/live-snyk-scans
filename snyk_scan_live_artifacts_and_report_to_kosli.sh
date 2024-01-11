@@ -40,9 +40,9 @@ snyk_scan_live_artifacts_and_report_any_new_vulnerabilities_to_kosli()
 report_snyk_vulnerabilities_to_kosli()
 {
     local -r flow="${1}"          # eg differ
-    local -r git_commit="${1}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
-    local -r artifact_name="${2}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
-    local -r fingerprint="${3}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
+    local -r git_commit="${2}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r artifact_name="${3}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+    local -r fingerprint="${4}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
 
     if [ "${flow}" == "languages-start-points" ]; then
       # For one micro-service only, experiment with reporting to dedicated flow
@@ -74,9 +74,9 @@ report_snyk_vulnerabilities_to_kosli()
 report_snyk_vulnerabilities_to_kosli_in_dedicated_flow()
 {
     local -r flow="${1}"          # eg differ
-    local -r git_commit="${1}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
-    local -r artifact_name="${2}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
-    local -r fingerprint="${3}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
+    local -r git_commit="${2}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r artifact_name="${3}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+    local -r fingerprint="${4}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
 
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
