@@ -64,6 +64,11 @@ report_snyk_vulnerabilities_to_kosli()
         --policy-path="${snyk_policy_filename}"
     set -e
 
+    echo "==============================="
+    echo "Flow=${flow}"
+    echo kosli report evidence artifact snyk
+    echo "==============================="
+
     kosli report evidence artifact snyk \
       --fingerprint="${fingerprint}" \
       --flow="${flow}" \
