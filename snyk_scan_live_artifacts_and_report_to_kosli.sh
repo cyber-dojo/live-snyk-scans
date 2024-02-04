@@ -58,12 +58,16 @@ report_snyk_vulnerabilities_to_kosli()
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
-    echo "==============================="
+    echo "-------------------------------"
     rm "${snyk_policy_filename}" || true
-    curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk"  > "${snyk_policy_filename}"
+    if [ "${flow}" = "creator" ]; then
+      curl "https://gitlab.com/cyber-dojo/creator/-/raw/${git_commit}/.snyk" > "${snyk_policy_filename}"
+    else
+      curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk" > "${snyk_policy_filename}"
+    fi
     cat "${snyk_policy_filename}"
 
-    echo "==============================="
+    echo "-------------------------------"
     echo snyk container test "${artifact_name}@sha256:${fingerprint}"
 
     set +e
@@ -73,7 +77,7 @@ report_snyk_vulnerabilities_to_kosli()
         --policy-path="${snyk_policy_filename}"
     set -e
 
-    echo "==============================="
+    echo "-------------------------------"
     echo kosli report evidence artifact snyk
 
     set +e
@@ -81,13 +85,13 @@ report_snyk_vulnerabilities_to_kosli()
       --fingerprint="${fingerprint}" \
       --flow="${flow}" \
       --name=snyk-scan \
-      --scan-results="${snyk_output_json_filename}" | tee /tmp/kosli.snyk.log
+      --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.log
     STATUS=${PIPESTATUS[0]}
     # Error: The data value transmitted exceeds the capacity limit.
     set -e
-    
-    if [ ${STATUS} != 0 ] ; then
-      echo "==============================="
+
+    if [ "${STATUS}" != "0" ] ; then
+      echo "-------------------------------"
       echo ERROR: kosli report evidence artifact snyk
       cat /tmp/kosli.snyk.log
     fi
@@ -106,7 +110,13 @@ report_snyk_vulnerabilities_to_kosli_in_dedicated_flow()
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
-    curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk"  > "${snyk_policy_filename}"
+    rm "${snyk_policy_filename}" || true
+    if [ "${flow}" = "creator" ]; then
+      curl "https://gitlab.com/cyber-dojo/creator/-/raw/${git_commit}/.snyk" > "${snyk_policy_filename}"
+    else
+      curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk" > "${snyk_policy_filename}"
+    fi
+    cat "${snyk_policy_filename}"
 
     set +e
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
