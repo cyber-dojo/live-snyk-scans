@@ -52,10 +52,19 @@ report_snyk_vulnerabilities_to_kosli()
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
 
+    echo "==============================="
+    echo "Flow=${flow}"
+
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
+    echo "==============================="
+    rm "${snyk_policy_filename}" || true
     curl "https://raw.githubusercontent.com/cyber-dojo/${flow}/${git_commit}/.snyk"  > "${snyk_policy_filename}"
+    cat "${snyk_policy_filename}"
+
+    echo "==============================="
+    echo snyk container test "${artifact_name}@sha256:${fingerprint}"
 
     set +e
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
@@ -65,15 +74,23 @@ report_snyk_vulnerabilities_to_kosli()
     set -e
 
     echo "==============================="
-    echo "Flow=${flow}"
     echo kosli report evidence artifact snyk
-    echo "==============================="
 
+    set +e
     kosli report evidence artifact snyk \
       --fingerprint="${fingerprint}" \
       --flow="${flow}" \
       --name=snyk-scan \
-      --scan-results="${snyk_output_json_filename}"
+      --scan-results="${snyk_output_json_filename}" | tee /tmp/kosli.snyk.log
+    STATUS=${PIPESTATUS[0]}
+    # Error: The data value transmitted exceeds the capacity limit.
+    set -e
+    
+    if [ ${STATUS} != 0 ] ; then
+      echo "==============================="
+      echo ERROR: kosli report evidence artifact snyk
+      cat /tmp/kosli.snyk.log
+    fi
 }
 
 report_snyk_vulnerabilities_to_kosli_in_dedicated_flow()
