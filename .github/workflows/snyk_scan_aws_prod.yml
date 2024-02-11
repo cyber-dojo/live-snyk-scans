@@ -37,7 +37,7 @@ jobs:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v4
         with:
             role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/gh_actions_snyk_scans
             aws-region: ${{ env.AWS_REGION }}
@@ -46,7 +46,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master
