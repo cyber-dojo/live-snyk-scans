@@ -51,14 +51,16 @@ jobs:
 
       - name: Run Snyk
         run: |
+          export KOSLI_ENVIRONMENT=aws-prod
+          export KOSLI_FLOW=aws-prod-snyk-scan
+          export KOSLI_TRAIL=$(date +"%Y-%m-%d-T-%T" )
+          
           # What https://app.kosli.com says is running in aws-prod
-          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
+          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
              "${KOSLI_HOST_PROD}" \
-             "${KOSLI_API_TOKEN_PROD}" \
-             aws-prod
+             "${KOSLI_API_TOKEN_PROD}"
 
           # What https://staging.app.kosli.com says is running in aws-prod
-          ./snyk_scan_live_artifacts_and_report_to_kosli.sh \
-             "${KOSLI_HOST_STAGING}" \
-             "${KOSLI_API_TOKEN_STAGING}" \
-             aws-prod
+          #./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
+          #   "${KOSLI_HOST_STAGING}" \
+          #   "${KOSLI_API_TOKEN_STAGING}" 
