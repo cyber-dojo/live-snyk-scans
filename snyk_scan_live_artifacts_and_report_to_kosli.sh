@@ -136,11 +136,6 @@ report_snyk_vulnerabilities_to_kosli_in_dedicated_flow()
       --fingerprint="${fingerprint}" \
       --name=snyk-scan \
       --scan-results="${snyk_output_json_filename}"
-
-    kosli expect deployment "${artifact_name}" \
-      --fingerprint="${fingerprint}" \
-      --description="Deployed in ${KOSLI_ENVIRONMENT}" \
-      --environment="${KOSLI_ENVIRONMENT}"
 }
 
 
