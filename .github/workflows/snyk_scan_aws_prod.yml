@@ -1,4 +1,4 @@
-name: Regular Snyk scans of aws-prod
+name: Live Snyk scans of aws-prod
 
 on:
   push:

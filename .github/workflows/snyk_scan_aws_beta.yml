@@ -1,4 +1,4 @@
-name: Regular Snyk scan of aws-beta
+name: Live Snyk scan of aws-beta
 
 on:
   push:
