@@ -1,44 +1,24 @@
 version: 1
 
 trail:
-  artifacts:
+  attestations:
     - name: creator
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: custom-start-points
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: dashboard
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: differ
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: exercises-start-points
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: languages-start-points
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: nginx
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
 #    - name: runner
-#      attestations:
-#        - name: snyk-scan
-#          type: snyk
+#      type: snyk
     - name: saver
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk
     - name: web
-      attestations:
-        - name: snyk-scan
-          type: snyk
+      type: snyk

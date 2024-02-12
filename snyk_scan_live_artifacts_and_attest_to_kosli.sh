@@ -12,6 +12,16 @@ source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 export KOSLI_HOST="${1}"
 export KOSLI_API_TOKEN="${2}"
 
+kosli_begin_trail()
+{
+    kosli create flow "${KOSLI_FLOW}" \
+      --description="Scan of Artifacts running in ${KOSLI_ENVIRONMENT}" \
+      --template-file="$(repo_root)/.kosli.yml" \
+      --visibility=public
+
+    kosli begin trail "${KOSLI_TRAIL}"
+}
+
 snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 {
     local -r snapshot_json_filename=snapshot.json
@@ -33,13 +43,13 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
           else
             git_commit=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
             fingerprint=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
-            attest_snyk_vulnerabilities_to_kosli_trail "${flow}" "${git_commit}" "${artifact_name}" "${fingerprint}"
+            attest_snyk_scan_to_kosli_trail "${flow}" "${git_commit}" "${artifact_name}" "${fingerprint}"
           fi
        fi
     done
 }
 
-attest_snyk_vulnerabilities_to_kosli_trail()
+attest_snyk_scan_to_kosli_trail()
 {
     local -r flow="${1}"          # eg differ-ci
     local -r git_commit="${2}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
@@ -57,11 +67,6 @@ attest_snyk_vulnerabilities_to_kosli_trail()
 
     if [ "${repo}" == "runner" ] ; then
       # runner's snyk report currently exceeds the request size limit
-      return 0
-    fi
-
-    if [ "${repo}" != "languages-start-points" ] ; then
-      # For now, do just one repo
       return 0
     fi
 
@@ -93,29 +98,18 @@ attest_snyk_vulnerabilities_to_kosli_trail()
         --policy-path="${snyk_policy_filename}"
     set -e
 
-    echo "-------------------------------"
-    echo kosli create flow "${KOSLI_FLOW}"
-    kosli create flow "${KOSLI_FLOW}" \
-      --description="Scan of Artifacts running in ${KOSLI_ENVIRONMENT}" \
-      --template-file="$(repo_root)/.kosli.yml" \
-      --visibility=public
-
-    echo "-------------------------------"
-    echo kosli begin trail "${KOSLI_TRAIL}"
-    kosli begin trail "${KOSLI_TRAIL}"
-
-    echo "-------------------------------"
-    echo kosli attest artifact "${artifact_name}"
-    kosli attest artifact "${artifact_name}" \
-      --fingerprint="${fingerprint}" \
-      --name="${repo}"
+#    echo "-------------------------------"
+#    echo kosli attest artifact "${artifact_name}"
+#    kosli attest artifact "${artifact_name}" \
+#      --fingerprint="${fingerprint}" \
+#      --name="${repo}"
 
     echo "-------------------------------"
     echo kosli attest snyk "${artifact_name}"
     set +e
     kosli attest snyk "${artifact_name}" \
       --fingerprint="${fingerprint}" \
-      --name="${repo}.snyk-scan" \
+      --name="${repo}" \
       --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.log
     STATUS=${PIPESTATUS[0]}
     # Error: The data value transmitted exceeds the capacity limit.
@@ -129,4 +123,5 @@ attest_snyk_vulnerabilities_to_kosli_trail()
 }
 
 exit_non_zero_unless_installed kosli snyk jq
+kosli_begin_trail
 snyk_scan_live_artifacts_and_attest_to_kosli_trail
