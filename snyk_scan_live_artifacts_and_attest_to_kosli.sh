@@ -61,6 +61,11 @@ attest_snyk_vulnerabilities_to_kosli_trail()
       return 0
     fi
 
+    if [ "${repo}" != "languages-start-points" ] ; then
+      # For now, do just one repo
+      return 0
+    fi
+
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
 
