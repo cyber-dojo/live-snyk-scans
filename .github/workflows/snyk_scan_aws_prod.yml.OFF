@@ -53,7 +53,7 @@ jobs:
         run: |
           export KOSLI_ENVIRONMENT=aws-prod
           export KOSLI_FLOW=aws-prod-snyk-scan
-          export KOSLI_TRAIL=$(date +"%Y-%m-%d-T-%T")
+          export KOSLI_TRAIL=$(date +"%Y-%m-%d-T-%H-%M-%S")
           
           # What https://app.kosli.com says is running in aws-prod
           ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
