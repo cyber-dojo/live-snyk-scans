@@ -88,29 +88,52 @@ attest_snyk_scan_to_kosli_trail()
     fi
     cat "${snyk_policy_filename}"
 
-    set +e
     # In CI we have already performed these actions:
     #   aws-actions/configure-aws-credentials@v4
     #   aws-actions/amazon-ecr-login@v2
     #   snyk/actions/setup@master
+    set +e
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
         --json-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium \
         --policy-path="${snyk_policy_filename}"
     set -e
 
+    # Do attestation on the Flow+Trail representing this live-snyk-scan use-case.
+    # Don't do attestation at the Artifact level because that would make
+    # KOSLI_FLOW appear as an extra Flow in the Environment snapshots.
     set +e
     kosli attest snyk \
-      --description="artifact=${artifact_name}, fingerprint=${fingerprint}" \
+      --user-data=<(printf '{"artifact_name": "%s", "fingerprint": "%s"}' "$artifact_name" "$fingerprint") \
+      --flow="${KOSLI_FLOW}" \
+      --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \
-      --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.log
+      --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.trail.log
     STATUS=${PIPESTATUS[0]}
     set -e
 
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
-      echo ERROR: kosli attest snyk
-      cat /tmp/kosli.snyk.log
+      echo ERROR: kosli attest snyk --flow="${KOSLI_FLOW}" --trail="${KOSLI_TRAIL}" --name="${repo}"
+      cat /tmp/kosli.snyk.trail.log
+    fi
+
+    # Do attestation on the Artifact in the _original_ Flow+Trail that built it.
+    # The next Environment snapshot will be non-compliant if the snyk report finds a vulnerability.
+    set +e
+    kosli attest snyk "${artifact_name}" \
+      --fingerprint="${fingerprint}" \
+      --flow="${flow}" \
+      --trail="${git_commit}" \
+      --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan" \
+      --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.artifact.log
+    STATUS=${PIPESTATUS[0]}
+    set -e
+
+    if [ "${STATUS}" != "0" ] ; then
+      echo "-------------------------------"
+      echo ERROR: kosli attest snyk --flow="${flow}" --trail="${git_commit}" --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan"
+      cat /tmp/kosli.snyk.artifact.log
     fi
 }
 
