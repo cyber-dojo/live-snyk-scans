@@ -56,11 +56,11 @@ jobs:
           export KOSLI_TRAIL=$(date +"%Y-%m-%d-T-%T" )
           
           # What https://app.kosli.com says is running in aws-prod
-          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
-             "${KOSLI_HOST_PROD}" \
-             "${KOSLI_API_TOKEN_PROD}"
+          #./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
+          #   "${KOSLI_HOST_PROD}" \
+          #   "${KOSLI_API_TOKEN_PROD}"
 
           # What https://staging.app.kosli.com says is running in aws-prod
-          #./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
-          #   "${KOSLI_HOST_STAGING}" \
-          #   "${KOSLI_API_TOKEN_STAGING}" 
+          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
+             "${KOSLI_HOST_STAGING}" \
+             "${KOSLI_API_TOKEN_STAGING}" 

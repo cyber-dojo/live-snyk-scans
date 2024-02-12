@@ -12,7 +12,6 @@ source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 export KOSLI_HOST="${1}"
 export KOSLI_API_TOKEN="${2}"
 
-
 snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 {
     local -r snapshot_json_filename=snapshot.json
