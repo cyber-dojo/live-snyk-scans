@@ -47,7 +47,7 @@ attest_snyk_vulnerabilities_to_kosli_trail()
     local -r artifact_name="${3}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
     local -r fingerprint="${4}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
 
-    local -r repo="${flow::-2}"   # eg differ
+    local -r repo="${flow::-3}"   # eg differ
 
     echo "==============================="
     echo "         flow=${flow}"
