@@ -107,8 +107,8 @@ attest_snyk_scan_to_kosli_trail()
     echo "-------------------------------"
     echo kosli attest snyk "${artifact_name}"
     set +e
-    kosli attest snyk "${artifact_name}" \
-      --fingerprint="${fingerprint}" \
+    kosli attest snyk \
+      --description="artifact=${artifact_name}, fingerprint=${fingerprint}" \
       --name="${repo}" \
       --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.log
     STATUS=${PIPESTATUS[0]}
