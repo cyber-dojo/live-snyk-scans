@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeu
 
-root_dir() { git rev-parse --show-toplevel; }
-source "$(root_dir)/scripts/exit_non_zero_unless_installed.sh"
+repo_root() { git rev-parse --show-toplevel; }
+source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 
 # KOSLI_ORG          # Set in CI, cyber-dojo
 # KOSLI_FLOW         # Set in CI, eg aws-prod-snyk-scan
