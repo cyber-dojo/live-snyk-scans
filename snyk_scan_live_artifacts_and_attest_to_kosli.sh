@@ -6,7 +6,7 @@ source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 
 # KOSLI_ORG          # Set in CI, cyber-dojo
 # KOSLI_FLOW         # Set in CI, eg aws-prod-snyk-scan
-# KOSLI_TRAIL        # Set in CI, eg 2024-02-11-T-12:06:59
+# KOSLI_TRAIL        # Set in CI, eg 2024-02-11-T-12-06-59
 # KOSLI_ENVIRONMENT  # Set in CI, eg aws-prod
 
 export KOSLI_HOST="${1}"
