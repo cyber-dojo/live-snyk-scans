@@ -58,12 +58,12 @@ attest_snyk_scan_to_kosli_trail()
 
     local -r repo="${flow::-3}"   # eg differ
 
-    echo "==============================="
-    echo "         flow=${flow}"
-    echo "   git-commit=${git_commit}"
-    echo "artifact_name=${artifact_name}"
-    echo "  fingerprint=${fingerprint}"
-    echo "         repo=${repo}"
+    #echo "==============================="
+    #echo "         flow=${flow}"
+    #echo "   git-commit=${git_commit}"
+    #echo "artifact_name=${artifact_name}"
+    #echo "  fingerprint=${fingerprint}"
+    #echo "         repo=${repo}"
 
     if [ "${repo}" == "runner" ] ; then
       # runner's snyk report currently exceeds the request size limit
@@ -76,7 +76,6 @@ attest_snyk_scan_to_kosli_trail()
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
-    echo "-------------------------------"
     rm "${snyk_policy_filename}" || true
     if [ "${repo}" == "creator" ] ; then
       curl "https://gitlab.com/cyber-dojo/creator/-/raw/${git_commit}/.snyk" > "${snyk_policy_filename}"
@@ -85,8 +84,6 @@ attest_snyk_scan_to_kosli_trail()
     fi
     cat "${snyk_policy_filename}"
 
-    echo "-------------------------------"
-    echo snyk container test "${artifact_name}@sha256:${fingerprint}"
     set +e
     # In CI we have already performed these actions:
     #   aws-actions/configure-aws-credentials@v4
@@ -98,21 +95,12 @@ attest_snyk_scan_to_kosli_trail()
         --policy-path="${snyk_policy_filename}"
     set -e
 
-#    echo "-------------------------------"
-#    echo kosli attest artifact "${artifact_name}"
-#    kosli attest artifact "${artifact_name}" \
-#      --fingerprint="${fingerprint}" \
-#      --name="${repo}"
-
-    echo "-------------------------------"
-    echo kosli attest snyk "${artifact_name}"
     set +e
     kosli attest snyk \
       --description="artifact=${artifact_name}, fingerprint=${fingerprint}" \
       --name="${repo}" \
       --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.log
     STATUS=${PIPESTATUS[0]}
-    # Error: The data value transmitted exceeds the capacity limit.
     set -e
 
     if [ "${STATUS}" != "0" ] ; then
