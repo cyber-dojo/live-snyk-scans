@@ -69,10 +69,6 @@ attest_snyk_scan_to_kosli_trail()
       # runner's snyk report currently exceeds the request size limit
       return 0
     fi
-    if [ "${repo:0:9}" == "dashboard" ] ; then
-      # Don't know whether we'll get dashboard-ci or dashboard-github-issues
-      return 0
-    fi
 
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk

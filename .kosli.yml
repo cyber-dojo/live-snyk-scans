@@ -6,8 +6,8 @@ trail:
       type: snyk
     - name: custom-start-points
       type: snyk
-#    - name: dashboard
-#      type: snyk
+    - name: dashboard
+      type: snyk
     - name: differ
       type: snyk
     - name: exercises-start-points
