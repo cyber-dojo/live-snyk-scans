@@ -16,8 +16,6 @@ trail:
       type: snyk
     - name: nginx
       type: snyk
-#    - name: runner
-#      type: snyk
     - name: saver
       type: snyk
     - name: web
