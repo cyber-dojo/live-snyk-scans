@@ -65,8 +65,8 @@ attest_snyk_scan_to_kosli_trail()
     #echo "  fingerprint=${fingerprint}"
     #echo "         repo=${repo}"
 
-    if [ "${repo}" == "runner" ] ; then
-      # runner's snyk report currently exceeds the request size limit
+    if [ "${repo}" != "runner" ] ; then
+      # Does runner's snyk report still exceeds the request size limit?
       return 0
     fi
 
