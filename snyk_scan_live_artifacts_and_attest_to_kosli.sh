@@ -90,9 +90,10 @@ attest_snyk_scan_to_kosli_trail()
     #   snyk/actions/setup@master
     set +e
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
-        --json-file-output="${snyk_output_json_filename}" \
-        --severity-threshold=medium \
-        --policy-path="${snyk_policy_filename}"
+        --policy-path="${snyk_policy_filename}" \
+        --sarif \
+        --sarif-file-output="${snyk_output_json_filename}" \
+        --severity-threshold=medium
     set -e
 
     # Do attestation on the Flow+Trail representing this live-snyk-scan use-case.
@@ -104,6 +105,7 @@ attest_snyk_scan_to_kosli_trail()
       --flow="${KOSLI_FLOW}" \
       --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \
+      --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.trail.log
     STATUS=${PIPESTATUS[0]}
     set -e
@@ -122,6 +124,7 @@ attest_snyk_scan_to_kosli_trail()
       --flow="${flow}" \
       --trail="${git_commit}" \
       --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan" \
+      --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.artifact.log
     STATUS=${PIPESTATUS[0]}
     set -e
