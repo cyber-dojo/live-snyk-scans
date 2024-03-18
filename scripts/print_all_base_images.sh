@@ -16,6 +16,7 @@ export KOSLI_ENVIRONMENT="${2:-aws-prod}"
 
 snapshot_json_filename=snapshot.json
 
+mkdir "$(repo_root)/tmp"
 kosli get snapshot "${KOSLI_ENVIRONMENT}" --output=json > "$(repo_root)/tmp/${snapshot_json_filename}"
 
 docker run \
