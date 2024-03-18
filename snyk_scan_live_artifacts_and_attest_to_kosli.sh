@@ -37,13 +37,14 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
         annotation_type=$(jq -r ".artifacts[$i].annotation.type" ${snapshot_json_filename})
         if [ "${annotation_type}" != "exited" ] ; then
           flow=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})
+          trail=$(jq -r ".artifacts[$i].trail_name" ${snapshot_json_filename})
           artifact_name=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
           if [ "${flow}" == "" ] ; then
             echo "Artifact ${artifact_name} in Environment ${KOSLI_ENVIRONMENT} has no provenance in ${KOSLI_HOST}"
           else
             git_commit=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
             fingerprint=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
-            attest_snyk_scan_to_kosli_trail "${flow}" "${git_commit}" "${artifact_name}" "${fingerprint}"
+            attest_snyk_scan_to_kosli_trail "${flow}" "${trail}" "${git_commit}" "${artifact_name}" "${fingerprint}"
           fi
        fi
     done
@@ -52,14 +53,16 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 attest_snyk_scan_to_kosli_trail()
 {
     local -r flow="${1}"          # eg differ-ci
-    local -r git_commit="${2}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
-    local -r artifact_name="${3}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
-    local -r fingerprint="${4}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
+    local -r trail="${2}"         # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r git_commit="${3}"    # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r artifact_name="${4}" # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/differ:44e6c27
+    local -r fingerprint="${5}"   # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
 
     local -r repo="${flow::-3}"   # eg differ
 
     #echo "==============================="
     #echo "         flow=${flow}"
+    #echo "        trail=${trail}"
     #echo "   git-commit=${git_commit}"
     #echo "artifact_name=${artifact_name}"
     #echo "  fingerprint=${fingerprint}"
@@ -117,7 +120,7 @@ attest_snyk_scan_to_kosli_trail()
     kosli attest snyk "${artifact_name}" \
       --fingerprint="${fingerprint}" \
       --flow="${flow}" \
-      --trail="${git_commit}" \
+      --trail="${trail}" \
       --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan" \
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.artifact.log
@@ -126,7 +129,7 @@ attest_snyk_scan_to_kosli_trail()
 
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
-      echo ERROR: kosli attest snyk --flow="${flow}" --trail="${git_commit}" --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan"
+      echo ERROR: kosli attest snyk --flow="${flow}" --trail="${trail}" --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan"
       cat /tmp/kosli.snyk.artifact.log
     fi
 }
