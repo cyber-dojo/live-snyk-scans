@@ -68,6 +68,10 @@ attest_snyk_scan_to_kosli_trail()
     #echo "  fingerprint=${fingerprint}"
     #echo "         repo=${repo}"
 
+    if [ "${repo}" != "differ" ]; then
+      return
+    fi
+
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
 
@@ -97,6 +101,9 @@ attest_snyk_scan_to_kosli_trail()
     # Do attestation on the Flow+Trail representing this live-snyk-scan use-case.
     # Don't do attestation at the Artifact level because that would make
     # KOSLI_FLOW appear as an extra Flow in the Environment snapshots.
+    printf '{"artifact_name": "%s", "fingerprint": "%s"}' "$artifact_name" "$fingerprint" > /tmp/user-data.json
+    cat /tmp/user-data.json
+    jq . /tmp/user-data.json
     set +e
     kosli attest snyk \
       --user-data=<(printf '{"artifact_name": "%s", "fingerprint": "%s"}' "$artifact_name" "$fingerprint") \

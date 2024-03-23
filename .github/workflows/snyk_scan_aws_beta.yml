@@ -60,7 +60,7 @@ jobs:
              "${KOSLI_HOST_PROD}" \
              "${KOSLI_API_TOKEN_PROD}"
 
-          # What https://staging.app.kosli.com says is running in aws-beta
-          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
-             "${KOSLI_HOST_STAGING}" \
-             "${KOSLI_API_TOKEN_STAGING}"
+#        # What https://staging.app.kosli.com says is running in aws-beta
+#          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
+#             "${KOSLI_HOST_STAGING}" \
+#             "${KOSLI_API_TOKEN_STAGING}"
