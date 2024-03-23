@@ -109,7 +109,7 @@ attest_snyk_scan_to_kosli_trail()
     echo
     set +e
     kosli attest snyk \
-      --user-data=/tmp/user-data.json \
+      --user-data=<(printf '{"artifact_name": "%s", "fingerprint": "%s"}' "$artifact_name" "$fingerprint") \
       --flow="${KOSLI_FLOW}" \
       --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \

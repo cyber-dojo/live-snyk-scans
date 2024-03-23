@@ -12,8 +12,8 @@ env:
   KOSLI_ORG: ${{ vars.KOSLI_ORG }}  # cyber-dojo
   KOSLI_HOST_STAGING: ${{ vars.KOSLI_HOST_STAGING }}
   KOSLI_API_TOKEN_STAGING: ${{ secrets.KOSLI_API_TOKEN_STAGING }}
-  KOSLI_HOST_PROD: ${{ vars.KOSLI_HOST }}
-  KOSLI_API_TOKEN_PROD: ${{ secrets.KOSLI_API_TOKEN }}
+  KOSLI_HOST_PROD: ${{ vars.KOSLI_HOST_PROD }}
+  KOSLI_API_TOKEN_PROD: ${{ secrets.KOSLI_API_TOKEN_PROD }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID_BETA }} # <<<<<<<
   AWS_REGION: ${{ vars.AWS_REGION }}
