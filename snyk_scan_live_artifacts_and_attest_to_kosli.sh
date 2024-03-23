@@ -102,11 +102,14 @@ attest_snyk_scan_to_kosli_trail()
     # Don't do attestation at the Artifact level because that would make
     # KOSLI_FLOW appear as an extra Flow in the Environment snapshots.
     printf '{"artifact_name": "%s", "fingerprint": "%s"}' "$artifact_name" "$fingerprint" > /tmp/user-data.json
+    echo raw json...
     cat /tmp/user-data.json
+    echo JQ prettified...
     jq . /tmp/user-data.json
+    echo
     set +e
     kosli attest snyk \
-      --user-data=<(printf '{"artifact_name": "%s", "fingerprint": "%s"}' "$artifact_name" "$fingerprint") \
+      --user-data=/tmp/user-data.json \
       --flow="${KOSLI_FLOW}" \
       --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \
