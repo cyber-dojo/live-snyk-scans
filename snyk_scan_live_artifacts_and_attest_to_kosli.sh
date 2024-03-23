@@ -37,11 +37,11 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
         annotation_type=$(jq -r ".artifacts[$i].annotation.type" ${snapshot_json_filename})
         if [ "${annotation_type}" != "exited" ] ; then
           flow=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})
-          trail=$(jq -r ".artifacts[$i].trail_name" ${snapshot_json_filename})
-          artifact_name=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
           if [ "${flow}" == "" ] ; then
             echo "Artifact ${artifact_name} in Environment ${KOSLI_ENVIRONMENT} has no provenance in ${KOSLI_HOST}"
           else
+            trail=$(jq -r ".artifacts[$i].flows[0].trail_name" ${snapshot_json_filename})
+            artifact_name=$(jq -r ".artifacts[$i].name" ${snapshot_json_filename})
             git_commit=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
             fingerprint=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
             attest_snyk_scan_to_kosli_trail "${flow}" "${trail}" "${git_commit}" "${artifact_name}" "${fingerprint}"
@@ -60,10 +60,6 @@ attest_snyk_scan_to_kosli_trail()
 
     local -r repo="${flow::-3}"   # eg differ
 
-    if [ "${repo}" != "runner" ]; then
-      return
-    fi
-
     echo "==============================="
     echo "         flow='${flow}'"
     echo "        trail='${trail}'"
@@ -71,6 +67,10 @@ attest_snyk_scan_to_kosli_trail()
     echo "artifact_name='${artifact_name}'"
     echo "  fingerprint='${fingerprint}'"
     echo "         repo='${repo}'"
+
+    if [ "${repo}" != "xrunner" ]; then
+      return
+    fi
 
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
