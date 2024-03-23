@@ -60,17 +60,13 @@ attest_snyk_scan_to_kosli_trail()
 
     local -r repo="${flow::-3}"   # eg differ
 
-    echo "==============================="
-    echo "         flow='${flow}'"
-    echo "        trail='${trail}'"
-    echo "   git-commit='${git_commit}'"
-    echo "artifact_name='${artifact_name}'"
-    echo "  fingerprint='${fingerprint}'"
-    echo "         repo='${repo}'"
-
-    if [ "${repo}" != "xrunner" ]; then
-      return
-    fi
+#    echo "==============================="
+#    echo "         flow='${flow}'"
+#    echo "        trail='${trail}'"
+#    echo "   git-commit='${git_commit}'"
+#    echo "artifact_name='${artifact_name}'"
+#    echo "  fingerprint='${fingerprint}'"
+#    echo "         repo='${repo}'"
 
     local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
