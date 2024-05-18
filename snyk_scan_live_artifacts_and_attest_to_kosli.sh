@@ -86,13 +86,13 @@ attest_snyk_scan_to_kosli_trail()
     #   aws-actions/configure-aws-credentials@v4
     #   aws-actions/amazon-ecr-login@v2
     #   snyk/actions/setup@master
-    set +e
+
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
+        -d \
         --policy-path="${snyk_policy_filename}" \
         --sarif \
         --sarif-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium
-    set -e
 
     # Do attestation on the Flow+Trail representing this live-snyk-scan use-case.
     # Don't do attestation at the Artifact level because that would make
@@ -112,6 +112,7 @@ attest_snyk_scan_to_kosli_trail()
       echo "-------------------------------"
       echo ERROR: kosli attest snyk --flow="${KOSLI_FLOW}" --trail="${KOSLI_TRAIL}" --name="${repo}"
       cat /tmp/kosli.snyk.trail.log
+      exit ${STATUS}
     fi
 
     # Do attestation on the Artifact in the _original_ Flow+Trail that built it.
@@ -131,6 +132,7 @@ attest_snyk_scan_to_kosli_trail()
       echo "-------------------------------"
       echo ERROR: kosli attest snyk --flow="${flow}" --trail="${trail}" --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan"
       cat /tmp/kosli.snyk.artifact.log
+      exit ${STATUS}
     fi
 }
 
