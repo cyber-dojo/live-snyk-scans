@@ -10,7 +10,7 @@ source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 # KOSLI_ENVIRONMENT  # Set in CI, eg aws-prod
 
 export KOSLI_HOST="${1}"
-export KOSLI_API_TOKEN="${2}"
+export KOSLI_API_TOKEN="${2}"  # read-write
 
 kosli_begin_trail()
 {
@@ -28,7 +28,12 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 
     # Use Kosli CLI to get info on what artifacts are currently running in the given environment
     # (docs/snapshot.json contains an example json file)
-    kosli get snapshot "${KOSLI_ENVIRONMENT}" --output=json > "${snapshot_json_filename}"
+    local -r read_only_api_token=Pj_XT2deaVA6V1qrTlthuaWsmjVt4eaHQwqnwqjRO3A
+
+    kosli get snapshot "${KOSLI_ENVIRONMENT}" \
+      --host=https://app.kosli.com \
+      --api-token="${read_only_api_token}" \
+      --output=json > "${snapshot_json_filename}"
 
     # Process info, one artifact at a time
     artifacts_length=$(jq '.artifacts | length' ${snapshot_json_filename})
@@ -104,13 +109,16 @@ attest_snyk_scan_to_kosli_trail()
       --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \
       --attachments="${snyk_policy_filename}" \
-      --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.trail.log
+      --scan-results="${snyk_output_json_filename}" \
+        2>&1 | tee /tmp/kosli.snyk.trail.log
+
     STATUS=${PIPESTATUS[0]}
     set -e
 
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
-      echo ERROR: kosli attest snyk --flow="${KOSLI_FLOW}" --trail="${KOSLI_TRAIL}" --name="${repo}"
+      echo ERROR: failed to attest snyk results to Trail representing the live-snyk-scan
+      echo kosli attest snyk --flow="${KOSLI_FLOW}" --trail="${KOSLI_TRAIL}" --name="${repo}"
       cat /tmp/kosli.snyk.trail.log
       exit ${STATUS}
     fi
@@ -124,13 +132,16 @@ attest_snyk_scan_to_kosli_trail()
       --trail="${trail}" \
       --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan" \
       --attachments="${snyk_policy_filename}" \
-      --scan-results="${snyk_output_json_filename}" 2>&1 | tee /tmp/kosli.snyk.artifact.log
+      --scan-results="${snyk_output_json_filename}" \
+        2>&1 | tee /tmp/kosli.snyk.artifact.log
+
     STATUS=${PIPESTATUS[0]}
     set -e
 
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
-      echo ERROR: kosli attest snyk --flow="${flow}" --trail="${trail}" --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan"
+      echo ERROR: failed to attest snyk results to Trail which originally built the artifact
+      echo kosli attest snyk --flow="${flow}" --trail="${trail}" --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan"
       cat /tmp/kosli.snyk.artifact.log
       exit ${STATUS}
     fi
