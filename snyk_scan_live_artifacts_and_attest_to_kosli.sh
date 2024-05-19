@@ -92,12 +92,16 @@ attest_snyk_scan_to_kosli_trail()
     #   aws-actions/amazon-ecr-login@v2
     #   snyk/actions/setup@master
 
+    rm "${snyk_output_json_filename}" || true
+
+    set +e
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
         -d \
         --policy-path="${snyk_policy_filename}" \
         --sarif \
         --sarif-file-output="${snyk_output_json_filename}" \
         --severity-threshold=medium
+    set -e
 
     # Do attestation on the Flow+Trail representing this live-snyk-scan use-case.
     # Don't do attestation at the Artifact level because that would make
