@@ -10,7 +10,7 @@ source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 # KOSLI_ENVIRONMENT  # Set in CI, eg aws-prod
 
 export KOSLI_HOST="${1}"
-export KOSLI_API_TOKEN="${2}"  # read-write
+export KOSLI_API_TOKEN="${2}"
 
 kosli_begin_trail()
 {
@@ -28,11 +28,7 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 
     # Use Kosli CLI to get info on what artifacts are currently running in the given environment
     # (docs/snapshot.json contains an example json file)
-    local -r read_only_api_token=Pj_XT2deaVA6V1qrTlthuaWsmjVt4eaHQwqnwqjRO3A
-
     kosli get snapshot "${KOSLI_ENVIRONMENT}" \
-      --host=https://app.kosli.com \
-      --api-token="${read_only_api_token}" \
       --output=json > "${snapshot_json_filename}"
 
     # Process info, one artifact at a time
@@ -73,13 +69,15 @@ attest_snyk_scan_to_kosli_trail()
 #    echo "  fingerprint='${fingerprint}'"
 #    echo "         repo='${repo}'"
 
-    local -r snyk_output_json_filename=snyk.json
     local -r snyk_policy_filename=.snyk
+    local -r snyk_output_json_filename=snyk.json
 
     # All cyber-dojo microservice repos hold a .snyk policy file.
     # This is an empty file when no vulnerabilities are turned-off.
     # Ensure we get the .snyk file for the given artifact's git commit.
     rm "${snyk_policy_filename}" || true
+    rm "${snyk_output_json_filename}" || true
+
     if [ "${repo}" == "creator" ] ; then
       curl "https://gitlab.com/cyber-dojo/creator/-/raw/${git_commit}/.snyk" > "${snyk_policy_filename}"
     else
@@ -91,9 +89,6 @@ attest_snyk_scan_to_kosli_trail()
     #   aws-actions/configure-aws-credentials@v4
     #   aws-actions/amazon-ecr-login@v2
     #   snyk/actions/setup@master
-
-    rm "${snyk_output_json_filename}" || true
-
     set +e
     snyk container test "${artifact_name}@sha256:${fingerprint}" \
         -d \
