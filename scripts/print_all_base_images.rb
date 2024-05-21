@@ -25,6 +25,14 @@ def base_image(public_image_name)
    dot
    shell("docker pull #{public_image_name}")
    stdout = shell("docker run --rm --entrypoint='' #{public_image_name} printenv BASE_IMAGE || true")
+   # This will print something like
+   #    cyberdojo/sinatra-base:6b753be
+   # If you want the full commit of this base image, you can then do
+   #    docker run --rm --entrypoint="" cyberdojo/sinatra-base:6b753be printenv COMMIT_SHA
+   #    6b753bea38aea5b30ab40f7c99580f5137a2158d
+   # It is conceivable that at some point Kosli will want the evidence for a base-image
+   # to be part of the evidence for the derived image.
+   # This full-sha would be the name of the Kosli trail that built this sinatra-base image.
    stdout.strip
 end
 
