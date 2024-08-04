@@ -1,0 +1,25 @@
+# GitHub disables workflows after 60 days with no commit
+name: Keep workflows alive
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule: # At 09:00 every Saturday
+    - cron: '0 9 * * SAT'
+
+
+jobs:
+  keep-cron-workflows-alive:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+    - name: Keep all three workflows alive
+      env:
+        GH_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
+      run:
+          gh workflow enable enable_workflow.yml
