@@ -24,5 +24,7 @@ jobs:
       - name: Keep all three workflows alive
         env:
           GH_TOKEN: ${{ secrets.GH_WORKFLOW_TOKEN }}
-        run:
-            gh workflow enable enable_workflow.yml
+        run: |
+            gh workflow enable keep_workflows_alive.yml
+            gh workflow enable snyk_scan_aws_beta.yml
+            gh workflow enable snyk_scan_aws_prod.yml
