@@ -23,6 +23,6 @@ jobs:
 
       - name: Keep all three workflows alive
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_WORKFLOW_TOKEN }}
         run:
             gh workflow enable enable_workflow.yml
