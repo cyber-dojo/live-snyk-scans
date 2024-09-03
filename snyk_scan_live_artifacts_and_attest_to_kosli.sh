@@ -110,6 +110,7 @@ attest_snyk_scan_to_kosli_trail()
       --flow="${KOSLI_FLOW}" \
       --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \
+      --commit="${git_commit}" \
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" \
         2>&1 | tee /tmp/kosli.snyk.trail.log
