@@ -131,14 +131,6 @@ attest_snyk_scan_to_kosli_trail()
       exit ${STATUS}
     fi
 
-    return
-
-    # Do NOT do the attestation on the Artifact in the original Flow+Trail that built it because
-    # 1. this creates events on the Trail with multiple commit SHAs, which in turn means the
-    #    Trail description, in the Trails listing page, does not get a common-commit-info default
-    # 2. the original Trail represents the CI workflow that _created_ the Artifact and this
-    #    live-snyk-scanning is a _different_ process/workflow.
-
     # Do attestation on the Artifact in the _original_ Flow+Trail that built it.
     # The next Environment snapshot will be non-compliant if the snyk report finds a vulnerability.
     set +e
