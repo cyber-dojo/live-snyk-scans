@@ -110,7 +110,6 @@ attest_snyk_scan_to_kosli_trail()
       --flow="${KOSLI_FLOW}" \
       --trail="${KOSLI_TRAIL}" \
       --name="${repo}" \
-      --commit="${git_commit}" \
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" \
         2>&1 | tee /tmp/kosli.snyk.trail.log
@@ -138,6 +137,7 @@ attest_snyk_scan_to_kosli_trail()
       --fingerprint="${fingerprint}" \
       --flow="${flow}" \
       --trail="${trail}" \
+      --commit="${git_commit}" \
       --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan" \
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" \
