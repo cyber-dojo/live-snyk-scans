@@ -105,7 +105,8 @@ attest_snyk_scan_to_kosli_trail()
     printf '{"artifact_name": "%s", "fingerprint": "%s"}' "${artifact_name}" "${fingerprint}" > /tmp/user-data.json
 
     set +e
-    kosli attest snyk \
+    kosli attest snyk "${artifact_name}" \
+      --fingerprint="${fingerprint}" \
       --user-data=/tmp/user-data.json \
       --flow="${KOSLI_FLOW}" \
       --trail="${KOSLI_TRAIL}" \
@@ -130,6 +131,14 @@ attest_snyk_scan_to_kosli_trail()
       exit ${STATUS}
     fi
 
+    return
+
+    # Do NOT do the attestation on the Artifact in the original Flow+Trail that built it because
+    # 1. this creates events on the Trail with multiple commit SHAs, which in turn means the
+    #    Trail description, in the Trails listing page, does not get a common-commit-info default
+    # 2. the original Trail represents the CI workflow that _created_ the Artifact and this
+    #    live-snyk-scanning is a _different_ process/workflow.
+
     # Do attestation on the Artifact in the _original_ Flow+Trail that built it.
     # The next Environment snapshot will be non-compliant if the snyk report finds a vulnerability.
     set +e
@@ -137,7 +146,6 @@ attest_snyk_scan_to_kosli_trail()
       --fingerprint="${fingerprint}" \
       --flow="${flow}" \
       --trail="${trail}" \
-      --commit="${git_commit}" \
       --name="${repo}.${KOSLI_ENVIRONMENT}-snyk-scan" \
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" \
