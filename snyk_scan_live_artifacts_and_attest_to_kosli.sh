@@ -234,7 +234,7 @@ attest_snyk_scan_to_one_kosli_trail()
       --flow="${KOSLI_FLOW}" \
       --trail="${repo}-${fingerprint}" \
       --name="${timestamp}" \
-      --annotation=snapshot_url="${KOSLI_HOST}/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}" \
+      --annotate=snapshot_url="${KOSLI_HOST}/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}" \
         2>&1 | tee /tmp/kosli.artifact.log
 
     STATUS=${PIPESTATUS[0]}
