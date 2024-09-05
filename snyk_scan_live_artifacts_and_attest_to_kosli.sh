@@ -108,7 +108,7 @@ attest_snyk_scan_to_two_kosli_trails()
     set -e
 
     # Do attestation on the Flow+Trail representing this live-snyk-scan use-case.
-    # Don't do attestation at the Artifact level because that would make
+    # Don't attest at the Artifact level because that would make
     # KOSLI_FLOW appear as an extra Flow in the Environment snapshots.
     rm /tmp/user-data.json || true
     printf '{"artifact_name": "%s", "fingerprint": "%s"}' "${artifact_name}" "${fingerprint}" > /tmp/user-data.json
@@ -166,38 +166,38 @@ attest_snyk_scan_to_two_kosli_trails()
 
 attest_snyk_scan_to_one_kosli_trail()
 {
-# What should the Flow/Trail/Artifact be here? If runner fails a live snyk scan...\
-# I want
-#   - the runner Artifact in the (new) snapshot to become red.
-#   - to have a Trail showing _all_ the snyk-scans for a given Artifact
-# I don't want
-#   - snyk scans for the same Artifact, over time, to write to the same slot and thus "overlay" each other
-#   - all Artifacts in the snapshot to become red - eg because the live snyk scans for all the Artifacts are in the same Trail...
-#   - the live snyk-scan Trail compliance of the current runner Artifact to be tied to the live snyk-scan compliance of any previous runner Artifact.
-#   - to make an attestation to the original CI Trail where the Artifact was built.
-#
-# So the live snyk-can Trail has to be unique for the runner artifact -> its fingerprint.
-# Later I might like to add a "link-attestation" for the very first snyk-scan from the CI build pipeline.
-# I want a slot-name based on the date so I can easily see all the attestations
-#
-# KOSLI_FLOW         aws-prod-snyk-scan
-# KOSLI_TRAIL        runner-${FINGERPRINT}
-# KOSLI_NAME         ${TIMESTAMP}.snyk-container-scan
+    # If an Artifact (eg runer) fails a live snyk scan...
+    # I want
+    #   - the runner Artifact in the (new) snapshot to become red.
+    #   - to have a Trail showing _all_ the snyk-scans for a given Artifact
+    # I don't want
+    #   - snyk scans for the same Artifact, over time, to write to the same slot and thus "overwrite" each other
+    #   - all Artifacts in the snapshot to become red - eg because the live snyk scans for all the Artifacts are in the same Trail...
+    #   - the live snyk-scan Trail compliance of the current runner Artifact to be tied to the live snyk-scan compliance of any previous runner Artifact.
+    #   - to make an attestation to the original CI Trail where the Artifact was built.
+    #
+    # So the live snyk-can Trail has to be unique for the runner artifact so I use its fingerprint.
+    # Later I might like to add a "link-attestation" for the very first snyk-scan from the CI build pipeline.
+    # I want a slot-name based on the date+time so I can easily see _all_ the live-snyk-scan attestations
+    #
+    # KOSLI_FLOW         aws-prod-snyk-scan
+    # KOSLI_TRAIL        runner-${FINGERPRINT}
+    # KOSLI_NAME         ${TIMESTAMP}.snyk-container-scan
 
-    local -r repo="${1}"           # eg runner
-    local -r git_commit="${2}"     # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
-    local -r artifact_name="${3}"  # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/runner:44e6c27
-    local -r fingerprint="${4}"    # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
-    local -r snapshot_index="${5}" # eg 2843
-    local -r timestamp=${KOSLI_TRAIL}
+    local -r repo="${1}"              # eg runner
+    local -r git_commit="${2}"        # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
+    local -r artifact_name="${3}"     # eg 274425519734.dkr.ecr.eu-central-1.amazonaws.com/runner:44e6c27
+    local -r fingerprint="${4}"       # eg c6cd1a5b122d88aaeb41c1fdd015ad88c2bea95ae85f63eb5544fb707254847e
+    local -r snapshot_index="${5}"    # eg 2843
+    local -r timestamp=${KOSLI_TRAIL} # eg 2024-02-11-T-12-06-59
 
-#    echo "==============================="
-#    echo "         repo='${repo}'"
-#    echo "   git-commit='${git_commit}'"
-#    echo "artifact_name='${artifact_name}'"
-#    echo "  fingerprint='${fingerprint}'"
-#    echo "        index='${index}'"
-#    echo "    timestamp='${timestamp}'"
+    # echo "==============================="
+    # echo "         repo='${repo}'"
+    # echo "   git-commit='${git_commit}'"
+    # echo "artifact_name='${artifact_name}'"
+    # echo "  fingerprint='${fingerprint}'"
+    # echo "        index='${index}'"
+    # echo "    timestamp='${timestamp}'"
 
     local -r snyk_policy_filename=.snyk
     local -r snyk_output_json_filename=snyk.json
