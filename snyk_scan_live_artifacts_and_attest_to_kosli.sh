@@ -50,7 +50,7 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
             git_commit=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
             fingerprint=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
             if [ "${flow}" != "runner-ci" ]; then
-              attest_snyk_scan_to_two_kosli_trails "${flow}" "${trail}" "${git_commit}" "${artifact_name}" "${fingerprint}"
+              #attest_snyk_scan_to_two_kosli_trails "${flow}" "${trail}" "${git_commit}" "${artifact_name}" "${fingerprint}"
             else
               repo="${flow::-3}"   # eg runner
               attest_snyk_scan_to_one_kosli_trail "${repo}" "${git_commit}" "${artifact_name}" "${fingerprint}" "${snapshot_index}"
@@ -70,13 +70,13 @@ attest_snyk_scan_to_two_kosli_trails()
 
     local -r repo="${flow::-3}"   # eg differ
 
-#    echo "==============================="
-#    echo "         flow='${flow}'"
-#    echo "        trail='${trail}'"
-#    echo "   git-commit='${git_commit}'"
-#    echo "artifact_name='${artifact_name}'"
-#    echo "  fingerprint='${fingerprint}'"
-#    echo "         repo='${repo}'"
+    # echo "==============================="
+    # echo "         flow='${flow}'"
+    # echo "        trail='${trail}'"
+    # echo "   git-commit='${git_commit}'"
+    # echo "artifact_name='${artifact_name}'"
+    # echo "  fingerprint='${fingerprint}'"
+    # echo "         repo='${repo}'"
 
     local -r snyk_policy_filename=.snyk
     local -r snyk_output_json_filename=snyk.json
@@ -166,7 +166,7 @@ attest_snyk_scan_to_two_kosli_trails()
 
 attest_snyk_scan_to_one_kosli_trail()
 {
-    # If an Artifact (eg runer) fails a live snyk scan...
+    # If an Artifact (eg runner) fails a live snyk scan...
     # I want
     #   - the runner Artifact in the (new) snapshot to become red.
     #   - to have a Trail showing _all_ the snyk-scans for a given Artifact
@@ -182,7 +182,7 @@ attest_snyk_scan_to_one_kosli_trail()
     #
     # KOSLI_FLOW         aws-prod-snyk-scan
     # KOSLI_TRAIL        runner-${FINGERPRINT}
-    # KOSLI_NAME         ${TIMESTAMP}.snyk-container-scan
+    # KOSLI_NAME         ${TIMESTAMP}
 
     local -r repo="${1}"              # eg runner
     local -r git_commit="${2}"        # eg 44e6c271b46a56acd07f3b426c6cbca393442bb4
@@ -237,7 +237,7 @@ attest_snyk_scan_to_one_kosli_trail()
       --fingerprint="${fingerprint}" \
       --flow="${KOSLI_FLOW}" \
       --trail="${repo}-${fingerprint}" \
-      --name="${timestamp}" \
+      --name="${repo}" \
       --annotate=snapshot_url="${KOSLI_HOST}/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}" \
         2>&1 | tee /tmp/kosli.artifact.log
 
@@ -247,7 +247,7 @@ attest_snyk_scan_to_one_kosli_trail()
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
       echo ERROR: failed to attest "${repo}" artifact results to live-snyk-scan Trail
-      echo kosli attest artifact "${artifact_name}" --fingerprint "${fingerprint}" --flow="${KOSLI_FLOW}" --trail="${repo}-${fingerprint}" --name="${timestamp}"
+      echo kosli attest artifact "${artifact_name}" --fingerprint "${fingerprint}" --flow="${KOSLI_FLOW}" --trail="${repo}-${fingerprint}" --name="${repo}"
       echo
       echo kosli.artifact.log
       cat /tmp/kosli.artifact.log
@@ -260,7 +260,7 @@ attest_snyk_scan_to_one_kosli_trail()
       --fingerprint="${fingerprint}" \
       --flow="${KOSLI_FLOW}" \
       --trail="${repo}-${fingerprint}" \
-      --name="${timestamp}.snyk-container-scan" \
+      --name="${timestamp}" \
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}" \
         2>&1 | tee /tmp/kosli.snyk.trail.log
@@ -271,7 +271,7 @@ attest_snyk_scan_to_one_kosli_trail()
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
       echo ERROR: failed to attest "${repo}" snyk results to live-snyk-scan Trail
-      echo kosli attest snyk "${artifact_name}" --fingerprint "${fingerprint}" --flow="${KOSLI_FLOW}" --trail="${repo}-${fingerprint}" --name="${timestamp}.snyk-container-scan"
+      echo kosli attest snyk "${artifact_name}" --fingerprint "${fingerprint}" --flow="${KOSLI_FLOW}" --trail="${repo}-${fingerprint}" --name="${timestamp}"
       echo
       echo kosli.snyk.trail.log
       cat /tmp/kosli.snyk.trail.log
