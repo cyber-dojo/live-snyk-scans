@@ -270,8 +270,35 @@ attest_snyk_scan_to_one_kosli_trail()
 
     if [ "${STATUS}" != "0" ] ; then
       echo "-------------------------------"
-      echo ERROR: failed to attest "${repo}" snyk results to live-snyk-scan Trail
+      echo ERROR: failed to attest "${repo}" snyk results to live-snyk-scan Trail at Trail level
       echo kosli attest snyk "${artifact_name}" --fingerprint "${fingerprint}" --flow="${KOSLI_FLOW}" --trail="${repo}-${fingerprint}" --name="${timestamp}"
+      echo
+      echo kosli.snyk.trail.log
+      cat /tmp/kosli.snyk.trail.log
+      echo
+      exit ${STATUS}
+    fi
+
+    # Currently, policies only look at at named attestations at the Artifact level. And there is a
+    # snyk-policy for aws-prod on staghing. So I am attesting the snyk-container scan again, this time
+    # at the Artifact level.
+    set +e
+    kosli attest snyk "${artifact_name}" \
+      --fingerprint="${fingerprint}" \
+      --flow="${KOSLI_FLOW}" \
+      --trail="${repo}-${fingerprint}" \
+      --name="${repo}.snyk-container-scan" \
+      --attachments="${snyk_policy_filename}" \
+      --scan-results="${snyk_output_json_filename}" \
+        2>&1 | tee /tmp/kosli.snyk.trail.log
+
+    STATUS=${PIPESTATUS[0]}
+    set -e
+
+    if [ "${STATUS}" != "0" ] ; then
+      echo "-------------------------------"
+      echo ERROR: failed to attest "${repo}" snyk results to live-snyk-scan Trail at Artifact level
+      echo kosli attest snyk "${artifact_name}" --fingerprint "${fingerprint}" --flow="${KOSLI_FLOW}" --trail="${repo}-${fingerprint}" --name="${repo}.snyk-container-scan"
       echo
       echo kosli.snyk.trail.log
       cat /tmp/kosli.snyk.trail.log
