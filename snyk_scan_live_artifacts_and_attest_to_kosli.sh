@@ -228,6 +228,10 @@ attest_snyk_scan_to_one_kosli_trail()
     # Do attestation at the Artifact level, by fingerprint, to make
     # the live-snyk scan appear as a 2nd Flow in the Environment snapshots.
 
+    kosli begin trail "${repo}-${fingerprint}" \
+      --flow="${KOSLI_FLOW}" \
+      --use-empty-template
+
     set +e
     kosli attest artifact "${artifact_name}" \
       --fingerprint="${fingerprint}" \
