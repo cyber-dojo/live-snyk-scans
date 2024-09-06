@@ -230,7 +230,7 @@ attest_snyk_scan_to_one_kosli_trail()
 
     kosli begin trail "${repo}-${fingerprint}" \
       --flow="${KOSLI_FLOW}" \
-      --use-empty-template
+      --template-file="$(repo_root)/.kosli.${repo}.yml"
 
     set +e
     kosli attest artifact "${artifact_name}" \

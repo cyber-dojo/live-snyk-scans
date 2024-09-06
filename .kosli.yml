@@ -20,8 +20,3 @@ trail:
       type: snyk
     - name: web
       type: snyk
-  artifacts:
-    - name: runner
-      attestations:
-        - name: snyk-container-scan
-          type: snyk
