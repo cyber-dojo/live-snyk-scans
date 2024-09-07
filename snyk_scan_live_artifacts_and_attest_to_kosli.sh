@@ -280,7 +280,7 @@ attest_snyk_scan_to_one_kosli_trail()
     fi
 
     # Currently, policies only look at at named attestations at the Artifact level. And there is a
-    # snyk-policy for aws-prod on staghing. So I am attesting the snyk-container scan again, this time
+    # snyk-policy for aws-prod on staging. So I am attesting the snyk-container scan again, this time
     # at the Artifact level.
     set +e
     kosli attest snyk "${artifact_name}" \
