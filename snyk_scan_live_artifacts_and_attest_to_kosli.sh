@@ -50,7 +50,7 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
             git_commit=$(jq -r ".artifacts[$i].git_commit" ${snapshot_json_filename})
             fingerprint=$(jq -r ".artifacts[$i].fingerprint" ${snapshot_json_filename})
             if [ "${flow}" != "runner-ci" ]; then
-              : # attest_snyk_scan_to_two_kosli_trails "${flow}" "${trail}" "${git_commit}" "${artifact_name}" "${fingerprint}"
+              attest_snyk_scan_to_two_kosli_trails "${flow}" "${trail}" "${git_commit}" "${artifact_name}" "${fingerprint}"
             else
               repo="${flow::-3}"   # eg runner
               attest_snyk_scan_to_one_kosli_trail "${repo}" "${git_commit}" "${artifact_name}" "${fingerprint}" "${snapshot_index}"
