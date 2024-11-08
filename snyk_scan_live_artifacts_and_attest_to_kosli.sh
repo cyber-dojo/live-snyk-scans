@@ -41,7 +41,7 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
         if [ "${annotation_type}" != "exited" ] ; then
           flow=$(jq -r ".artifacts[$i].flow_name" ${snapshot_json_filename})  # eg runner-ci
           if [ "${flow}" == "" ] ; then
-            echo "Artifact ${artifact_name} in Environment ${KOSLI_ENVIRONMENT} has no provenance in ${KOSLI_HOST}"
+            echo "Artifact ${artifact_name} in Environment ${KOSLI_ENVIRONMENT} has no provenance in https://app.kosli.com"
           else
             # When an Artifact has matches in 2+ Flows, there is no need to iterate through all Flows,
             # since all matches are for the same Artifact (it has the same fingerprint)
@@ -238,7 +238,7 @@ attest_snyk_scan_to_one_kosli_trail()
       --flow="${KOSLI_FLOW}" \
       --trail="${repo}-${fingerprint}" \
       --name="${repo}" \
-      --annotate=snapshot_url="${KOSLI_HOST}/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}" \
+      --annotate=snapshot_url="https://app.kosli.com/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}" \
         2>&1 | tee /tmp/kosli.artifact.log
 
     STATUS=${PIPESTATUS[0]}
