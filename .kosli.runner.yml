@@ -1,8 +1,0 @@
-version: 1
-
-trail:
-  artifacts:
-    - name: runner
-      attestations:
-        - name: snyk-container-scan
-          type: snyk
