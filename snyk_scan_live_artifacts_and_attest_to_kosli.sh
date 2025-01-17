@@ -10,6 +10,7 @@ source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
 
 export KOSLI_ENVIRONMENT="${1}"  # eg aws-prod
 export KOSLI_FLOW=aws-snyk-scan
+export KOSLI_DRY_RUN=true
 
 snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 {
