@@ -47,12 +47,6 @@ jobs:
       - name: Setup Snyk
         uses: snyk/actions/setup@master
 
-      - name: Run Snyk
-        run: |
-          export KOSLI_ENVIRONMENT=aws-prod
-          export KOSLI_FLOW=aws-prod-snyk-scan
-          export KOSLI_TRAIL=$(date +"%Y-%m-%d-T-%H-%M-%S")
-          
-          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh \
-             "${KOSLI_HOST}" \
-             "${KOSLI_API_TOKEN}"
+      - name: Run Snyk Live Scan
+        run:
+          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh aws-prod
