@@ -1,16 +1,39 @@
 #!/usr/bin/env bash
 set -Eeu
 
-repo_root() { git rev-parse --show-toplevel; }
-source "$(repo_root)/scripts/exit_non_zero_unless_installed.sh"
-
 # KOSLI_HOST         # Set in workflow
 # KOSLI_API_TOKEN    # Set in workflow
 # KOSLI_ORG          # Set in workflow, cyber-dojo
 
 export KOSLI_ENVIRONMENT="${1}"  # eg aws-prod
 export KOSLI_FLOW=aws-snyk-scan
-export KOSLI_DRY_RUN=true
+
+exit_non_zero_unless_installed()
+{
+  for dependent in "$@"
+  do
+    if ! installed "${dependent}" ; then
+      stderr "ERROR: ${dependent} is not installed"
+      exit 42
+    fi
+  done
+}
+
+installed()
+{
+  local -r dependent="${1}"
+  if hash "${dependent}" 2> /dev/null; then
+    true
+  else
+    false
+  fi
+}
+
+stderr()
+{
+  local -r message="${1}"
+  >&2 echo "ERROR: ${message}"
+}
 
 snyk_scan_live_artifacts_and_attest_to_kosli_trail()
 {
