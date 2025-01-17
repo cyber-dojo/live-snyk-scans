@@ -125,7 +125,7 @@ attest_snyk_scan_to_one_kosli_trail()
 
 kosli create flow "${KOSLI_FLOW}" \
   --description="Snyk scans of Artifacts running live in aws-beta and aws-prod" \
-  --template="version: 1"
+  --template-file=.kosli.yml
 
 kosli tag flow "${KOSLI_FLOW}" --set repo_url=https://github.com/cyber-dojo/live-snyk-scans
 kosli tag flow "${KOSLI_FLOW}" --set ci=github
