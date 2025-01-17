@@ -86,7 +86,7 @@ attest_snyk_scan_to_one_kosli_trail()
 
     kosli attest artifact "${artifact_name}" \
       --name="${repo}" \
-      --annotate=snapshot_url="https://app.kosli.com/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}"
+      --annotate=snapshot_url="https://app.kosli.com/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}?fingerprint=${fingerprint}"
 
     # There is a Policy requiring a snyk attestation called snyk-container-scan
     kosli attest snyk "${artifact_name}" \
