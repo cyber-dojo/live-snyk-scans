@@ -108,10 +108,6 @@ attest_snyk_scan_to_one_kosli_trail()
         --severity-threshold=medium
     set -e
 
-    kosli create flow "${KOSLI_FLOW}" --description="Snyk scans of Artifacts running live in aws-beta and aws-prod"
-
-    kosli tag flow "${KOSLI_FLOW }" --set repo_url=https://github.com/cyber-dojo/live-snyk-scans
-    kosli tag flow "${KOSLI_FLOW}"  --set ci=github
 
     kosli attest artifact "${artifact_name}" \
       --name="${repo}" \
@@ -123,6 +119,10 @@ attest_snyk_scan_to_one_kosli_trail()
       --attachments="${snyk_policy_filename}" \
       --scan-results="${snyk_output_json_filename}"
 }
+
+kosli create flow "${KOSLI_FLOW}" --description="Snyk scans of Artifacts running live in aws-beta and aws-prod"
+kosli tag flow "${KOSLI_FLOW}" --set repo_url=https://github.com/cyber-dojo/live-snyk-scans
+kosli tag flow "${KOSLI_FLOW}" --set ci=github
 
 exit_non_zero_unless_installed kosli snyk jq
 snyk_scan_live_artifacts_and_attest_to_kosli_trail
