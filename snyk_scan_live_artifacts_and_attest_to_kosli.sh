@@ -108,6 +108,11 @@ attest_snyk_scan_to_one_kosli_trail()
         --severity-threshold=medium
     set -e
 
+    kosli create flow "${KOSLI_FLOW}" --description="Snyk scans of Artifacts running live in aws-beta and aws-prod"
+
+    kosli tag flow "${KOSLI_FLOW }" --set repo_url=https://github.com/cyber-dojo/live-snyk-scans
+    kosli tag flow "${KOSLI_FLOW}"  --set ci=github
+
     kosli attest artifact "${artifact_name}" \
       --name="${repo}" \
       --annotate=snapshot_url="https://app.kosli.com/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}?fingerprint=${fingerprint}"
