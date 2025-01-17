@@ -110,6 +110,8 @@ attest_snyk_scan_to_one_kosli_trail()
         --severity-threshold=medium
     set -e
 
+    kosli begin trail "${KOSLI_TRAIL}"
+
     kosli attest artifact "${artifact_name}" \
       --name="${repo}" \
       --annotate=snapshot_url="https://app.kosli.com/${KOSLI_ORG}/environments/${KOSLI_ENVIRONMENT}/snapshots/${snapshot_index}?fingerprint=${fingerprint}"
