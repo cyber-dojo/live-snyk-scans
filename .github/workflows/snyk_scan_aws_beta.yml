@@ -48,11 +48,5 @@ jobs:
         uses: snyk/actions/setup@master
 
       - name: Run Snyk Live Scan
-        run: |
-          # Initially, send attestations to https://staging.app.kosli.com only
-          doubled_host="${KOSLI_HOST}"
-          export KOSLI_HOST="$(echo "${doubled_host}" | cut -d ',' -f1)"
-          doubled_api="${KOSLI_API_TOKEN}"
-          export KOSLI_API_TOKEN="$(echo "${doubled_api}" | cut -d ',' -f1)"
-          
+        run:
           ./snyk_scan_live_artifacts_and_attest_to_kosli.sh aws-beta
