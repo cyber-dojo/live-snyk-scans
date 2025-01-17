@@ -22,19 +22,19 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
     local -r artifacts_length=$(echo "${snapshot}" | jq -r '.artifacts | length')
     for a in $(seq 0 $(( ${artifacts_length} - 1 )))
     do
-        artifact="$(echo "${snapshot}" | jq -r '.artifacts[$a]')"
-        annotation_type=$(echo "${artifact}" | jq -r ".annotation.type")
+        artifact="$(echo "${snapshot}" | jq -r ".artifacts[$a]")"
+        annotation_type="$(echo "${artifact}" | jq -r ".annotation.type")"
         if [ "${annotation_type}" != "exited" ] ; then
-          artifact_name=$(echo "${artifact}" | jq -r ".name")
+          artifact_name="$(echo "${artifact}" | jq -r ".name")"
           # ...one flow at a time
-          flows_length=$(echo "${artifact}" | jq -r '.flows | length')
+          flows_length="$(echo "${artifact}" | jq -r ".flows | length")"
           for f in $(seq 0 $(( ${flows_length} - 1 )))
           do
-            flow="$(echo "${artifact}" | jq -r '.flows[$f]')"
-            flow_name=$(echo "${flow}" |  jq -r '.flow_name')  # eg runner-ci
+            flow="$(echo "${artifact}" | jq -r ".flows[$f]")"
+            flow_name="$(echo "${flow}" |  jq -r ".flow_name")"  # eg runner-ci
             if [ "${flow_name}" != "${KOSLI_FLOW}" ] ; then
-              git_commit=$(echo "${flow}" | jq -r ".git_commit")
-              fingerprint=$(echo "${flow}" | jq -r ".fingerprint")
+              git_commit="$(echo "${flow}" | jq -r ".git_commit")"
+              fingerprint="$(echo "${flow}" | jq -r ".fingerprint")"
               repo_name="${flow_name::-3}"  # eg runner
               attest_snyk_scan_to_one_kosli_trail "${repo_name}" "${git_commit}" "${artifact_name}" "${fingerprint}" "${snapshot_index}"
             fi
