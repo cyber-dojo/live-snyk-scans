@@ -59,7 +59,7 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
             if [ "${flow_name}" != "${KOSLI_FLOW}" ] ; then
               git_commit="$(echo "${flow}" | jq -r ".git_commit")"
               repo_name="${flow_name::-3}"  # eg runner
-              if [ "${repo_name}" == 'runner' ] ; then
+              if [ "${repo_name}" == 'saver' ] ; then
                 attest_snyk_scan_to_one_kosli_trail "${repo_name}" "${git_commit}" "${artifact_name}" "${fingerprint}" "${snapshot_index}"
               fi
             fi
