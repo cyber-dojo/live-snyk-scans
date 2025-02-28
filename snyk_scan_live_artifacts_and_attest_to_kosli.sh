@@ -43,9 +43,9 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
     # ...one artifact at a time
     local -r snapshot_index=$(echo "${snapshot}" | jq -r '.index')
     local -r artifacts_length=$(echo "${snapshot}" | jq -r '.artifacts | length')
-    for a in $(seq 0 $(( ${artifacts_length} - 1 )))
+    for ((n=0; n < ${artifacts_length}; n++))
     do
-        artifact="$(echo "${snapshot}" | jq -r ".artifacts[$a]")"
+        artifact="$(echo "${snapshot}" | jq -r ".artifacts[$n]")"
         annotation_type="$(echo "${artifact}" | jq -r ".annotation.type")"
         if [ "${annotation_type}" != "exited" ] ; then
           artifact_name="$(echo "${artifact}" | jq -r ".name")"
