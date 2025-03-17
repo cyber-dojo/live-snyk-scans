@@ -43,7 +43,7 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
     # ...one artifact at a time
     local -r snapshot_index=$(echo "${snapshot}" | jq -r '.index')
     local -r artifacts_length=$(echo "${snapshot}" | jq -r '.artifacts | length')
-    for ((n=0; n < ${artifacts_length}; n++))
+    local n; for ((n = 0; n < artifacts_length; n++))
     do
         artifact="$(echo "${snapshot}" | jq -r ".artifacts[$n]")"
         annotation_type="$(echo "${artifact}" | jq -r ".annotation.type")"
@@ -52,14 +52,20 @@ snyk_scan_live_artifacts_and_attest_to_kosli_trail()
           fingerprint="$(echo "${artifact}" | jq -r ".fingerprint")"
           # ...one flow at a time
           flows_length="$(echo "${artifact}" | jq -r ".flows | length")"
-          for f in $(seq 0 $(( ${flows_length} - 1 )))
+          local f; for ((f = 0; f < flows_length; f++))
           do
             flow="$(echo "${artifact}" | jq -r ".flows[$f]")"
             flow_name="$(echo "${flow}" |  jq -r ".flow_name")"  # eg runner-ci
+
+            # There are two Flows for processes that run after each repo's main workflow.
+            # One is this one, and one is the promotion workflow.
+            # Ignore these two, as we only want each repo's main Flow.
             if [ "${flow_name}" != "${KOSLI_FLOW}" ] ; then
-              git_commit="$(echo "${flow}" | jq -r ".git_commit")"
-              repo_name="${flow_name::-3}"  # eg runner
-              attest_snyk_scan_to_one_kosli_trail "${repo_name}" "${git_commit}" "${artifact_name}" "${fingerprint}" "${snapshot_index}"
+              if [ "${flow_name}" != "production-promotion" ]; then
+                git_commit="$(echo "${flow}" | jq -r ".git_commit")"
+                repo_name="${flow_name::-3}"  # eg runner
+                attest_snyk_scan_to_one_kosli_trail "${repo_name}" "${git_commit}" "${artifact_name}" "${fingerprint}" "${snapshot_index}"
+              fi
             fi
           done
        fi
