@@ -1,0 +1,11 @@
+
+Write python script (like in aws-prod-co-promotion repo) to generate JSON for all Artifacts that will be re-snyk-scanned.
+
+Write tests for this (like in aws-prod-co-promotion repo)
+
+Use this in main workflow's strategy:matrix:include to run snyk-scans in parallel.
+
+See if the matrix can include what it needs to be able to incorporate the
+snyk-scan runs for aws-beta and for aws-prod into the same parallelization.
+
+
