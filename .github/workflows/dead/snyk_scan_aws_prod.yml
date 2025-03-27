@@ -1,9 +1,9 @@
-name: Live Snyk scan of aws-beta
+name: Live Snyk scans of aws-prod
 
 on:
-  push:
-    branches:
-      - main
+#  push:
+#    branches:
+#      - main
   workflow_dispatch:
   schedule: # At 09:00 every Saturday
     - cron: '0 9 * * SAT'
@@ -50,4 +50,4 @@ jobs:
 
       - name: Run Snyk Live Scan
         run:
-          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh aws-beta
+          ./snyk_scan_live_artifacts_and_attest_to_kosli.sh aws-prod
