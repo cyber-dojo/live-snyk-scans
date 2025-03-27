@@ -51,6 +51,9 @@ jobs:
     if: ${{ needs.find-artifacts.outputs.artifacts != '[]' }}
     needs: [find-artifacts]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     strategy:
       matrix:
         include: ${{ fromJSON(needs.find-artifacts.outputs.artifacts) }}
