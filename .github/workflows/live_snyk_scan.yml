@@ -96,11 +96,6 @@ jobs:
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
-      - name: Debug ls
-        if: ${{ success() || failure() }}
-        run:
-          ls -al
-
       - name: Setup Kosli CLI
         if: ${{ success() || failure() }}
         uses: kosli-dev/setup-cli-action@v2
