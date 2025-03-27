@@ -109,7 +109,7 @@ jobs:
         env:
           KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
         run:
-          kosli attest artifact
+          kosli attest artifact "${{ matrix.artifact_name }}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
             --name="${{ matrix.repo_name }}"
 
