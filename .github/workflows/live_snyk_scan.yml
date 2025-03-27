@@ -87,12 +87,12 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
           snyk container test "${{ matrix.artifact_name }}"
-            --debug
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
       - name: Debug ls
+        if: ${{ success() || failure() }}
         run:
           ls -al
 
