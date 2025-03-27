@@ -81,7 +81,7 @@ jobs:
           curl "${{ matrix.raw_snyk_file_url }}" > ${SNYK_POLICY_FILENAME}
 
       - name: Run Snyk container scan
-        if: ${{ matrix.flow_name == 'runner' }}
+        if: ${{ matrix.flow_name == 'runner-ci' }}
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
@@ -104,7 +104,7 @@ jobs:
 
       # [kosli attest artifact] should not be necessary here, but currently it is.
       - name: Attest artifact to Kosli
-        if: ${{ matrix.flow_name == 'runner' && (success() || failure()) }}
+        if: ${{ matrix.flow_name == 'runner-ci' && (success() || failure()) }}
         # if: ${{ success() || failure() }}
         env:
           KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
@@ -114,7 +114,7 @@ jobs:
             --name="${{ matrix.repo_name }}"
 
       - name: Attest snyk scan to Kosli
-        if: ${{ matrix.flow_name == 'runner' && (success() || failure()) }}
+        if: ${{ matrix.flow_name == 'runner-ci' && (success() || failure()) }}
         # if: ${{ success() || failure() }}
         env:
           KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
