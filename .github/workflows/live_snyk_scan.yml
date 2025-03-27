@@ -60,6 +60,7 @@ jobs:
     env:
       SNYK_POLICY_FILENAME: .snyk
       SNYK_SARIF_FILENAME: snyk.container.scan.json
+      KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -81,7 +82,7 @@ jobs:
           curl "${{ matrix.raw_snyk_file_url }}" > ${SNYK_POLICY_FILENAME}
 
       - name: Run Snyk container scan
-        if: ${{ matrix.flow_name == 'runner-ci' }}
+        if: ${{ matrix.flow_name == 'web-ci' }}
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
@@ -90,6 +91,10 @@ jobs:
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
+
+      - name: Debug ls
+        run:
+          ls -al
 
       - name: Setup Kosli CLI
         if: ${{ success() || failure() }}
@@ -104,20 +109,16 @@ jobs:
 
       # [kosli attest artifact] should not be necessary here, but currently it is.
       - name: Attest artifact to Kosli
-        if: ${{ matrix.flow_name == 'runner-ci' && (success() || failure()) }}
+        if: ${{ matrix.flow_name == 'web-ci' && (success() || failure()) }}
         # if: ${{ success() || failure() }}
-        env:
-          KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
         run:
           kosli attest artifact "${{ matrix.artifact_name }}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
             --name="${{ matrix.repo_name }}"
 
       - name: Attest snyk scan to Kosli
-        if: ${{ matrix.flow_name == 'runner-ci' && (success() || failure()) }}
+        if: ${{ matrix.flow_name == 'web-ci' && (success() || failure()) }}
         # if: ${{ success() || failure() }}
-        env:
-          KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
         run:
           kosli attest snyk
             --annotate=snapshot_url="${{ matrix.snapshot_artifact_url }}"
