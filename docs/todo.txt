@@ -1,10 +1,11 @@
 
-Write python script (like in aws-prod-co-promotion repo) to
-generate JSON for all Artifacts that will be re-snyk-scanned.
+Add checks that not only in the Flow the same, but also the reference-name.
 
-Write tests for this (like in aws-prod-co-promotion repo)
+Put the trail name into the matrix json
 
-Use this in main workflow's strategy:matrix:include to run snyk-scans in parallel.
+Put the reference name into the matrix json
+
+- - - - - - - -
 
 See if the matrix can include what it needs to be able to incorporate the
 snyk-scan runs for aws-beta and for aws-prod into the same parallelization.
@@ -19,27 +20,3 @@ and hard-wire the KOSLI_ENV.
 Need to pass KOSLI_ENV as argument to artifacts.py ?
 
 - - - - - - - -
-
-The current bash script is not correct. It has an artifact-name as
-   "${artifact_name}@sha256:${fingerprint}"
-but the artifact_name already has the sha256:fingerprint suffix.
-
-- - - - - - - -
-
-The current bash script does not correctly handle the fact that creator is a repo
-that is on gitlab and not on github.
-    "commit_url": "https://gitlab.com/cyber-dojo/creator/-/commit/dca5d2f7571f9b63d651088c2b38946091853083",
-    "commit_url": "https://github.com/cyber-dojo/languages-start-points/commit/88366281011d1aa83c5db4280aa8a6daa0be8541",
-
-- - - - - - - -
-
-Github action workflow is doing this in its last step
-          kosli attest snyk
-            --annotate=snapshot_url="https://app.kosli.com/${KOSLI_ORG}/environments/${KOSLI_ENV}/snapshots/${{ matrix.snapshot_index }}?fingerprint=${{ matrix.artifact_fingerprint }}"
-
-I would like to squash that URL into the matrix
-
-At top level, get-snapshot JSON contains
-  "html_url": "https://app.kosli.com/cyber-dojo/environments/aws-beta/snapshots/4825",
-It looks like you simply need to append the fingerprint.
-
