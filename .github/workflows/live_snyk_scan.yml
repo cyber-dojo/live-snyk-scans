@@ -78,7 +78,6 @@ jobs:
         uses: snyk/actions/setup@master
 
       - uses: actions/checkout@v4
-        if: ${{ success() || failure() }}
         with:
           fetch-depth: 1
 
@@ -104,16 +103,14 @@ jobs:
 
       # [kosli attest artifact] should not be necessary here, but currently it is.
       - name: Attest artifact to Kosli
-        if: ${{ matrix.flow_name == 'runner-ci' && (success() || failure()) }}
-        # if: ${{ success() || failure() }}
+        if: ${{ success() || failure() }}
         run:
           kosli attest artifact "${{ matrix.artifact_name }}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
             --name="${{ matrix.repo_name }}"
 
       - name: Attest snyk scan to Kosli
-        if: ${{ matrix.flow_name == 'runner-ci' && (success() || failure()) }}
-        # if: ${{ success() || failure() }}
+        if: ${{ success() || failure() }}
         run:
           kosli attest snyk
             --annotate=snapshot_url="${{ matrix.snapshot_artifact_url }}"
