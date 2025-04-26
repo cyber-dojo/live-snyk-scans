@@ -1,10 +1,10 @@
 name: Main
 
 on:
-  push:
-#  workflow_dispatch:
-#  schedule: # At 09:00 every Saturday
-#    - cron: '0 9 * * SAT'
+  # push:
+  workflow_dispatch:
+  schedule: # At 09:00 every Saturday
+    - cron: '0 9 * * SAT'
 
 jobs:
   trigger-aws-beta:
