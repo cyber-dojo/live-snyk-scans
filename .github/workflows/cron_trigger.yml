@@ -1,8 +1,8 @@
 name: Main
 
 on:
-  # push:
-  workflow_dispatch:
+  push:
+  # workflow_dispatch:
   schedule: # At 09:00 every Saturday
     - cron: '0 9 * * SAT'
 
