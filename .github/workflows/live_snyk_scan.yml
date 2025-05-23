@@ -113,7 +113,7 @@ jobs:
         if: ${{ success() || failure() }}
         run:
           kosli attest snyk
-            --annotate=snapshot_url="${{ matrix.snapshot_artifact_url }}"
+            --annotate=snapshot_URL="${{ matrix.snapshot_artifact_url }}"
             --attachments="${SNYK_POLICY_FILENAME}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
             --name="${{ matrix.repo_name }}.snyk-container-scan"
