@@ -4,7 +4,7 @@
      - cron: "0 0 * * *"
 
  jobs:
- cronjob-based-github-action:
+   cronjob-based-github-action:
      name: Cronjob based github action
      runs-on: ubuntu-latest
      steps:
