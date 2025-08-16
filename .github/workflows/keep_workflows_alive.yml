@@ -1,6 +1,6 @@
  name: Github Action with a cronjob trigger
  on:
-   schedule:
+   schedule:  # Midnight every day
      - cron: "0 0 * * *"
 
  jobs:
@@ -9,5 +9,4 @@
      runs-on: ubuntu-latest
      steps:
      - uses: actions/checkout@v4
-     # - steps
      - uses: entepotenz/keep-github-actions-alive-min-dependencies@v1

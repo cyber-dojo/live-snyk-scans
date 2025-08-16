@@ -5,18 +5,4 @@ Put the trail name into the matrix json
 
 Put the reference name into the matrix json
 
-- - - - - - - -
 
-See if the matrix can include what it needs to be able to incorporate the
-snyk-scan runs for aws-beta and for aws-prod into the same parallelization.
-
-There are two envs to do a get-snapshot for. Each [kosli get snapshot] returns
-a json dict. I could merge this into a single array of Artifacts, and then
-pass this json array to the python script. To keep the same behaviour as I
-currently have, it would be simpler to make a reusable/composite workflow
-and call it twice. That can be a later refactoring. For now, create new workflow
-and hard-wire the KOSLI_ENV.
-
-Need to pass KOSLI_ENV as argument to artifacts.py ?
-
-- - - - - - - -
