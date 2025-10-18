@@ -1,4 +1,4 @@
- name: Github Action with a cronjob trigger
+ name: Keep workflows alive
  on:
    schedule:  # Midnight every day
      - cron: "0 0 * * *"
