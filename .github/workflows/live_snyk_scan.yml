@@ -41,6 +41,13 @@ jobs:
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
+      - name: Tag Kosli Flow
+        run:
+          kosli tag flow "${KOSLI_FLOW}"
+            --set kind=run
+            --set repo_url="${{ github.server_url }}/${{ github.repository }}"
+            --set ci=github
+
       - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
         id: vars
         run:
