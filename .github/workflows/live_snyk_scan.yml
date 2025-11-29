@@ -123,6 +123,6 @@ jobs:
             --annotate=snapshot_URL="${{ matrix.snapshot_artifact_url }}"
             --attachments="${SNYK_POLICY_FILENAME}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
-            --name="${{ matrix.repo_name }}.snyk-container-scan"
+            --name="${{ matrix.repo_name }}.snyk-container-scan-${KOSLI_ENV}"
             --scan-results="${SNYK_SARIF_FILENAME}"
 
