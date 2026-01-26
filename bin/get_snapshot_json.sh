@@ -22,9 +22,4 @@ json="$(kosli get snapshot "${KOSLI_ENV}" \
     --debug=false \
     --output=json)"
 
-# Temporary edit till Kosli CLI multi-host mode bug is fixed.
-fix="$(echo "${json}" | sed 1d)"
-jq --raw-output . <<< "${fix}"
-
-# Restore this when bug fixed.
-# jq --raw-output . <<< "${json}"
+jq --raw-output . <<< "${json}"
