@@ -50,10 +50,7 @@ jobs:
 
       - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
         id: vars
-        run: |
-          ./bin/get_snapshot_json.sh
-          make artifacts
-          make artifacts | jq .
+        run: 
           echo "artifacts=$(make artifacts | jq --raw-output --compact-output .)" >> ${GITHUB_OUTPUT}
 
 
