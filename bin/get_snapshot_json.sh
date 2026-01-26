@@ -22,5 +22,7 @@ json="$(kosli get snapshot "${KOSLI_ENV}" \
     --debug=false \
     --output=json)"
 
-jq --raw-output . <<< "${json}"
+fix="$(echo "${json}" | sed 1d)"
+
+jq --raw-output . <<< "${fix}"
 
