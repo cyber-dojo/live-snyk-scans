@@ -1,0 +1,95 @@
+
+It would be useful if each repo could still had its own snyk scan if desired.
+Could be a separate workflow? One issue is that if the main workflow runs 
+then it will create a docker image in the registry with an immutable tag,
+so the snyk workflow would not be able to build its image in the same way.
+
+Could the main workflow have a snyk-container-scan job that does not participate 
+in the sdlc-control-gate and so does not affect deployment?
+This would mean the scan is definitely on the correct docker image.
+
+Can a snyk scan work on a docker image saved to a tar file?
+
+I could have Trails in a Flow=aws-snyk-scan whose names are taken from
+- the fingerprint
+- the snyk vulnerability identifier
+
+For example,
+21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9@SNYK-ALPINE321-EXPAT-15199474
+or
+SNYK-ALPINE321-EXPAT-15199474@21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9
+
+When the Trail is created it does a kosli-attest-artifact so non-compliance will ripple 
+into any Env that has trail-compliance in an attached Policy.
+
+Inputs for each snyk-scan:
+1. The timestamp of the trail is the start-date.
+2. The sarif file. Map to a dict with keys for each snyk vuln,
+   with values {"level":"low", ...? }
+3. The .snyk file? This would a very nice extra.
+   Could you add entries into the map from 2) for each entry in the .snyk file?
+   Just because a vuln is named in a .snyk file does not mean the Artifact has that vuln.
+   Idea: Specify that the .snyk file must never have any ignores! Let the control handle it.
+   This does not work for long running vulns that do not get fixed quickly. Eg runner's.
+   That suggests it is better to simply assume the .snyk file tells the truth.
+   However, the .snyk file does not specify the vuln level, only its ID.
+   Is there a way to find the level with a snyk API call?
+   That would avoid assuming it is in the .shortDescription.text (see below)
+   The actual score is present. See below.
+4. The current timestamp
+5. The max age (in days?) for each level. Defaults?
+
+Should there also be a maximum number of vulns at a specific level?
+eg low=100, medium=20, high=5, critical=1
+
+If an Artifact has a given snyk vuln, and a new artifact is deployed to replace it 
+before it "expires" and becomes non-compliant, then it the Trail never becomes non-compliant 
+because the Artifact is not seen in later live-snyk-scans. So there is never a later 
+attestation which trips it into red.
+
+Suppose an Artifact is deployed to aws-beta and then to aws-prod. 
+Why should the start-date (for the max-age) come from the Trail connected to aws-prod?
+It was seen in aws-beta first. And in reality the Env is irrelevant, since the fingerprint 
+will match regardless of the Flow or Trail.
+
+Sometimes emergency rollback deployments are necessary. Suppose an Artifact is 
+rolled back. It will then be seen in a live-snyk-scan, and a new attestation will be made.
+This may well cause the Trail to become non-compliant. I think this is correct.
+Note that there is no way that a given Artifact can ever "not have" the given vulnerability. 
+You can avoid a non-compliance by deploying a new Artifact that has fixed the given vuln.
+
+Should all Trails go under a single Flow?
+Can a case be made for having a Flow per quarter - for example if you need 
+a quarterly report on the compliance of this specific control?
+I think it is better to have a single Flow, and use a date range filter for the report.
+
+Sarif file processing
+---------------------
+
+runs[@].tool.driver.rules[@]
+  .id                           eg "SNYK-ALPINE321-EXPAT-15199474"
+  .shortDescription.text        eg "Low severity - Integer Overflow..."
+  .cvssv3_baseScore             eg 2.5, Note: sometimes == null
+  .properties.security-severity eg "2.5" Note: Sometimes == "null"!
+
+Another example:
+
+runs[@].tool.driver.rules[@]
+  .id                           eg "SNYK-GOLANG-GITHUBCOMOPENCONTAINERSSELINUXGOSELINUX-13843568"
+  .shortDescription.text        eg "High severity - Race Condition Enabli..."
+  .cvssv3_baseScore             eg 7.3,
+  .properties.security-severity eg "7.3" 
+
+From https://support.snyk.io/s/article/How-is-a-vulnerabilitys-severity-determined
+
+At Snyk, we useCVSS framework version 3.1to communicate the 
+characteristics and severity of vulnerabilities.
+A vulnerability's severity (critical, high, medium or low) is based on its CVSS score:
+
+  Severity	CVSS v3 Rating
+  Critical	9.0 - 10.0
+  High	    7.0 -  8.9
+  Medium	4.0 -  6.9
+  Low	    0.1 -  3.9
+
+
