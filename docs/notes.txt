@@ -1,5 +1,5 @@
 
-It would be useful if each repo could still had its own snyk scan if desired.
+It would be useful if each repo could still have its own snyk scan if desired.
 Could be a separate workflow? One issue is that if the main workflow runs 
 then it will create a docker image in the registry with an immutable tag,
 so the snyk workflow would not be able to build its image in the same way.
@@ -62,6 +62,13 @@ Should all Trails go under a single Flow?
 Can a case be made for having a Flow per quarter - for example if you need 
 a quarterly report on the compliance of this specific control?
 I think it is better to have a single Flow, and use a date range filter for the report.
+
+It is interesting that the max-age determination is only applied when an attestation 
+is made. It would be better if it was re-determined at the point you asked. For example,
+Artifact F1 might be compliant in Kosli, but if a live-snyk-scan was done NOW it would 
+become non-compliant. Nevertheless, if you ask if F1 is compliant, Kosli will say yes 
+because it can only see the date of the most recent attestation.
+
 
 Sarif file processing
 ---------------------
