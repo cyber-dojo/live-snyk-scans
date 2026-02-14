@@ -107,7 +107,8 @@ jobs:
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
-      - name: Fail if no sarif file produced 
+      - name: Fail if no sarif file produced
+        continue-on-error: false
         run:
           cat "${SNYK_SARIF_FILENAME}"
 
