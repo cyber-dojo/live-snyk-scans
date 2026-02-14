@@ -107,7 +107,7 @@ jobs:
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
-      - name: Fail if no sarif file produced
+      - name: Snyk-container-test's exit code can be zero when no sarif file is produced!
         run:
           cat "${SNYK_SARIF_FILENAME}"
 
