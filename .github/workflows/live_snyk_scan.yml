@@ -108,26 +108,25 @@ jobs:
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
       - name: Fail if no sarif file produced
-        continue-on-error: false
         run:
           cat "${SNYK_SARIF_FILENAME}"
 
       - name: Setup Kosli CLI
-        if: ${{ success() || failure() }}
+        if: ${{ success() }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
       # [kosli attest artifact] should not be necessary here, but currently it is.
       - name: Attest artifact to Kosli
-        if: ${{ success() || failure() }}
+        if: ${{ success() }}
         run:
           kosli attest artifact "${{ matrix.artifact_name }}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
             --name="${{ matrix.repo_name }}"
 
       - name: Attest snyk scan to Kosli
-        if: ${{ success() || failure() }}
+        if: ${{ success() }}
         run:
           kosli attest snyk
             --annotate=snapshot_URL="${{ matrix.snapshot_artifact_url }}"
