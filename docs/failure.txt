@@ -1,0 +1,21 @@
+
+At present the snyk-container-test calls are running ok
+for some Artifacts, but failing for others.
+
+OK:
+- custom-start-points
+- exercise-start-points
+- languages-start-points
+- creator 
+ 
+FAILING:
+- dashboard
+- differ
+- nginx
+- runner
+- saver
+- web 
+
+So it appears that recently built Artifacts from github workflows are failing.
+Does this correspond to the message I saw in the -debug log, which seemed to 
+indicate there were no layers in the image!
