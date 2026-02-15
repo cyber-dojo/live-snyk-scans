@@ -101,7 +101,7 @@ A vulnerability's severity (critical, high, medium or low) is based on its CVSS 
   Low	      0.1 -  3.9
 
 
-The Flow the attestations are written to will not be aws-snyk-scan since that does 
+The Flow the attestations are written to will notion be aws-snyk-scan since that does 
 not implement the policy of max-age per vuln severity. 
 Create a new Flow called snyk-vulnerabilities.
 Its Trails will be named based on fingerprint@vuln, eg
@@ -112,6 +112,8 @@ When a Trail is created it will also need a _single_ kosli-attest-artifact
 The Env will rely on a Trail-compliance env-policy.
 Note that a weakness of this approach is that an Env will no longer become 
 non-compliant if a snyk-attestation is MISSING. Is there a way this can be overcome?
+Yes. See below. The clock needs to start when deployment has finished.
+The snyk-scan and attestation can be made in the main workflow after the deployment!
 
 Attestations to this Trail will be custom attestations.
 This can have the same name as the Flow - snyk-vulnerabilities
@@ -141,3 +143,29 @@ for that scan will pass in "high" as input to the custom-attestation.
 
 Note that a customer might want to find all Artifacts with a given
 vulnerability. Is this possible?
+
+Does it make sense for the custom-attestation max-age thresholds to
+be different for aws-beta vs aws-prod?
+Eg critical can be 10 days in aws-beta but only 1 day in prod?
+I think yes. 
+If so does it make sense (work?) for there to be 2 Flows?
+And how does this work with the notion that what makes the Env 
+turn green is Trail-compliance?
+I don't think I can easily do it based on Trail compliance since 
+the fingerprint will match regardless of the Env.
+It has to be a specific custom-attestation.
+
+1. You have to have a Flow + Trails dedicated to the Env.
+2. You have to make one of these custom attestations in the build process
+   _after_ deployment. The clock starts not when the Artifact is built,
+   but when it is deployed.
+3. You can also make these custom-attestations in the live-snyk-scan process.
+4. You have to have a Policy that requires the custom-attestation like this:
+
+  attestations:
+    - if: ${{ flow.name == 'snyk-vuln-ages-on-aws-beta' }}
+      name: snyk-vuln-ages-on-aws-beta
+      type: custom:snyk-vuln-ages-on-aws-beta
+
+This is not bad. It means a rogue deployment won't have the attestation.
+
