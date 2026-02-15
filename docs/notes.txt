@@ -56,7 +56,7 @@ Sometimes emergency rollback deployments are necessary. Suppose an Artifact is
 rolled back. It will then be seen in a live-snyk-scan, and a new attestation will be made.
 This may well cause the Trail to become non-compliant. I think this is correct.
 Note that there is no way that a given Artifact can ever "not have" the given vulnerability. 
-You can avoid a non-compliance by deploying a new Artifact that has fixed the given vuln.
+You can only fix a non-compliance by deploying a new Artifact that has fixed the given vuln.
 
 Should all Trails go under a single Flow?
 Can a case be made for having a Flow per quarter - for example if you need 
@@ -89,14 +89,55 @@ runs[@].tool.driver.rules[@]
 
 From https://support.snyk.io/s/article/How-is-a-vulnerabilitys-severity-determined
 
-At Snyk, we useCVSS framework version 3.1to communicate the 
+At Snyk, we use CVSS framework version 3.1 to communicate the 
 characteristics and severity of vulnerabilities.
 A vulnerability's severity (critical, high, medium or low) is based on its CVSS score:
 
   Severity	CVSS v3 Rating
+  ------------------------
   Critical	9.0 - 10.0
   High	    7.0 -  8.9
-  Medium	4.0 -  6.9
-  Low	    0.1 -  3.9
+  Medium	  4.0 -  6.9
+  Low	      0.1 -  3.9
 
 
+The Flow the attestations are written to will not be aws-snyk-scan since that does 
+not implement the policy of max-age per vuln severity. 
+Create a new Flow called snyk-vulnerabilities.
+Its Trails will be named based on fingerprint@vuln, eg
+21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9@SNYK-ALPINE321-EXPAT-15199474
+
+When a Trail is created it will also need a _single_ kosli-attest-artifact
+(so the Trail will be found by Env Policies). 
+The Env will rely on a Trail-compliance env-policy.
+Note that a weakness of this approach is that an Env will no longer become 
+non-compliant if a snyk-attestation is MISSING. Is there a way this can be overcome?
+
+Attestations to this Trail will be custom attestations.
+This can have the same name as the Flow - snyk-vulnerabilities
+They will implement max-age policy based on severity.
+
+  Critical	 7 days
+  High	    14 days
+  Medium	  21 days
+  Low	      28 days
+
+The jq rule will accept three arguments:
+- timestamp for when Trail was created (could this be held as a tag on the Trail?)
+- timestamp now (can jq supply this itself?)
+- severity (critical, high, medium, low)
+
+The main.yml workflows can attest to this Flow/Trail.
+The workflows in the live-snyk-scans will also attest to the _same_ Flow/Trail.
+
+The old Flow called aws-snyk-scan can be deleted.
+
+Some severities are initially "null".
+How to handle these?
+Suppose they default to medium?
+That will work.
+If, in a later snyk-scan it becomes "high" then the attestation 
+for that scan will pass in "high" as input to the custom-attestation.
+
+Note that a customer might want to find all Artifacts with a given
+vulnerability. Is this possible?
