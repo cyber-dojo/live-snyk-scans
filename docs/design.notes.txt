@@ -180,3 +180,6 @@ Simplest is to add it to the Trail name. Eg
 Better is
 21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9.low.SNYK-ALPINE321-EXPAT-15199474
 
+Note that "Configure AWS credentials" step relies on OIDC permissions 
+which will need to be configured for both the build workflow in the Artifact's repo 
+and the live-snyk-scan workflow in this repo.
