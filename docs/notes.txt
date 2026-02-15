@@ -157,8 +157,11 @@ It has to be a specific custom-attestation.
 
 1. You have to have a Flow + Trails dedicated to the Env.
 2. You have to make one of these custom attestations in the build process
-   _after_ deployment. The clock starts not when the Artifact is built,
-   but when it is deployed.
+   "close" to deployment. The clock starts not when the Artifact is built,
+   but when it is deployed. Probably best is to run the attest job in parallel
+   with the deploy job. If it is after then you will get the odd "false" red 
+   snapshot for the Env because you'll get a snapshot report just before the 
+   attestation.
 3. You can also make these custom-attestations in the live-snyk-scan process.
 4. You have to have a Policy that requires the custom-attestation like this:
 
