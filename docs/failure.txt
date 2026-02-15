@@ -213,3 +213,9 @@ What does Kosli server do?
 So it doesn't use a cache or an download.
 It does a direct docker push/docker pull
 Which is what I do in the live-snyk-scan workflow!?
+
+Current thoughts
+- I am assuming it is working for custom-start-points 
+- Ask Graham to add OIDC so saver can configure AWS credentials directly
+  Then try saver doing snyk-scan after explicit pull of image 
+- Try scanning the tar file
