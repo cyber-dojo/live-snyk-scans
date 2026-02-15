@@ -169,3 +169,11 @@ It has to be a specific custom-attestation.
 
 This is not bad. It means a rogue deployment won't have the attestation.
 
+Would be nice if the severity of the vuln was easily visible.
+You cannot tag a Trail, only a Flow (or Env).
+Simplest is to add it to the Trail name. Eg
+
+21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9@low.SNYK-ALPINE321-EXPAT-15199474
+Better is
+21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9.low.SNYK-ALPINE321-EXPAT-15199474
+
