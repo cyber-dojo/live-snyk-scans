@@ -102,7 +102,10 @@ jobs:
 
       - name: Fail if the sarif file already exists
         run:
-          [ ! -f "${SNYK_SARIF_FILENAME}" ]
+          if test -f "${SNYK_SARIF_FILENAME}" ; then
+            echo "ERROR: ${SNYK_SARIF_FILENAME} already exists"
+            exit 42
+          fi
 
       - name: Run Snyk container scan
         env:
