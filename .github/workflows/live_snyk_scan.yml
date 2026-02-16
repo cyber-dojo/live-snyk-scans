@@ -107,16 +107,18 @@ jobs:
             exit 42
           fi
 
-      - name: Run Snyk container scan
+      - name: Run Snyk container test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
           snyk container test "${{ matrix.artifact_name }}"
+            --debug
+            --log-level=trace
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
-      - name: Snyk-container-test's exit code can be zero when no sarif file is produced!
+      - name: Snyk-container-test's exit code can be zero when no sarif file is created!
         run:
           cat "${SNYK_SARIF_FILENAME}"
 
