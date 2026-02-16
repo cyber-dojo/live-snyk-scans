@@ -101,7 +101,7 @@ jobs:
           snyk-version: v1.1300.2         
 
       - name: Fail if the sarif file already exists
-        run:
+        run: |
           if test -f "${SNYK_SARIF_FILENAME}" ; then
             echo "ERROR: ${SNYK_SARIF_FILENAME} already exists"
             exit 42
