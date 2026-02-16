@@ -8,8 +8,6 @@ Could the main workflow have a snyk-container-scan job that does not participate
 in the sdlc-control-gate and so does not affect deployment?
 This would mean the scan is definitely on the correct docker image.
 
-Can a snyk scan work on a docker image saved to a tar file?
-
 I could have Trails in a Flow=aws-snyk-scan whose names are taken from
 - the snyk vulnerability identifier
 
@@ -19,10 +17,17 @@ SNYK-ALPINE321-EXPAT-15199474
 When the Trail is attested to it first does a kosli-attest-artifact so non-compliance will ripple 
 into any Env that has trail-compliance in an attached Policy.
 
-Inputs for each snyk-scan:
+Inputs from each snyk-scan for a custom-attestation
 1. The timestamp of the trail is the start-date.
+   curl -X 'GET' \
+  'https://app.kosli.com/api/v2/trails/cyber-dojo/differ-ci/ac3a41d1c764bbdf71dcaf15018ad0a008f0dc1b' \
+  -H 'accept: application/json'
+  Gives...
+  { "created_at": 1770627481.667767, ...}
+
 2. The sarif file. Map to a dict with keys for each snyk vuln,
    with values {"level":"low", ...? }
+
 3. The .snyk file? This would a very nice extra.
    Could you add entries into the map from 2) for each entry in the .snyk file?
    Just because a vuln is named in a .snyk file does not mean the Artifact has that vuln.
@@ -33,11 +38,17 @@ Inputs for each snyk-scan:
    Is there a way to find the level with a snyk API call?
    That would avoid assuming it is in the .shortDescription.text (see below)
    The actual score is present. See below.
-4. The current timestamp
-5. The max age (in days?) for each level. Defaults?
+
+4. The current timestamp.
+   Is there a jq expression for this?
+   Apparently yes: now
+
+5. The max age (in days?) for each level.
+   No. This should be set in the custom-attestation's type.
 
 Should there also be a maximum number of vulns at a specific level?
 eg low=100, medium=20, high=5, critical=1
+Maybe - but that is a different policy.
 
 If an Artifact has a given snyk vuln, and a new artifact is deployed to replace it 
 before it "expires" and becomes non-compliant, then it the Trail never becomes non-compliant 
@@ -178,3 +189,90 @@ which will need to be configured for both the build workflow in the Artifact's r
 and the live-snyk-scan workflow in this repo.
 
 Maybe have 4 Flows per Env? One for each vuln level?
+
+If you have a Trail per vuln, then you will get several Artifacts with that vuln.
+This is ok, since each Artifact can attest its own fingerprint and thus 
+be found when a new snapshot is being evaluated.
+However, it does mean that using the start-date of the Trail will start 
+the clock for all Artifacts. 
+Is it better for the Trail name to be a combination of the 
+fingerprint and the vuln?
+Maybe both?
+Consider if the vuln is critical
+1. From the env point of view, what matters is when it first appears - regardless 
+of how many running Artifacts exhibit it.
+2. From the Trail's point of view, what matters is when that artifact was deployed
+if the policy is that it must be fixed within a certain period of time.
+
+Suppose 1 < 2 
+Eg Env non-compliant for critical vuln running for >= 1 day.
+   Trail non-compliant for critical vuln known for >= 10 days.
+In this case you can deploy through the sdlc gate, but will become
+non-compliant once deployed.
+
+Suppose 1 > 2
+Eg Env non-compliant for critical vuln running for >= 10 day.
+   Trail non-compliant for any critical vuln - known for >= 0 days.
+In this case you can't deploy. 
+
+What is the behaviour we want?
+
+Suppose I am a dev and there is a policy that ANY high vuln must be fixed 
+within 5 days of first appearance in an Env.
+This affects my sdlc gate for deploying that artifact to that Env.
+The assert-artifact (--environment) evaluation needs to somehow get the timestamp 
+of first Artifact with that vuln running in that Env (which defaults to now if none yet).
+
+This is doable if creation timestamps is passed explicitly to the custom-attestation
+
+Example...
+
+Flow=snyk-vuln-ages-on-aws-beta
+Trail=low.SNYK-ALPINE321-EXPAT-15199474
+
+Creation of this Trail is attempted when this vuln is seen in aws-beta
+Then attest the fingerprint.
+Then custom-attestion whose type is based on Flow.
+  snyk-vuln-ages-on-aws-beta
+  - 1st timestamp == creation timestamp of Trail 
+  - 2nd timestamp == now... is it needed? 
+    This is really the timestamp of the attestation itself.
+    Is 'now' in jq expression of the Env-Policy enough?
+  - level.  critical,high,medium,low
+
+What happens when a new snapshot for aws-beta comes in?
+Fingerprint finds Trail
+Env Policy is attached to aws-beta so is evaluated.
+
+Now, if the Trail has 3 Artifacts, then 3rd one was 3rd,
+but the timestamp of all attestations is the same, the timestamp
+of the Trail. So all Artifacts become non-compliant because they 
+are in the same Trail, via Trail-compliance.
+
+Now suppose there are two low vulns...
+
+Trail=low.SNYK-ALPINE321-EXPAT-15199474
+Trail=low.SNYK-ALPINE321-EXPAT-15199475
+
+One is seen Monday, 2nd is seen Tuesday.
+So there will be two clocks.
+But that is correct. 
+This is not a policy on how many low vulns there are.
+It is a policy on how long you've got to fix each SPECIFIC low vuln.
+
+Now suppose an Artifact with low.SNYK-ALPINE321-EXPAT-15199474 is deployed to aws-beta.
+It lives for a while and is replaced by a blue-green deployment.
+Now, several weeks later, there is a "regression" and some Artifact with 
+this vuln appears at the sdlc-gate. It could easily be immediately be non-compliant.
+But maybe this is what you want?
+This is not about preventing deployment. 
+It is about how long an Artifact is allowed to have the vuln.
+
+Regardless, I'd like to experiment with an Env-Policy whose jq rule uses 'now'
+
+
+
+
+
+
+
