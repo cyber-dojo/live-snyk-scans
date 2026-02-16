@@ -11,15 +11,12 @@ This would mean the scan is definitely on the correct docker image.
 Can a snyk scan work on a docker image saved to a tar file?
 
 I could have Trails in a Flow=aws-snyk-scan whose names are taken from
-- the fingerprint
 - the snyk vulnerability identifier
 
 For example,
-21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9@SNYK-ALPINE321-EXPAT-15199474
-or
-SNYK-ALPINE321-EXPAT-15199474@21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9
+SNYK-ALPINE321-EXPAT-15199474
 
-When the Trail is created it does a kosli-attest-artifact so non-compliance will ripple 
+When the Trail is attested to it first does a kosli-attest-artifact so non-compliance will ripple 
 into any Env that has trail-compliance in an attached Policy.
 
 Inputs for each snyk-scan:
@@ -101,14 +98,12 @@ A vulnerability's severity (critical, high, medium or low) is based on its CVSS 
   Low	      0.1 -  3.9
 
 
-The Flow the attestations are written to will notion be aws-snyk-scan since that does 
+The Flow the attestations are written to will not be aws-snyk-scan since that does 
 not implement the policy of max-age per vuln severity. 
 Create a new Flow called snyk-vulnerabilities.
 Its Trails will be named based on fingerprint@vuln, eg
 21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9@SNYK-ALPINE321-EXPAT-15199474
 
-When a Trail is created it will also need a _single_ kosli-attest-artifact
-(so the Trail will be found by Env Policies). 
 The Env will rely on a Trail-compliance env-policy.
 Note that a weakness of this approach is that an Env will no longer become 
 non-compliant if a snyk-attestation is MISSING. Is there a way this can be overcome?
@@ -176,10 +171,10 @@ Would be nice if the severity of the vuln was easily visible.
 You cannot tag a Trail, only a Flow (or Env).
 Simplest is to add it to the Trail name. Eg
 
-21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9@low.SNYK-ALPINE321-EXPAT-15199474
-Better is
-21aeb61ece58bab3221fde0ec9ad26d8b11a0c12b04ad4162e0f8dfb2b5f47c9.low.SNYK-ALPINE321-EXPAT-15199474
+low.SNYK-ALPINE321-EXPAT-15199474
 
 Note that "Configure AWS credentials" step relies on OIDC permissions 
 which will need to be configured for both the build workflow in the Artifact's repo 
 and the live-snyk-scan workflow in this repo.
+
+Maybe have 4 Flows per Env? One for each vuln level?
