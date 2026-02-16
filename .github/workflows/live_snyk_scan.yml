@@ -97,6 +97,8 @@ jobs:
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master
+        with:
+          snyk-version: v1.1300.2         
 
       - name: Run Snyk container scan
         env:
