@@ -100,13 +100,16 @@ jobs:
         with:
           snyk-version: v1.1300.2         
 
+      - name: Fail if the sarif file already exists
+        run:
+          [ ! -f "${SNYK_SARIF_FILENAME}" ]
+
       - name: Run Snyk container scan
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
           snyk container test "${{ matrix.artifact_name }}"
             --org=jonjagger
-            --debug
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
