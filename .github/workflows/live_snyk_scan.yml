@@ -102,7 +102,8 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
-          snyk container "${{ matrix.artifact_name }}"
+          snyk container test "${{ matrix.artifact_name }}"
+            --org=jonjagger
             --debug
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
