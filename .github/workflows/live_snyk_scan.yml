@@ -90,10 +90,6 @@ jobs:
         run:
           docker pull --platform linux/amd64 "${{ matrix.artifact_name }}"
 
-      - name: Save docker image as tar file 
-        run:
-          docker save --output image.tar "${{ matrix.artifact_name }}"
-
       - name: Get the .snyk file
         run: |
           curl "${{ matrix.raw_snyk_file_url }}" > ${SNYK_POLICY_FILENAME}
@@ -106,7 +102,8 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run:
-          snyk container test image.tar
+          snyk container "${{ matrix.artifact_name }}"
+            --debug
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
