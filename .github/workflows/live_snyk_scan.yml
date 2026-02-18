@@ -114,6 +114,7 @@ jobs:
           snyk container test "${{ matrix.artifact_name }}"
             --debug
             --log-level=trace
+            --org=kosli
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
