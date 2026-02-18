@@ -345,3 +345,10 @@ However, this might not work since if the attestation to aws-prod-snyk-vuln-ages
 is red, then if aws-beta has a global Trail-compliance Env-policy then that will fail.
 So Trail-compliance policy has to be tied to specific Flow or Tag.
 
+There is still a problem. If there are no vulns for an Artifact then
+there will be no attestations, and the Env-Policy will fail!
+So in that case we have to somehow ensure there is a TRUE cat.
+How to do that? Some kind of "override" argument?
+Perhaps in a Trail called digest.low.NONE
+
+
