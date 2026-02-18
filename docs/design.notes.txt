@@ -272,7 +272,76 @@ Regardless, I'd like to experiment with an Env-Policy whose jq rule uses 'now'
 
 
 
+A cron-job scrapes a aws-beta snapshot json and does a snyk-scan for each Artifact.
+Each snyk-scan generates a sarif file.
+Small python script extracts each vuln name and its level (eg medium).
+In a flow called aws-beta-snyk-vuln-ages, we create a Trail.
+Name of the Trail is combination of Artifact fingerprint and vuln name.
+Now get the JSON for the trail and extract "creation" timestamp.
+kosli-attest-artifact to stamp fingerprint into Trail.
+kosli-attest-custom passing in creation timestamp and vuln level.
+
+Now have an Env-Policy 
+
+Core ideas.
+
+Have a Flow dedicated to the control, eg aws-beta-snyk-vuln-ages
+Create Trails on this Flow with identity based on fingerprint and vuln name.
+Have custom attestation again based on the control which attests only to these Trails.
+Input data for the custom-attestation is 
+  - "creation" timestamp of Trail
+  - vuln level
+Custom attestation embeds rule, eg
+ vuln=="medium" => 'now' - creation <= 7 days.
+(now is a jq expression)
+
+Assumption: each new snapshot report (eg every 3 mins) does a re-evaluation of
+compliance and this re-evaluates 'now' in each found custom-attestation.
+
+These Trails will be found when asking if the Artifact "would be" compliant if deployed 
+to different Env. So Env-Policies have to have a way being "specific enough".
+This could be via filter on flow name or flow tag (can't tag trails)
+Or env name or env tag.
+Or it could be via type-name of the custom-attestation.
+
+A customer might want to "allow-list" (or un-allow-list) not at the Artifact level, but at 
+the "control" level for that Artifact. Which in this case would equate to the specific Trail's 
+overall trail-compliance.
+Eg I might want to allow-list compliance of Trail
+  12345678.SNYK-ALPINE321-EXPAT-15199474
+but not of 
+  87654321.SNYK-ALPINE321-EXPAT-15199474
 
 
+Idea:
+When you get the snapshot of aws-beta, the Artifacts found should be snyk scanned 
+and then an attestation made to TWO flows, one for the aws-beta env it is currently 
+in, and one for the aws-prod env it may get promoted to.
 
+Flow: aws-beta-snyk-vuln-ages
+Trail: digest.low.SNYK-ALPINE321-EXPAT-15199474
+CAT: aws-beta-snyk-vuln-age
+  vuln=="medium" => 'now' - creation <= 7 days.
+
+Flow: aws-prod-snyk-vuln-ages
+Trail: digest.low.SNYK-ALPINE321-EXPAT-15199474
+CAT: aws-prod-snyk-vuln-age
+  vuln=="medium" => 'now' - creation <= 1 days.
+
+A critical vuln could be prevented from ever reaching prod 
+by having a vuln=="critical" rule with no part for its age.
+
+Now have TWO Env policies
+
+Attached to aws-beta only:
+CAT aws-beta-snyk-vuln-age
+
+Attached to aws-prod only:
+CAT aws-prod-snyk-vuln-age
+
+These attestations must ALSO be made just before deployment.
+
+However, this might not work since if the attestation to aws-prod-snyk-vuln-ages
+is red, then if aws-beta has a global Trail-compliance Env-policy then that will fail.
+So Trail-compliance policy has to be tied to specific Flow or Tag.
 
