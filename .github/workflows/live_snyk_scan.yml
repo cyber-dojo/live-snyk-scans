@@ -112,11 +112,12 @@ jobs:
       - name: Run Snyk container test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         run:
           snyk container test "${{ matrix.artifact_name }}"
             --debug
             --log-level=trace
-            --org=kosli
+            --org="${SNYK_ORG_ID}"
             --policy-path=${SNYK_POLICY_FILENAME}
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
