@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
   # workflow_dispatch:
-  schedule: # At 09:00 every Saturday
-    - cron: '0 9 * * SAT'
+  schedule: # At 09:00 every day
+    - cron: '0 9 * * *'
 
 jobs:
   trigger-aws-beta:
