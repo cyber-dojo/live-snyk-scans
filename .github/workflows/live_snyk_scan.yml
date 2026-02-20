@@ -115,33 +115,27 @@ jobs:
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         run:
           snyk container test "${{ matrix.artifact_name }}"
-            --debug
-            --log-level=trace
             --org="${SNYK_ORG_ID}"
-            --policy-path=${SNYK_POLICY_FILENAME}
+            --policy-path="${SNYK_POLICY_FILENAME}"
             --sarif
             --sarif-file-output="${SNYK_SARIF_FILENAME}"
 
-      - name: Fail if no sarif file is created, otherwise cat it
-        run:
-          cat "${SNYK_SARIF_FILENAME}"
-
       - name: Setup Kosli CLI
-        if: ${{ success() }}
+        if: ${{ success() || failure() }}
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
       # [kosli attest artifact] should not be necessary here, but currently it is.
       - name: Attest artifact to Kosli
-        if: ${{ success() }}
+        if: ${{ success() || failure() }}
         run:
           kosli attest artifact "${{ matrix.artifact_name }}"
             --fingerprint="${{ matrix.artifact_fingerprint }}"
             --name="${{ matrix.repo_name }}"
 
       - name: Attest snyk scan to Kosli
-        if: ${{ success() }}
+        if: ${{ success() || failure() }}
         run:
           kosli attest snyk
             --annotate=snapshot_URL="${{ matrix.snapshot_artifact_url }}"
