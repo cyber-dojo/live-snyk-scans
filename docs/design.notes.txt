@@ -351,4 +351,9 @@ So in that case we have to somehow ensure there is a TRUE cat.
 How to do that? Some kind of "override" argument?
 Perhaps in a Trail called digest.low.NONE
 
+-----------------------------------
+
+Key point: the cron job that runs every day, finds live artifacts 
+and does a snyk-container-tests WITH the .snyk file
+It then makes attestations for what will be NEW vulns, with an aged based flow/trail.
 

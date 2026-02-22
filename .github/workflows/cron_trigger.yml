@@ -3,7 +3,6 @@ name: Main
 on:
   workflow_dispatch:
   push:
-  # workflow_dispatch:
   schedule: # At 09:00 every day
     - cron: '0 9 * * *'
 
