@@ -48,7 +48,7 @@ jobs:
           echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}
 
       - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
-      . id: set-artifacts
+        id: set-artifacts
         run: |
           # Fake getting snapshot from kosli_env
           artifacts="$(jq --compact-output . ./fake-data/artifacts-${{ inputs.kosli_env }}.json)"
