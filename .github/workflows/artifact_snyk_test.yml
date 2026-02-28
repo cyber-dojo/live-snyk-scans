@@ -117,13 +117,7 @@ jobs:
         run: |
           artifact="$(jq \
             --compact-output \
-            --arg artifact_name        "${{ inputs.artifact_name        }}" \
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}" \
-            --arg repo_name            "${{ inputs.repo_name            }}" \
-            --arg git_commit           "${{ inputs.git_commit           }}" \
-            --arg commit_url           "${{ inputs.commit_url           }}" \
-            --arg raw_snyk_file_url    "${{ inputs.raw_snyk_file_url    }}" \
-            --arg kosli_env            "${{ inputs.kosli_env            }}" \
             --arg kosli_flow           "${{ inputs.kosli_flow           }}" \
             '. += $ARGS.named' <<< '{}')"
             
@@ -203,14 +197,14 @@ jobs:
 
       - name: Attest evidence to Kosli
         run: |
-          echo ${{ matrix.artifact_name }}
-          echo ${{ matrix.artifact_fingerprint }}
-          echo ${{ matrix.repo_name }}
-          echo ${{ matrix.git_commit }}
-          echo ${{ matrix.commit_url }}
-          echo ${{ matrix.raw_snyk_file_url }}
-          echo ${{ matrix.kosli_env }}
-          echo ${{ matrix.kosli_flow }}
+          echo ${{ inputs.artifact_name }}
+          echo ${{ inputs.artifact_fingerprint }}
+          echo ${{ inputs.repo_name }}
+          echo ${{ inputs.git_commit }}
+          echo ${{ inputs.commit_url }}
+          echo ${{ inputs.raw_snyk_file_url }}
+          echo ${{ inputs.kosli_env }}
+          echo ${{ inputs.kosli_flow }}
           echo ${{ matrix.snyk_id }}
           echo ${{ matrix.snyk_url }}
           echo ${{ matrix.snyk_severity }}
