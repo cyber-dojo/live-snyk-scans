@@ -160,7 +160,36 @@ jobs:
           echo "vulns=${vulns}" >> $GITHUB_OUTPUT
 
 
+  attest-no-snyk-vulns:
+    if: ${{ needs.collect-snyk-vulns.outputs.vulns == '[]' }}
+    needs: collect-snyk-vulns
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
+
+      # Create flow
+      # Begin trail
+      # Get starting date/time of trail
+      # Attest artifact
+      # Attest custom
+
+      - name: Attest evidence to Kosli
+        run: |
+          echo ${{ matrix.artifact_name }}
+          echo ${{ matrix.artifact_fingerprint }}
+          echo ${{ matrix.repo_name }}
+          echo ${{ matrix.git_commit }}
+          echo ${{ matrix.commit_url }}
+          echo ${{ matrix.raw_snyk_file_url }}
+          echo ${{ matrix.kosli_env }}
+          echo ${{ matrix.kosli_flow }}
+
+
   attest-snyk-vulns:
+    if: ${{ needs.collect-snyk-vulns.outputs.vulns != '[]' }}
     needs: collect-snyk-vulns
     runs-on: ubuntu-latest
     strategy:
