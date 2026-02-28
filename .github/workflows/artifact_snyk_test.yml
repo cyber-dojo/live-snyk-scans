@@ -123,6 +123,8 @@ jobs:
             
           jq --compact-output "map(. + ${artifact})" snyk-ids.json > vulns
 
+          jq . vulns
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ hashFiles('vulns') }}
@@ -152,6 +154,8 @@ jobs:
             all-vulns)"
           
           echo "vulns=${vulns}" >> $GITHUB_OUTPUT
+
+          jq . <<< "${vulns}"
 
 
   attest-no-snyk-vulns:
