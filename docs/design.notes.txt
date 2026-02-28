@@ -51,7 +51,7 @@ eg low=100, medium=20, high=5, critical=1
 Maybe - but that is a different policy.
 
 If an Artifact has a given snyk vuln, and a new artifact is deployed to replace it 
-before it "expires" and becomes non-compliant, then it the Trail never becomes non-compliant 
+before it "expires" and becomes non-compliant, then the Trail never becomes non-compliant 
 because the Artifact is not seen in later live-snyk-scans. So there is never a later 
 attestation which trips it into red.
 
@@ -357,3 +357,7 @@ Key point: the cron job that runs every day, finds live artifacts
 and does a snyk-container-tests WITH the .snyk file
 It then makes attestations for what will be NEW vulns, with an aged based flow/trail.
 
+Do I need a program to get the start-dates of the Trails 
+that will be attested to? I think yes.
+When you have the individual snyk vuln it is for a specific artifact.
+So makes sense to add it last of all?

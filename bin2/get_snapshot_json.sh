@@ -10,7 +10,6 @@ KOSLI_API_TOKEN="${KOSLI_API_TOKEN:-read-only-dummy}"
 KOSLI_ENV="${KOSLI_ENV:-aws-prod}"
 
 # NOTE: in a Github Action, stdout and stderr are multiplexed together.
-# This multiplexing is standard behaviour inside a docker container with a tty.
 # This means that the output of the $(subshell) is not just stdout, it is stdout+stderr!
 # To ensure the Kosli CLI does not print to stderr, we set the --debug=false flag explicitly.
 

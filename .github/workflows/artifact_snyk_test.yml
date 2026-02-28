@@ -1,0 +1,196 @@
+name: Artifact Snyk Test
+
+on:
+  workflow_call:
+    secrets:
+      snyk_token:
+        required: true
+      kosli_api_token:
+        required: true
+
+    inputs:
+      artifact_name:
+        description: "Artifact name"
+        required: true
+        type: string
+      artifact_fingerprint:
+        description: "Artifact fingerprint/digest (64 chars)"
+        required: true
+        type: string
+      repo_name:
+        description: "Artifact repo"
+        required: true
+        type: string
+      git_commit:
+        description: "Artifact commit (40 chars)"
+        required: true
+        type: string
+      commit_url:
+        description: "Artifact commit URL"
+        required: true
+        type: string
+      raw_snyk_file_url:
+        description: "Url of snyk policy file in commit for artifact"
+        required: true
+        type: string
+      kosli_env:
+        description: "Name of Kosli environment the artifact is running in"
+        required: true
+        type: string
+      kosli_flow:
+        description: "Name of Kosli flow to attest evidence in"
+        required: true
+        type: string
+
+
+env:
+  KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+  KOSLI_DEBUG:     ${{ vars.KOSLI_DEBUG }}          # true/false
+  KOSLI_DRY_RUN:   ${{ vars.KOSLI_DRY_RUN }}        # true/false
+  KOSLI_HOST:      ${{ vars.KOSLI_HOST }}           # https://app.kosli.com
+  KOSLI_ORG:       ${{ vars.KOSLI_ORG }}            # cyber-dojo
+
+
+jobs:
+  find-snyk-vulns:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    env:
+      SNYK_SARIF_FILENAME: snyk.container.test.json
+      SNYK_POLICY_FILENAME: .snyk
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Load docker image from registry
+        uses: cyber-dojo/load-image-from-registry@main
+        with:
+          image_name: "${{ inputs.artifact_name }}"
+          aws_rolename: "gh_actions_live_snyk_scans"
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+        with:
+          snyk-version: v1.1300.2
+
+      - name: Fail if the sarif file already exists
+        run: |
+          if test -f "${SNYK_SARIF_FILENAME}" ; then
+            echo "ERROR: ${SNYK_SARIF_FILENAME} already exists"
+            exit 42
+          fi
+
+      - name: Set empty .snyk policy file
+        run:
+          echo '' > "${SNYK_POLICY_FILENAME}"
+
+      - name: Run Snyk container test
+        env:
+          SNYK_TOKEN: ${{ secrets.snyk_token }}
+        run:
+          snyk container test "${{ inputs.artifact_name }}"
+            --policy-path="${SNYK_POLICY_FILENAME}"
+            --sarif
+            --sarif-file-output="${SNYK_SARIF_FILENAME}"
+
+      - name: Fail if the sarif file is not created
+        run: |
+          if ! test -f "${SNYK_SARIF_FILENAME}" ; then
+            echo "ERROR: ${SNYK_SARIF_FILENAME} was not created"
+            exit 43
+          fi
+
+      - name: Get the real .snyk file
+        run: |
+          curl "${{ inputs.raw_snyk_file_url }}" > "${SNYK_POLICY_FILENAME}"
+          cat "${SNYK_POLICY_FILENAME}"
+
+      - name: Combine vulns in sarif and snyk policy file info
+        run:
+          ./bin/filter_sarif.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > snyk-ids.json
+
+      # - name: Simulate running snyk and extracting json from sarif file
+      #   run:
+      #     cp ./fake-data/snyk-${{ inputs.repo_name }}.json snyk-ids.json
+
+      - name: Merge artifact json into each snyk vuln json
+        run: |
+          artifact="$(jq \
+            --compact-output \
+            --arg artifact_name        "${{ inputs.artifact_name        }}" \
+            --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}" \
+            --arg repo_name            "${{ inputs.repo_name            }}" \
+            --arg git_commit           "${{ inputs.git_commit           }}" \
+            --arg commit_url           "${{ inputs.commit_url           }}" \
+            --arg raw_snyk_file_url    "${{ inputs.raw_snyk_file_url    }}" \
+            --arg kosli_env            "${{ inputs.kosli_env            }}" \
+            --arg kosli_flow           "${{ inputs.kosli_flow           }}" \
+            '. += $ARGS.named' <<< '{}')"
+            
+          jq --compact-output "map(. + ${artifact})" snyk-ids.json > vulns
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ hashFiles('vulns') }}
+          path: vulns
+
+
+  collect-snyk-vulns:
+    needs: find-snyk-vulns
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_FINGERPRINT: ${{ inputs.artifact_fingerprint }}
+      KOSLI_ENV:            ${{ inputs.kosli_env }}
+    outputs:
+      vulns: ${{ steps.set-vulns.outputs.vulns }}
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - id: set-vulns
+        run: |
+          cat */vulns | jq --compact-output --slurp add > all-vulns
+          
+          vulns="$(jq \
+            --compact-output \
+            --arg af "${ARTIFACT_FINGERPRINT}" \
+            --arg ke "${KOSLI_ENV}"            \
+            'map(. | select(.artifact_fingerprint == $af and .kosli_env == $ke))' \
+            all-vulns)"
+          
+          echo "vulns=${vulns}" >> $GITHUB_OUTPUT
+
+
+  attest-snyk-vulns:
+    needs: collect-snyk-vulns
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.collect-snyk-vulns.outputs.vulns) }}
+    steps:
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
+
+      # Create flow
+      # Begin trail
+      # Attest artifact
+      # Attest custom
+
+      - name: Attest evidence to Kosli
+        run: |
+          echo ${{ matrix.artifact_name }}
+          echo ${{ matrix.artifact_fingerprint }}
+          echo ${{ matrix.repo_name }}
+          echo ${{ matrix.git_commit }}
+          echo ${{ matrix.commit_url }}
+          echo ${{ matrix.raw_snyk_file_url }}
+          echo ${{ matrix.kosli_env }}
+          echo ${{ matrix.kosli_flow }}
+          echo ${{ matrix.snyk_id }}
+          echo ${{ matrix.snyk_url }}
+          echo ${{ matrix.snyk_severity }}
+          echo ${{ matrix.snyk_expires }}

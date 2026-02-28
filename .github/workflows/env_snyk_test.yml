@@ -1,0 +1,75 @@
+name: Environment Snyk Test
+
+on:
+  workflow_call:
+    secrets:
+      snyk_token:
+        required: true
+      kosli_api_token:
+        required: true
+
+    inputs:
+      kosli_env:
+        description: "Name of Kosli environment to find artifact running in"
+        required: true
+        type: string
+      kosli_flow:
+        description: "Name of Kosli flow to attest evidence in"
+        required: true
+        type: string
+
+env:
+  KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+  KOSLI_DEBUG:     ${{ vars.KOSLI_DEBUG }}          # true/false
+  KOSLI_DRY_RUN:   ${{ vars.KOSLI_DRY_RUN }}        # true/false
+  KOSLI_HOST:      ${{ vars.KOSLI_HOST }}           # https://app.kosli.com
+  KOSLI_ORG:       ${{ vars.KOSLI_ORG }}            # cyber-dojo
+
+jobs:
+
+  find-artifacts:
+    runs-on: ubuntu-latest
+    outputs:
+      artifacts: ${{ steps.set-artifacts.outputs.artifacts }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
+
+      - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
+        id: will-be-set-artifacts
+        run: |
+          artifacts="$(make artifacts | jq --raw-output --compact-output .)"
+          echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}
+
+      - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
+      . id: set-artifacts
+        run: |
+          # Fake getting snapshot from kosli_env
+          artifacts="$(jq --compact-output . ./fake-data/artifacts-${{ inputs.kosli_env }}.json)"
+          echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}          
+
+
+  artifact-snyk:
+    needs: find-artifacts
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.find-artifacts.outputs.artifacts) }}
+    uses: ./.github/workflows/artifact_snyk_test.yml
+    with:
+      artifact_name:        ${{ matrix.artifact_name }}
+      artifact_fingerprint: ${{ matrix.artifact_fingerprint }}
+      repo_name:            ${{ matrix.repo_name }}
+      git_commit:           ${{ matrix.git_commit }}
+      commit_url:           ${{ matrix.commit_url }}
+      raw_snyk_file_url:    ${{ matrix.raw_snyk_file_url }}
+      kosli_env:            ${{ inputs.kosli_env }}
+      kosli_flow:           ${{ inputs.kosli_flow }}
+    secrets:
+      snyk_token:      ${{ secrets.snyk_token }}
+      kosli_api_token: ${{ secrets.kosli_api_token }}
