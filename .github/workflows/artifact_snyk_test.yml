@@ -183,6 +183,10 @@ jobs:
       KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
       TRAIL_CREATED_AT: "${{ needs.setup.outputs.trail_created_at }}"
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
         with:
@@ -240,6 +244,10 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.find-snyk-vulns.outputs.vulns) }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
         with:
