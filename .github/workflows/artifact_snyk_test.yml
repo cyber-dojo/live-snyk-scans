@@ -85,7 +85,7 @@ jobs:
             --flow "${{ inputs.kosli_flow }}"
 
       - name: Get trail info
-        run: |
+        run:
           kosli get trail "${{ inputs.kosli_trail }}"
             --flow "${{ inputs.kosli_flow }}"
             --output json > trail.json
