@@ -110,12 +110,11 @@ jobs:
 
       - name: Combine vulns in sarif and snyk policy file info
         run: |
-          ./bin/filter_sarif.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > snyk-ids.json
+          ./bin/combine_snyk.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > snyk-ids.json
           jq . snyk-ids.json
 
       - name: Merge artifact json into each snyk vuln json
         run: |
-          # TODO: Can I only need --args for artifact_fingerprint and kosli_env ?
           artifact="$(jq \
             --compact-output \
             --arg artifact_name        "${{ inputs.artifact_name        }}" \

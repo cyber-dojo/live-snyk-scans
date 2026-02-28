@@ -1,0 +1,41 @@
+
+env_snyk_test.yml
+
+      Remove use of fake-data
+
+      - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
+        id: set-artifacts
+        run: |
+          # FAKE getting snapshot from kosli_env so we only do 1 snyk-container-test
+          artifacts="$(jq --compact-output . ./fake-data/artifacts-${{ inputs.kosli_env }}.json)"
+          echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}          
+
+
+artifact_snyk_test.yml
+
+      # These steps are done twice - in attest-no-snyk-vulns and attest-snyk-vulns jobs.
+      # - Create flow
+      # - Begin trail
+      # - Get starting date/time of trail
+      # - Attest artifact
+      # - Attest custom
+      # Can some of them be done only once?
+      # Or maybe they could even be done in env_snyk_test.yml in the command
+      #  artifacts="$(make artifacts | jq --raw-output --compact-output .)"
+
+
+      - name: Merge artifact json into each snyk vuln json
+        run: |
+          # TODO: Can I only need --args for artifact_fingerprint and kosli_env ?
+          artifact="$(jq \
+            --compact-output \
+            --arg artifact_name        "${{ inputs.artifact_name        }}" \
+            --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}" \
+            --arg repo_name            "${{ inputs.repo_name            }}" \
+            --arg git_commit           "${{ inputs.git_commit           }}" \
+            --arg commit_url           "${{ inputs.commit_url           }}" \
+            --arg raw_snyk_file_url    "${{ inputs.raw_snyk_file_url    }}" \
+            --arg kosli_env            "${{ inputs.kosli_env            }}" \
+            --arg kosli_flow           "${{ inputs.kosli_flow           }}" \
+            '. += $ARGS.named' <<< '{}')"
+
