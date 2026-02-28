@@ -36,7 +36,7 @@ if __name__ == "__main__":  # pragma: no cover
     with open(snyk_policy_filename) as snyk_file:
         snyk_data = yaml.safe_load(snyk_file)
 
-    ignore = snyk_data['ignore']
+    ignore = snyk_data.get('ignore', {})
     for id in ignore:
         if id in vulns:
             vulns[id]['expires'] = ignore[id][0]['*']['expires']
