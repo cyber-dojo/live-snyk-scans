@@ -5,6 +5,11 @@ import sys
 import json
 import yaml
 
+def dt(dts):
+    date_format = '%Y-%m-%dT%H:%M:%S.%fZ'
+    return datetime.strptime(dts, date_format)
+
+
 if __name__ == "__main__":  # pragma: no cover
     sarif_filename = sys.argv[1]
     snyk_policy_filename = sys.argv[2]
@@ -29,7 +34,9 @@ if __name__ == "__main__":  # pragma: no cover
             vulns[id] = {
                 'severity': severity,
                 'url': url,
-                'expires': epoch_start
+                'expires': epoch_start,
+                'expires_human': epoch_start,
+                'expires_timestamp': epoch_start.timestamp()
             }
 
     # Overwrite specific vulnerability expiry dates if found in snyk policy file (yaml)
@@ -39,7 +46,10 @@ if __name__ == "__main__":  # pragma: no cover
     ignore = snyk_data.get('ignore', {})
     for id in ignore:
         if id in vulns:
-            vulns[id]['expires'] = ignore[id][0]['*']['expires']
+            expires = ignore[id][0]['*']['expires']
+            vulns[id]['expires'] = expires
+            vulns[id]['expires_human'] = expires
+            vulns[id]['expires_timetamp'] = dt(expires).timestamp()
 
     flat = []
     for id, values in vulns.items():
@@ -47,7 +57,9 @@ if __name__ == "__main__":  # pragma: no cover
             'snyk_id': id,
             'snyk_severity': values['severity'],
             'snyk_url': values['url'],
-            'snyk_expires': values['expires']
+            'snyk_expires': values['expires'],
+            'snyk_expires_human': values['expires_human'],
+            'snyk_expires_timestamp': values['expires_timestamp'],
         })
 
     print(json.dumps(flat, default=str))
