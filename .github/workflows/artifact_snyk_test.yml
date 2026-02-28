@@ -41,6 +41,10 @@ on:
         description: "Name of Kosli flow to attest evidence in"
         required: true
         type: string
+      kosli_trail:
+        description: "Name of Kosli trail to attest evidence in"
+        required: true
+        type: string
 
 
 env:
@@ -127,38 +131,6 @@ jobs:
           vulns="$(jq --compact-output "map(. + ${artifact})" snyk-ids.json)"
           jq . <<< "${vulns}"
           echo "vulns=${vulns}" >> $GITHUB_OUTPUT
-
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ${{ hashFiles('vulns') }}
-      #     path: vulns
-
-
-  # collect-snyk-vulns:
-  #   needs: find-snyk-vulns
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ARTIFACT_FINGERPRINT: ${{ inputs.artifact_fingerprint }}
-  #     KOSLI_ENV:            ${{ inputs.kosli_env }}
-  #   outputs:
-  #     vulns: ${{ steps.set-vulns.outputs.vulns }}
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-
-  #     - id: set-vulns
-  #       run: |
-  #         cat */vulns | jq --compact-output --slurp add > all-vulns
-          
-  #         vulns="$(jq \
-  #           --compact-output \
-  #           --arg af "${ARTIFACT_FINGERPRINT}" \
-  #           --arg ke "${KOSLI_ENV}"            \
-  #           'map(. | select(.artifact_fingerprint == $af and .kosli_env == $ke))' \
-  #           all-vulns)"
-          
-  #         echo "vulns=${vulns}" >> $GITHUB_OUTPUT
-
-  #         jq . <<< "${vulns}"
 
 
   attest-no-snyk-vulns:

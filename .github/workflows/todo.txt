@@ -15,12 +15,14 @@ env_snyk_test.yml
         run: |
           artifacts="$(make artifacts | jq --raw-output --compact-output .)"
 
-      3. Pass kosli_trail into artifact_snyk_test.yml as input argument.
-
 
 artifact_snyk_test.yml
 
-      1. Don't do these steps twice - in attest-no-snyk-vulns and in attest-snyk-vulns jobs.
+      1. The attested data should include the snyk version number.
+         Could add that in the combine_snyk.yml if it is inside the sarif file.
+         If not, do an explicit [snyk --version]
+
+      2. Don't do these steps twice - in attest-no-snyk-vulns and in attest-snyk-vulns jobs.
       - Create flow
       - Begin trail
       - Get starting date/time of trail
@@ -34,28 +36,7 @@ artifact_snyk_test.yml
       twice, once as a string in human readable format, again as a number 
       in a form suitable for jq rule comparing with now.
 
-      3. Do I only need --args for artifact_fingerprint and kosli_env ?
-         The other --args are inputs to the workflow.
-         Do I need even those?
-         Find out with jq expression 
-         'map(. | select(.artifact_fingerprint != $af or .kosli_env != $ke))'
-         and see if it selects anything.
-
-      - name: Merge artifact json into each snyk vuln json
-        run: |
-          artifact="$(jq \
-            --compact-output \
-            --arg artifact_name        "${{ inputs.artifact_name        }}" \
-            --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}" \
-            --arg repo_name            "${{ inputs.repo_name            }}" \
-            --arg git_commit           "${{ inputs.git_commit           }}" \
-            --arg commit_url           "${{ inputs.commit_url           }}" \
-            --arg raw_snyk_file_url    "${{ inputs.raw_snyk_file_url    }}" \
-            --arg kosli_env            "${{ inputs.kosli_env            }}" \
-            --arg kosli_flow           "${{ inputs.kosli_flow           }}" \
-            '. += $ARGS.named' <<< '{}')"
-
-      4. The code in combine_snyk.py should create two expiry dates.
+      2. The code in combine_snyk.py should create two expiry dates.
            Once as a string in human readable format, again as a number 
            in a form suitable for jq rule comparing with now.
          
