@@ -137,14 +137,36 @@ jobs:
     if: ${{ needs.find-snyk-vulns.outputs.vulns == '[]' }}
     needs: find-snyk-vulns
     runs-on: ubuntu-latest
+    env:
+      ATTESTATION_DATA_FILENAME: custom.json
+      KOSLI_FLOW: "${{ inputs.kosli_flow }}"
+      KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
     steps:
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
-      # Attest artifact
-      # Attest custom
+      # - name: Attest artifact to Kosli
+      #   run:
+      #     kosli attest artifact "${{ inputs.artifact_name }}"
+      #       --fingerprint="${{ inputs.artifact_fingerprint }}"
+      #       --name=artifact
+
+      # - name: Create custom attestation json file
+      #   run:
+      #     jq
+      #       --arg severity none
+      #       --arg expires  ???
+      #       '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
+
+      # - name: Attest custom to Kosli
+      #   run:
+      #     kosli attest custom "${{ inputs.artifact_name }}"
+      #       --type="${{ inputs.kosli_flow }}"
+      #       --fingerprint="${{ inputs.artifact_fingerprint }}"
+      #       --name=none
+      #       --attestation-data="${ATTESTATION_DATA_FILENAME}"
 
       - name: Attest evidence to Kosli
         run: |
@@ -162,6 +184,10 @@ jobs:
     if: ${{ needs.find-snyk-vulns.outputs.vulns != '[]' }}
     needs: find-snyk-vulns
     runs-on: ubuntu-latest
+    env:
+      ATTESTATION_DATA_FILENAME: custom.json
+      KOSLI_FLOW: "${{ inputs.kosli_flow }}"
+      KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
     strategy:
       matrix:
         include: ${{ fromJSON(needs.find-snyk-vulns.outputs.vulns) }}
@@ -171,8 +197,26 @@ jobs:
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
-      # Attest artifact
-      # Attest custom
+      # - name: Attest artifact to Kosli
+      #   run:
+      #     kosli attest artifact "${{ inputs.artifact_name }}"
+      #       --fingerprint="${{ inputs.artifact_fingerprint }}"
+      #       --name=artifact
+
+      - name: Create custom attestation json file
+        run:
+          jq
+            --arg severity "${{ matrix.snyk_severity }}"
+            --arg expires  "${{ matrix.snyk_expires }}"
+            '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
+
+      # - name: Attest custom to Kosli
+      #   run:
+      #     kosli attest custom "${{ inputs.artifact_name }}"
+      #       --type="${{ inputs.kosli_flow }}"
+      #       --fingerprint="${{ inputs.artifact_fingerprint }}"
+      #       --name="artifact.${{ matrix.snyk_id }}"
+      #       --attestation-data="${ATTESTATION_DATA_FILENAME}"
 
       - name: Attest evidence to Kosli
         run: |
