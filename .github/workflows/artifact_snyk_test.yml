@@ -91,13 +91,9 @@ jobs:
             --output json > trail.json
 
       - name: Extra trail creation date
+        id: set-trail-created-at
         run: |
           trail_created_at="$(jq .created_at trail.json)"
-          echo "trail_created_at ${trail_created_at}"
-
-      - name: Set output
-        id: set-trail-created-at
-        run:
           echo "trail_created_at=${trail_created_at}" >> ${GITHUB_OUTPUT}
 
 
@@ -161,24 +157,13 @@ jobs:
 
       - name: Combine vulns in sarif and snyk policy file info
         id: set-vulns
+        env:
+          JSON_FILENAME: vulns.json
         run: |
-          ./bin/combine_snyk.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > vulns.json
-          jq . vulns.json
-          vulns="$(jq --compact-output . vulns.json)"
+          ./bin/combine_snyk.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > "${JSON_FILENAME}"
+          jq . "${JSON_FILENAME}"
+          vulns="$(jq --compact-output . "${JSON_FILENAME}")"
           echo "vulns=${vulns}" >> $GITHUB_OUTPUT
-
-      # - name: Merge artifact json into each snyk vuln json NEEDED?
-      #   id: set-vulns
-      #   run: |
-      #     artifact="$(jq \
-      #       --compact-output \
-      #       --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}" \
-      #       --arg kosli_flow           "${{ inputs.kosli_flow           }}" \
-      #       '. += $ARGS.named' <<< '{}')"
-            
-          # vulns="$(jq --compact-output "map(. + ${artifact})" snyk-ids.json)"
-          # jq . <<< "${vulns}"
-          # echo "vulns=${vulns}" >> $GITHUB_OUTPUT
 
 
   attest-no-snyk-vulns:
@@ -189,7 +174,7 @@ jobs:
       ATTESTATION_DATA_FILENAME: custom.json
       KOSLI_FLOW: "${{ inputs.kosli_flow }}"
       KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
-      TRAIL_CREATED_AT: "${{ needs.setup.outputs.trail_created_at }}"
+      FIRST_SEEN: "${{ needs.setup.outputs.trail_created_at }}"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -213,7 +198,7 @@ jobs:
             --arg severity   none
             --arg url        ''
             --arg expires    '1970-01-01 00:00:00.000000+00:00'
-            --arg first_seen "${TRAIL_CREATED_AT}"
+            --arg first_seen "${FIRST_SEEN}"
             '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
 
       - name: Print custom attestation data
@@ -223,10 +208,10 @@ jobs:
       # - name: Attest custom to Kosli
       #   run:
       #     kosli attest custom "${{ inputs.artifact_name }}"
-      #       --type "${{ inputs.kosli_cat }}"
+      #       --attestation-data "${ATTESTATION_DATA_FILENAME}"
       #       --fingerprint "${{ inputs.artifact_fingerprint }}"
       #       --name artifact.none
-      #       --attestation-data "${ATTESTATION_DATA_FILENAME}"
+      #       --type "${{ inputs.kosli_cat }}"
 
       - name: Attest evidence to Kosli
         run: |
@@ -249,7 +234,7 @@ jobs:
       ATTESTATION_DATA_FILENAME: custom.json
       KOSLI_FLOW: "${{ inputs.kosli_flow }}"
       KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
-      TRAIL_CREATED_AT: "${{ needs.setup.outputs.trail_created_at }}"
+      FIRST_SEEN: "${{ needs.setup.outputs.trail_created_at }}"
     strategy:
       matrix:
         include: ${{ fromJSON(needs.find-snyk-vulns.outputs.vulns) }}
@@ -276,7 +261,7 @@ jobs:
             --arg severity   "${{ matrix.snyk_severity }}"
             --arg url        "${{ matrix.snyk_url }}"
             --arg expires    "${{ matrix.snyk_expires }}"
-            --arg first_seen "${TRAIL_CREATED_AT}"
+            --arg first_seen "${FIRST_SEEN}"
             '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
 
       - name: Print custom attestation data
@@ -286,10 +271,10 @@ jobs:
       # - name: Attest custom to Kosli
       #   run:
       #     kosli attest custom "${{ inputs.artifact_name }}"
-      #       --type "${{ inputs.kosli_cat }}"
+      #       --attestation-data "${ATTESTATION_DATA_FILENAME}"
       #       --fingerprint "${{ inputs.artifact_fingerprint }}"
       #       --name "artifact.${{ matrix.snyk_id }}"
-      #       --attestation-data "${ATTESTATION_DATA_FILENAME}"
+      #       --type "${{ inputs.kosli_cat }}"
 
       - name: Attest evidence to Kosli
         run: |
