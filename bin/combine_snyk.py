@@ -32,7 +32,7 @@ if __name__ == "__main__":  # pragma: no cover
             assert severity in ["Critical", "High", "Medium", "Low"]
 
             vulns[id] = {
-                'severity': severity,
+                'severity': severity.lower(),
                 'url': url,
                 'expires': epoch_start,
                 'expires_human': epoch_start,
