@@ -22,7 +22,7 @@ def print_help():
               "snapshot_index": 3600,
               "snapshot_artifact_url": "https://app.kosli.com/cyber-dojo/environments/aws-prod/snapshots/3600?fingerprint=1d7fc67092bee8492e5019ca0175edf5189e4fc71a4b3a21976c64070def810a",
               "environment_name": "aws-prod",
-              "raw_snyk_file_url": "https://raw.githubusercontent.com/cyber-dojo/languages-start-points/commit/88366281011d1aa83c5db4280aa8a6daa0be8541/.snyk"
+              "raw_snyk_policy_url": "https://raw.githubusercontent.com/cyber-dojo/languages-start-points/commit/88366281011d1aa83c5db4280aa8a6daa0be8541/.snyk"
             },          
             ...
           ]
@@ -55,13 +55,13 @@ def artifacts():
                         "snapshot_index": snapshot_index,
                         "snapshot_artifact_url": f"{html_url}?fingerprint={fingerprint}",
                         "environment_name": "aws-prod",
-                        "raw_snyk_file_url": raw_snyk_file_url(commit_url)
+                        "raw_snyk_policy_url": raw_snyk_policy_url(commit_url)
                     })
 
     return result
 
 
-def raw_snyk_file_url(commit_url):
+def raw_snyk_policy_url(commit_url):
     commit_sha = commit_url[-40:]
     if commit_url.startswith("https://github.com"):
         # https://github.com/cyber-dojo/languages-start-points/commit/88366281011d1aa83c5db4280aa8a6daa0be8541
@@ -84,6 +84,10 @@ def excluded_flow(flow_name):
     if flow_name == "production-promotion":
         return True
     elif flow_name == "aws-snyk-scan":
+        return True
+    elif flow_name == "aws-beta-synk-vuln-ages":
+        return True
+    elif flow_name == "aws-prod-synk-vuln-ages":
         return True
     else:
         return False

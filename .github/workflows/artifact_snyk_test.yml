@@ -29,8 +29,8 @@ on:
         description: "Artifact commit URL"
         required: true
         type: string
-      raw_snyk_file_url:
-        description: "Url of snyk policy file in commit for artifact"
+      raw_snyk_policy_url:
+        description: "URL of snyk policy file (in commit for artifact)"
         required: true
         type: string
       kosli_env:
@@ -45,7 +45,10 @@ on:
         description: "Name of Kosli trail to attest evidence in"
         required: true
         type: string
-
+      kosli_cat:
+        description: "Name of custom attestion type"
+        required: true
+        type: string
 
 env:
   KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
@@ -56,6 +59,39 @@ env:
 
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      trail_created_at: ${{ steps.set-trail-created-at.outputs.trail_created_at }}
+    steps:
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
+
+      - name: Create Kosli flow
+        run:
+          kosli create flow "${{ inputs.kosli_flow }}"
+            --description="Holds snyk vulnerability, severities, ages, and policies for Artifacts destined for, or running in, the '${{ inputs.kosli_env }}' Environment"
+            --use-empty-template
+
+      - name: Begin Kosli trail (idempotent)
+        run:
+          kosli begin trail "${{ inputs.kosli_trail }}"
+            --flow="${{ inputs.kosli_flow }}"
+
+      - name: Get Trail creation timestamp
+        id: set-trail-created-at
+        run: |
+          kosli get trail "${{ inputs.kosli_trail }}" \
+            --flow="${{ inputs.kosli_flow }}" \
+            --output=json > trail.json
+
+          trail_created_at="$(jq .created_at trail.json)"
+
+          echo "trail_created_at=${trail_created_at}" >> ${GITHUB_OUTPUT}
+
+
   find-snyk-vulns:
     runs-on: ubuntu-latest
     outputs:
@@ -111,7 +147,7 @@ jobs:
 
       - name: Get the real .snyk file
         run: |
-          curl "${{ inputs.raw_snyk_file_url }}" > "${SNYK_POLICY_FILENAME}"
+          curl "${{ inputs.raw_snyk_policy_url }}" > "${SNYK_POLICY_FILENAME}"
           cat "${SNYK_POLICY_FILENAME}"
 
       - name: Combine vulns in sarif and snyk policy file info
@@ -135,37 +171,44 @@ jobs:
 
   attest-no-snyk-vulns:
     if: ${{ needs.find-snyk-vulns.outputs.vulns == '[]' }}
-    needs: find-snyk-vulns
+    needs: [ setup, find-snyk-vulns ]
     runs-on: ubuntu-latest
     env:
       ATTESTATION_DATA_FILENAME: custom.json
       KOSLI_FLOW: "${{ inputs.kosli_flow }}"
       KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
+      TRAIL_CREATED_AT: "${{ needs.setup.outputs.trail_created_at }}"
     steps:
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
-      # - name: Attest artifact to Kosli
-      #   run:
-      #     kosli attest artifact "${{ inputs.artifact_name }}"
-      #       --fingerprint="${{ inputs.artifact_fingerprint }}"
-      #       --name=artifact
+      - name: Attest artifact to Kosli
+        run:
+          kosli attest artifact "${{ inputs.artifact_name }}"
+            --fingerprint="${{ inputs.artifact_fingerprint }}"
+            --name=artifact
 
-      # - name: Create custom attestation json file
-      #   run:
-      #     jq
-      #       --arg severity none
-      #       --arg expires  ???
-      #       '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
+      - name: Create file containing custom attestation data
+        run:
+          jq
+            --arg severity   none
+            --arg url        ''
+            --arg expires    WHAT-HERE
+            --arg first_seen "${TRAIL_CREATED_AT}"
+            '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
+
+      - name: Print custom attestation data
+        run:
+          cat "${ATTESTATION_DATA_FILENAME}"
 
       # - name: Attest custom to Kosli
       #   run:
       #     kosli attest custom "${{ inputs.artifact_name }}"
-      #       --type="${{ inputs.kosli_flow }}"
+      #       --type="${{ inputs.kosli_cat }}"
       #       --fingerprint="${{ inputs.artifact_fingerprint }}"
-      #       --name=none
+      #       --name=artifact.none
       #       --attestation-data="${ATTESTATION_DATA_FILENAME}"
 
       - name: Attest evidence to Kosli
@@ -175,19 +218,20 @@ jobs:
           echo ${{ inputs.repo_name }}
           echo ${{ inputs.git_commit }}
           echo ${{ inputs.commit_url }}
-          echo ${{ inputs.raw_snyk_file_url }}
+          echo ${{ inputs.raw_snyk_policy_url }}
           echo ${{ inputs.kosli_env }}
           echo ${{ inputs.kosli_flow }}
 
 
   attest-snyk-vulns:
     if: ${{ needs.find-snyk-vulns.outputs.vulns != '[]' }}
-    needs: find-snyk-vulns
+    needs: [ setup, find-snyk-vulns ]
     runs-on: ubuntu-latest
     env:
       ATTESTATION_DATA_FILENAME: custom.json
       KOSLI_FLOW: "${{ inputs.kosli_flow }}"
       KOSLI_TRAIL: "${{ inputs.kosli_trail }}"
+      TRAIL_CREATED_AT: "${{ needs.setup.outputs.trail_created_at }}"
     strategy:
       matrix:
         include: ${{ fromJSON(needs.find-snyk-vulns.outputs.vulns) }}
@@ -197,23 +241,29 @@ jobs:
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
-      # - name: Attest artifact to Kosli
-      #   run:
-      #     kosli attest artifact "${{ inputs.artifact_name }}"
-      #       --fingerprint="${{ inputs.artifact_fingerprint }}"
-      #       --name=artifact
+      - name: Attest artifact to Kosli
+        run:
+          kosli attest artifact "${{ inputs.artifact_name }}"
+            --fingerprint="${{ inputs.artifact_fingerprint }}"
+            --name=artifact
 
-      - name: Create custom attestation json file
+      - name: Create file containing custom attestation data
         run:
           jq
-            --arg severity "${{ matrix.snyk_severity }}"
-            --arg expires  "${{ matrix.snyk_expires }}"
+            --arg severity   "${{ matrix.snyk_severity }}"
+            --arg url        "${{ matrix.snyk_url }}"
+            --arg expires    "${{ matrix.snyk_expires }}"
+            --arg first_seen "${TRAIL_CREATED_AT}"
             '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
+
+      - name: Print custom attestation data
+        run:
+          cat "${ATTESTATION_DATA_FILENAME}"
 
       # - name: Attest custom to Kosli
       #   run:
       #     kosli attest custom "${{ inputs.artifact_name }}"
-      #       --type="${{ inputs.kosli_flow }}"
+      #       --type="${{ inputs.kosli_cat }}"
       #       --fingerprint="${{ inputs.artifact_fingerprint }}"
       #       --name="artifact.${{ matrix.snyk_id }}"
       #       --attestation-data="${ATTESTATION_DATA_FILENAME}"
@@ -225,7 +275,7 @@ jobs:
           echo ${{ inputs.repo_name }}
           echo ${{ inputs.git_commit }}
           echo ${{ inputs.commit_url }}
-          echo ${{ inputs.raw_snyk_file_url }}
+          echo ${{ inputs.raw_snyk_policy_url }}
           echo ${{ inputs.kosli_env }}
           echo ${{ inputs.kosli_flow }}
           echo ${{ matrix.snyk_id }}

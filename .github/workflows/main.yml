@@ -7,12 +7,16 @@ on:
   #  - cron: '0 8 * * *'
 
 jobs:
+
+    # - name: Create custom attestation type
+
   trigger-aws-beta:
     needs: []
     uses: ./.github/workflows/env_snyk_test.yml
     with:
       kosli_env: aws-beta
       kosli_flow: aws-beta-synk-vuln-ages
+      kosli_cat: aws-beta-synk-vuln-ages
     secrets:
       snyk_token:      ${{ secrets.SNYK_TOKEN }}
       kosli_api_token: ${{ secrets.KOSLI_API_TOKEN }}
@@ -23,6 +27,7 @@ jobs:
   #   with:
   #     kosli_env: aws-prod
   #     kosli_flow: aws-prod-synk-vuln-ages
+  #     kosli_cat: aws-prod-synk-vuln-ages
   #   secrets:
   #     snyk_token:      ${{ secrets.SNYK_TOKEN }}
   #     kosli_api_token: ${{ secrets.KOSLI_API_TOKEN }}
