@@ -85,7 +85,7 @@ jobs:
 
       - name: Set empty .snyk policy file
         run:
-          echo '' > "${SNYK_POLICY_FILENAME}"
+          echo > "${SNYK_POLICY_FILENAME}"
 
       - name: Run Snyk container test
         env:
@@ -109,12 +109,9 @@ jobs:
           cat "${SNYK_POLICY_FILENAME}"
 
       - name: Combine vulns in sarif and snyk policy file info
-        run:
+        run: |
           ./bin/filter_sarif.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > snyk-ids.json
-
-      # - name: Simulate running snyk and extracting json from sarif file
-      #   run:
-      #     cp ./fake-data/snyk-${{ inputs.repo_name }}.json snyk-ids.json
+          jq . snyk-ids.json
 
       - name: Merge artifact json into each snyk vuln json
         run: |
@@ -177,6 +174,7 @@ jobs:
 
       # Create flow
       # Begin trail
+      # Get starting date/time of trail
       # Attest artifact
       # Attest custom
 
