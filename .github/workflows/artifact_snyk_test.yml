@@ -194,11 +194,11 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg id         none
-            --arg severity   none
-            --arg url        ''
-            --arg expires    '1970-01-01 00:00:00.000000+00:00'
-            --arg first_seen "${FIRST_SEEN}"
+            --arg     id         none
+            --arg     severity   none
+            --arg     url        ''
+            --arg     expires    '1970-01-01 00:00:00.000000+00:00'
+            --argjson first_seen ${FIRST_SEEN}
             '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
 
       - name: Print custom attestation data
@@ -257,11 +257,11 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg id         "${{ matrix.snyk_id }}"
-            --arg severity   "${{ matrix.snyk_severity }}"
-            --arg url        "${{ matrix.snyk_url }}"
-            --arg expires    "${{ matrix.snyk_expires }}"
-            --arg first_seen "${FIRST_SEEN}"
+            --arg     id         "${{ matrix.snyk_id }}"
+            --arg     severity   "${{ matrix.snyk_severity }}"
+            --arg     url        "${{ matrix.snyk_url }}"
+            --arg     expires    "${{ matrix.snyk_expires }}"
+            --argjson first_seen ${FIRST_SEEN}
             '$ARGS.named' <<< '{}' > "${ATTESTATION_DATA_FILENAME}"
 
       - name: Print custom attestation data
