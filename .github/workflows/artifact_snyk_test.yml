@@ -170,9 +170,6 @@ jobs:
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
-      # Create flow
-      # Begin trail
-      # Get starting date/time of trail
       # Attest artifact
       # Attest custom
 
@@ -201,9 +198,6 @@ jobs:
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
-      # Create flow
-      # Begin trail
-      # Get starting date/time of trail
       # Attest artifact
       # Attest custom
 
