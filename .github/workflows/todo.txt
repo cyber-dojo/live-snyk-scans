@@ -18,6 +18,8 @@ env_snyk_test.yml
 
 artifact_snyk_test.yml
 
+      0. NOTE: get-checkout is required for kosli-begin-trail!
+      
       1. The attested data should include the snyk version number.
          Could add that in the combine_snyk.yml if it is inside the sarif file.
          If not, do an explicit [snyk --version]

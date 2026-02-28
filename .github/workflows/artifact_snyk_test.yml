@@ -64,6 +64,10 @@ jobs:
     outputs:
       trail_created_at: ${{ steps.set-trail-created-at.outputs.trail_created_at }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
         with:
