@@ -75,7 +75,7 @@ jobs:
       raw_snyk_policy_url:  ${{ matrix.raw_snyk_policy_url }}
       kosli_env:            ${{ inputs.kosli_env }}
       kosli_flow:           ${{ inputs.kosli_flow }}
-      kosli_trail:          ${{ matrix.artifact_fingerprint }}
+      kosli_trail:          ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
       kosli_cat:            ${{ inputs.kosli_cat }}
     secrets:
       snyk_token:      ${{ secrets.snyk_token }}
