@@ -54,6 +54,8 @@ env:
 jobs:
   find-snyk-vulns:
     runs-on: ubuntu-latest
+    outputs:
+      vulns: ${{ steps.set-vulns.outputs.vulns }}
     permissions:
       id-token: write
       contents: write
@@ -114,6 +116,7 @@ jobs:
           jq . snyk-ids.json
 
       - name: Merge artifact json into each snyk vuln json
+        id: set-vulns
         run: |
           artifact="$(jq \
             --compact-output \
@@ -121,46 +124,46 @@ jobs:
             --arg kosli_flow           "${{ inputs.kosli_flow           }}" \
             '. += $ARGS.named' <<< '{}')"
             
-          jq --compact-output "map(. + ${artifact})" snyk-ids.json > vulns
-
-          jq . vulns
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ hashFiles('vulns') }}
-          path: vulns
-
-
-  collect-snyk-vulns:
-    needs: find-snyk-vulns
-    runs-on: ubuntu-latest
-    env:
-      ARTIFACT_FINGERPRINT: ${{ inputs.artifact_fingerprint }}
-      KOSLI_ENV:            ${{ inputs.kosli_env }}
-    outputs:
-      vulns: ${{ steps.set-vulns.outputs.vulns }}
-    steps:
-      - uses: actions/download-artifact@v4
-
-      - id: set-vulns
-        run: |
-          cat */vulns | jq --compact-output --slurp add > all-vulns
-          
-          vulns="$(jq \
-            --compact-output \
-            --arg af "${ARTIFACT_FINGERPRINT}" \
-            --arg ke "${KOSLI_ENV}"            \
-            'map(. | select(.artifact_fingerprint == $af and .kosli_env == $ke))' \
-            all-vulns)"
-          
+          vulns="$(jq --compact-output "map(. + ${artifact})" snyk-ids.json)"
+          jq . <<< "${vulns}"
           echo "vulns=${vulns}" >> $GITHUB_OUTPUT
 
-          jq . <<< "${vulns}"
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ hashFiles('vulns') }}
+      #     path: vulns
+
+
+  # collect-snyk-vulns:
+  #   needs: find-snyk-vulns
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     ARTIFACT_FINGERPRINT: ${{ inputs.artifact_fingerprint }}
+  #     KOSLI_ENV:            ${{ inputs.kosli_env }}
+  #   outputs:
+  #     vulns: ${{ steps.set-vulns.outputs.vulns }}
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+
+  #     - id: set-vulns
+  #       run: |
+  #         cat */vulns | jq --compact-output --slurp add > all-vulns
+          
+  #         vulns="$(jq \
+  #           --compact-output \
+  #           --arg af "${ARTIFACT_FINGERPRINT}" \
+  #           --arg ke "${KOSLI_ENV}"            \
+  #           'map(. | select(.artifact_fingerprint == $af and .kosli_env == $ke))' \
+  #           all-vulns)"
+          
+  #         echo "vulns=${vulns}" >> $GITHUB_OUTPUT
+
+  #         jq . <<< "${vulns}"
 
 
   attest-no-snyk-vulns:
-    if: ${{ needs.collect-snyk-vulns.outputs.vulns == '[]' }}
-    needs: collect-snyk-vulns
+    if: ${{ needs.find-snyk-vulns.outputs.vulns == '[]' }}
+    needs: find-snyk-vulns
     runs-on: ubuntu-latest
     steps:
       - name: Setup Kosli CLI
@@ -184,12 +187,12 @@ jobs:
 
 
   attest-snyk-vulns:
-    if: ${{ needs.collect-snyk-vulns.outputs.vulns != '[]' }}
-    needs: collect-snyk-vulns
+    if: ${{ needs.find-snyk-vulns.outputs.vulns != '[]' }}
+    needs: find-snyk-vulns
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include: ${{ fromJSON(needs.collect-snyk-vulns.outputs.vulns) }}
+        include: ${{ fromJSON(needs.find-snyk-vulns.outputs.vulns) }}
     steps:
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
