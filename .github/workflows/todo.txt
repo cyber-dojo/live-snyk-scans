@@ -24,9 +24,11 @@ artifact_snyk_test.yml
       - Create flow
       - Begin trail
       - Get starting date/time of trail
-      Do them in env_snyk_test.yml in the command
-         artifacts="$(make artifacts | jq --raw-output --compact-output .)"
+      Do them in env_snyk_test.yml somehow.
       Needs to be per artifact, because trail is named from the fingerprint.
+      In the command?
+         artifacts="$(make artifacts | jq --raw-output --compact-output .)"
+      At the start of artifact_snyk_test.yml and make available as global variable?
 
       2. Embed the date/time of the trail inside the json for each artifact
       twice, once as a string in human readable format, again as a number 
