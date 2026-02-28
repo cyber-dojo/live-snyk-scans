@@ -36,6 +36,10 @@ artifact_snyk_test.yml
 
       3. Do I only need --args for artifact_fingerprint and kosli_env ?
          The other --args are inputs to the workflow.
+         Do I need even those?
+         Find out with jq expression 
+         'map(. | select(.artifact_fingerprint != $af or .kosli_env != $ke))'
+         and see if it selects anything.
 
       - name: Merge artifact json into each snyk vuln json
         run: |
