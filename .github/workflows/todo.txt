@@ -19,7 +19,7 @@ env_snyk_test.yml
 artifact_snyk_test.yml
 
       0. NOTE: get-checkout is required for kosli-begin-trail!
-      
+
       1. The attested data should include the snyk version number.
          Could add that in the combine_snyk.yml if it is inside the sarif file.
          If not, do an explicit [snyk --version]
@@ -31,8 +31,3 @@ artifact_snyk_test.yml
       2. The code in combine_snyk.py should create TWO expiry dates.
          Once as a string in human readable format, again as a number 
          in a form suitable for jq rule comparing with now.
-         
-      - name: Combine vulns in sarif and snyk policy file info
-        run: |
-          ./bin/combine_snyk.py "${SNYK_SARIF_FILENAME}" "${SNYK_POLICY_FILENAME}" > snyk-ids.json
-          jq . snyk-ids.json

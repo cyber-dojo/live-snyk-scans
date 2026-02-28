@@ -223,7 +223,7 @@ jobs:
           echo ${{ inputs.raw_snyk_policy_url }}
           echo ${{ inputs.kosli_env }}
           echo ${{ inputs.kosli_flow }}
-          echo ${TRAIL_CREATED_AT}
+          echo ${FIRST_SEEN}
 
 
   attest-snyk-vulns:
@@ -290,4 +290,4 @@ jobs:
           echo ${{ matrix.snyk_url }}
           echo ${{ matrix.snyk_severity }}
           echo ${{ matrix.snyk_expires }}
-          echo ${TRAIL_CREATED_AT}
+          echo ${FIRST_SEEN}
