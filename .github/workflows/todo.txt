@@ -1,14 +1,21 @@
 
 env_snyk_test.yml
 
-      For release, remove use of fake-data
-
+      1. For release, remove use of fake-data
       - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
         id: set-artifacts
         run: |
           # FAKE getting snapshot from kosli_env so we only do 1 snyk-container-test
           artifacts="$(jq --compact-output . ./fake-data/artifacts-${{ inputs.kosli_env }}.json)"
           echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}          
+
+      2. For release, comment in id: of step using real data
+      - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
+        #id: set-artifacts
+        run: |
+          artifacts="$(make artifacts | jq --raw-output --compact-output .)"
+
+      3. Pass kosli_trail into artifact_snyk_test.yml as input argument.
 
 
 artifact_snyk_test.yml
@@ -25,8 +32,9 @@ artifact_snyk_test.yml
       twice, once as a string in human readable format, again as a number 
       in a form suitable for jq rule comparing with now.
 
+      3. Do I only need --args for artifact_fingerprint and kosli_env ?
+         The other --args are inputs to the workflow.
 
-      3. Can I only need --args for artifact_fingerprint and kosli_env ?
       - name: Merge artifact json into each snyk vuln json
         run: |
           artifact="$(jq \
