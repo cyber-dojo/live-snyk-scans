@@ -1,0 +1,22 @@
+name: Live Snyk Test aws-prod
+
+on:
+  #workflow_dispatch:
+  push:
+  #schedule: # At 08:00 every day
+  #  - cron: '0 8 * * *'
+
+jobs:
+
+    # - name: Create custom attestation type
+
+  scan-aws-prod:
+    needs: []
+    uses: ./.github/workflows/env_snyk_test.yml
+    with:
+      kosli_env: aws-prod
+      kosli_flow: aws-prod-synk-vuln-ages
+      kosli_cat: aws-prod-synk-vuln-ages
+    secrets:
+      snyk_token:      ${{secrets.SNYK_TOKEN}}
+      kosli_api_token: ${{secrets.KOSLI_API_TOKEN}}

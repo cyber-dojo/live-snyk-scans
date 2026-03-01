@@ -2,7 +2,7 @@
 main.yml
       
       1. Create custom attestation types
-      
+
 
 env_snyk_test.yml
 
@@ -23,16 +23,17 @@ env_snyk_test.yml
 
 artifact_snyk_test.yml
 
-      0. NOTE: get-checkout is required for kosli-begin-trail!
+      1. Now snyk-id is embedded in trail-name 
+         what should the custom-attestaton --name be?
+         artifact.snyk_container_test?
+         use cat name?
 
-      1. The attested data should include the snyk version number.
-         Could add that in the combine_snyk.yml if it is inside the sarif file.
-         If not, do an explicit [snyk --version]
+      NOTE: get-checkout is required for kosli-begin-trail!
 
-      2. Embed the date/time of the trail inside the json for each artifact
+      NOTE: I am assuming that if there are multiple custom-attestations 
+            on a trail, then any single red one will make the artifact red.
+
+      ?. Embed the date/time of the trail inside the json for each artifact
       TWICE, once as a string in human readable format, again as a number 
       in a form suitable for jq rule comparing with now.
 
-      2. The code in combine_snyk.py should create TWO expiry dates.
-         Once as a string in human readable format, again as a number 
-         in a form suitable for jq rule comparing with now.

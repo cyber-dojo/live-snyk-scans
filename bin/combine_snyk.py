@@ -35,8 +35,7 @@ if __name__ == "__main__":  # pragma: no cover
                 'severity': severity.lower(),
                 'url': url,
                 'expires': epoch_start,
-                'expires_human': epoch_start,
-                'expires_timestamp': epoch_start.timestamp()
+                'expires_ts': epoch_start.timestamp()
             }
 
     # Overwrite specific vulnerability expiry dates if found in snyk policy file (yaml)
@@ -46,10 +45,7 @@ if __name__ == "__main__":  # pragma: no cover
     ignore = snyk_data.get('ignore', {})
     for id in ignore:
         if id in vulns:
-            expires = ignore[id][0]['*']['expires']
-            vulns[id]['expires'] = expires
-            vulns[id]['expires_human'] = expires
-            vulns[id]['expires_timetamp'] = dt(expires).timestamp()
+            vulns[id]['expires'] = ignore[id][0]['*']['expires']
 
     flat = []
     for id, values in vulns.items():
@@ -58,8 +54,7 @@ if __name__ == "__main__":  # pragma: no cover
             'snyk_severity': values['severity'],
             'snyk_url': values['url'],
             'snyk_expires': values['expires'],
-            'snyk_expires_human': values['expires_human'],
-            'snyk_expires_timestamp': values['expires_timestamp'],
+            'snyk_expires_ts': dt(values['expires']).timestamp()
         })
 
     print(json.dumps(flat, default=str))
