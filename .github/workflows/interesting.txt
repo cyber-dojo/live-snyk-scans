@@ -28,5 +28,13 @@ o) You need separate cats for vulns in beta vs vulns in prod
    You also need a way to prevent the cats for beta affecting 
    the compliance in prod and vice-versa.
 
+MISC
+
 o) git-checkout is required for kosli-begin-trail
    Is that intentional?
+
+o) Not obvious what the evaluation of the jq rules is.
+
+o) Not obvious, from docs, what the exit-code of kosli-attest-custom is.
+   If the attestation is false, it does not exit non-zero 
+   (which is useful).
