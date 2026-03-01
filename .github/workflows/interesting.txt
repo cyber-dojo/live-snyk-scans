@@ -22,6 +22,11 @@ o) You do the snyk scan WITHOUT using a .snyk policy file
    A simple python program merges any expiry timestamps 
    for matching vulns into the cat json data.
 
+o) The snyk-container-test returns a non-zero exit code when it finds
+   vulnerabilities. This must not cause the step/job to fail, since:
+   - we want to do an attestation for each vuln
+   - we are using strategy:matrix and failures ripples to other jobs
+
 o) You need separate cats for vulns in beta vs vulns in prod
    if you want the rules to be different. Eg a vuln can remain
    green in beta longer than in prod.
@@ -33,8 +38,9 @@ MISC
 o) git-checkout is required for kosli-begin-trail
    Is that intentional?
 
-o) Not obvious what the evaluation of the jq rules is.
+o) Not obvious what the evaluation of the jq rules is in the attestation.
 
 o) Not obvious, from docs, what the exit-code of kosli-attest-custom is.
    If the attestation is false, it does not exit non-zero 
-   (which is useful).
+   (which is correct and useful), but this is not stated explicitly
+   in the commands page on https://docs.kosli.com
