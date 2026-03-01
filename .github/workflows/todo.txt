@@ -1,12 +1,14 @@
 
 aws-beta.yml
       
-      1. Write tests for custom attestation types.
-
-      2. Create env-policies and attach to Envs.
-
-      3. Once attached to Env call aws-beta.yml instead of snyk job in 
-         main workflow of all service repos.
+      1. Call aws-beta.yml instead of snyk job in main workflow of all service repos.
+         Should this attest to the build trail?
+         The gate is not the trail compliance, it is the deployment gate to aws-beta.
+         So it is reasonable that it deploys to a different trail.
+         And that fits with the idea of fixing synk vulns being othogonal
+         (as much as possible) to deploying to aws-beta.
+      2. Create env-policy for aws-beta and attach to aws-beta.
+      3. Write tests for custom attestation types.
 
 env_snyk_test.yml
 

@@ -39,12 +39,14 @@ on:
         type: string
       kosli_flow:
         description: "Name of Kosli flow to attest evidence in"
-        required: true
+        required: false
         type: string
+        default: ${{inputs.kosli_env}}-synk-vuln-ages
       kosli_cat:
         description: "Name of custom attestion type"
-        required: true
+        required: false
         type: string
+        default: ${{inputs.kosli_env}}-synk-vuln-ages
 
 env:
   KOSLI_DEBUG:   ${{vars.KOSLI_DEBUG}}   # true/false
@@ -54,7 +56,18 @@ env:
 
 jobs:
 
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show defaulted inputs
+        run: |
+          echo "kosli_flow=":${inputs.kosli_flow}:"
+          echo "kosli_cat=":${inputs.kosli_cat}:"
+          exit 42
+
+
   find-snyk-vulns:
+    needs: debug
     runs-on: ubuntu-latest
     outputs:
       vulns: ${{steps.set-vulns.outputs.vulns}}
