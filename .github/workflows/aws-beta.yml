@@ -9,7 +9,7 @@ on:
 env:
   KOSLI_ENV: aws-beta
   KOSLI_FLOW: aws-beta-synk-vuln-ages
-  KOSLI_ATTESTATION_TYPE_NAME: aws-beta-synk-vuln-ages
+  KOSLI_CUSTOM_ATTESTATION_TYPE: aws-beta-synk-vuln-ages
   KOSLI_POLICY_NAME: aws-beta-synk-vuln-ages
   KOSLI_POLICY_FILEPATH: aws-beta-synk-vuln-ages.yml
 
@@ -17,6 +17,10 @@ jobs:
 
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      kosli_env: ${KOSLI_ENV}
+      kosli_flow: ${KOSLI_FLOW}
+      kosli_cat: ${KOSLI_CUSTOM_ATTESTATION_TYPE}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +34,7 @@ jobs:
       - name: Create custom-attestation-type
         run:
           kosli create attestation-type 
-            ${KOSLI_ATTESTATION_TYPE_NAME}
+            ${KOSLI_CUSTOM_ATTESTATION_TYPE}
             
       - name: Create environment-policy
         run: |
@@ -49,9 +53,9 @@ jobs:
     needs: setup
     uses: ./.github/workflows/env_snyk_test.yml
     with:
-      kosli_env: ${{env.KOSLI_ENV}}
-      kosli_flow: ${{env.KOSLI_FLOW}}
-      kosli_cat: ${{env.KOSLI_ATTESTATION_TYPE_NAME}}
+      kosli_env: ${{need.setup.outputs.kosli_env}}
+      kosli_flow: ${{needs.setup.outputs.kosli_flow}}
+      kosli_cat: ${{needs.setup.outputs.kosli_cat}}
     secrets:
       snyk_token:      ${{secrets.SNYK_TOKEN}}
       kosli_api_token: ${{secrets.KOSLI_API_TOKEN}}
