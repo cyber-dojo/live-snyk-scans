@@ -23,11 +23,6 @@ env_snyk_test.yml
 
 artifact_snyk_test.yml
 
-      1. Now snyk-id is embedded in trail-name 
-         what should the custom-attestaton --name be?
-         artifact.snyk_container_test?
-         use cat name?
-
       NOTE: get-checkout is required for kosli-begin-trail!
 
       NOTE: I am assuming that if there are multiple custom-attestations 
