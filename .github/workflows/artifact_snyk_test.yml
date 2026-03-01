@@ -70,11 +70,11 @@ jobs:
         with:
           fetch-depth: 1
 
-      # - name: Load docker image from registry
-      #   uses: cyber-dojo/load-image-from-registry@main
-      #   with:
-      #     image_name: ${{inputs.artifact_name}}
-      #     aws_rolename: gh_actions_live_snyk_scans
+      - name: Load docker image from registry
+        uses: cyber-dojo/load-image-from-registry@main
+        with:
+          image_name: ${{inputs.artifact_name}}
+          aws_rolename: gh_actions_live_snyk_scans
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master
