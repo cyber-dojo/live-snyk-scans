@@ -28,9 +28,6 @@ env_snyk_test.yml
 
 
 artifact_snyk_test.yml
-
-      1. Add severity into trail-name?
-      2. Add days-left into trail-name?
             
       ?. Embed the date/time of the trail inside the json for each artifact
       TWICE, once as a string in human readable format, again as a number 
