@@ -10,6 +10,9 @@ commit dcb067129404b68dd05b8db6135d630687b4b64d
 
 Note commit is different to one that actually built the artifact
 
+Does a custom-attestation that is non-compliant break the pipeline?
+Not obvious what the evaluation of the rules is.
+Need to tweak the jq rules to get it to fail.
 
 aws-beta.yml
       
