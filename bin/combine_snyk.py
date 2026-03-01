@@ -7,7 +7,7 @@ import yaml
 
 def dt(dts):
     date_format = '%Y-%m-%dT%H:%M:%S.%fZ'
-    return datetime.strptime(dts, date_format)
+    return datetime.datetime.strptime(dts, date_format)
 
 
 if __name__ == "__main__":  # pragma: no cover
