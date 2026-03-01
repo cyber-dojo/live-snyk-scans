@@ -27,3 +27,6 @@ o) You need separate cats for vulns in beta vs vulns in prod
    green in beta longer than in prod.
    You also need a way to prevent the cats for beta affecting 
    the compliance in prod and vice-versa.
+
+o) git-checkout is required for kosli-begin-trail
+   Is that intentional?

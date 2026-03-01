@@ -4,23 +4,21 @@ Try with fake saver replaced with artifact that has some vulns. Eg web
 https://staging.app.kosli.com/cyber-dojo/flows/aws-snyk-scan/trails/web-e08d60d6c3ee4c66b5e27647608ac07fcecaa09bfa81c0b100748b1fdfcb7c36
 Ensure parallel jobs do not interfere with each other.
 
+name   244531986313.dkr.ecr.eu-central-1.amazonaws.com/web:6023a15
+digest e08d60d6c3ee4c66b5e27647608ac07fcecaa09bfa81c0b100748b1fdfcb7c36
+commit dcb067129404b68dd05b8db6135d630687b4b64d
+
+Note commit is different to one that actually built the artifact
+
+
 aws-beta.yml
       
-      0. Try calling this instead of snyk job in main workflow of each service repo.
+      1. Write tests for custom attestation types.
 
-      1. Create custom attestation types. This is aws-beta
+      2. Create env-policies and attach to Envs.
 
-  jq '(.severity == "none") or
-      (now < .expires_ts) or
-      ((.severity == "low")      and ((now - .first_seen_ts) < 5*24*60*60)) or
-      ((.severity == "medium")   and ((now - .first_seen_ts) < 2*24*60*60)) or
-      ((.severity == "high")     and ((now - .first_seen_ts) < 1*24*60*60)) or
-      ((.severity == "critical") and ((now - .first_seen_ts) < 0*24*60*60))' <<< $x
-
-      Could drop the last clause (.severity == "critical")
-      Writes tests for these.
-
-      2. Create env-policy
+      3. Once attached to Env call aws-beta.yml instead of snyk job in 
+         main workflow of all service repos.
 
 env_snyk_test.yml
 
@@ -40,8 +38,6 @@ env_snyk_test.yml
 
 
 artifact_snyk_test.yml
-
-      NOTE: git-checkout is required for kosli-begin-trail!
 
       1. Add severity into trail-name?
       2. Add days-left into trail-name?
