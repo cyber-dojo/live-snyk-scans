@@ -229,11 +229,6 @@ jobs:
         with:
           version: ${{vars.KOSLI_CLI_VERSION}}
 
-      # DROP
-      - name: Check trail name has matrix.snyk_id
-        run:
-          echo "KOSLI_TRAIL=:${KOSLI_TRAIL}:"
-
       - name: Begin Kosli trail (idempotent)
         run:
           kosli begin trail ${KOSLI_TRAIL}
@@ -256,11 +251,11 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg     version       ${{matrix.snyk_version}}
-            --arg     id            ${{matrix.snyk_id}}
-            --arg     severity      ${{matrix.snyk_severity}}
-            --arg     url           ${{matrix.snyk_url}}
-            --arg     expires       ${{matrix.snyk_expires}}
+            --arg     version       "${{matrix.snyk_version}}"
+            --arg     id            "${{matrix.snyk_id}}"
+            --arg     severity      "${{matrix.snyk_severity}}"
+            --arg     url           "${{matrix.snyk_url}}"
+            --arg     expires       "${{matrix.snyk_expires}}"
             --argjson expires_ts    ${{matrix.snyk_expires_ts}}
             --argjson first_seen_ts ${FIRST_SEEN_TS}
             '$ARGS.named' <<< '{}' > ${ATTESTATION_DATA_FILENAME}
