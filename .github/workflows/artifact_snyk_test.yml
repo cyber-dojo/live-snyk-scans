@@ -124,7 +124,7 @@ jobs:
           JSON_FILENAME: vulns.json
         run: |
           ./bin/combine_snyk.py ${SNYK_SARIF_FILENAME} ${SNYK_POLICY_FILENAME} > ${JSON_FILENAME}                  
-          vulns="$(jq --compact-output ${JSON_FILENAME})"
+          vulns="$(jq --compact-output . ${JSON_FILENAME})"
           jq . <<< "${vulns}"
           echo "vulns=${vulns}" >> $GITHUB_OUTPUT
 
