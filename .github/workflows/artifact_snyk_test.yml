@@ -82,7 +82,7 @@ jobs:
           snyk-version: v1.1300.2
 
       - name: Output snyk version
-        id: version
+        id: set-version
         run:
           echo "version=$(snyk --version)" >> ${GITHUB_OUTPUT}
 
