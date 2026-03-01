@@ -6,17 +6,52 @@ on:
   #schedule: # At 08:00 every day
   #  - cron: '0 8 * * *'
 
+env:
+  KOSLI_ENV: aws-beta
+  KOSLI_FLOW: aws-beta-synk-vuln-ages
+  KOSLI_ATTESTATION_TYPE_NAME: aws-beta-synk-vuln-ages
+  KOSLI_POLICY_NAME: aws-beta-synk-vuln-ages
+  KOSLI_POLICY_FILEPATH: aws-beta-synk-vuln-ages.yml
+
 jobs:
 
-    # - name: Create custom attestation type
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{vars.KOSLI_CLI_VERSION}}
+
+      - name: Create custom-attestation-type
+        run:
+          kosli create attestation-type 
+            ${KOSLI_ATTESTATION_TYPE_NAME}
+            
+      - name: Create environment-policy
+        run: |
+          echo TODO
+          #kosli create policy 
+          #  ${KOSLI_POLICY_NAME}
+          #  ${KOSLI_POLICY_FILEPATH}
+
+      - name: Attach custom-attestation-type to Environment
+        run: |
+          echo TODO
+          #kosli attach-policy ${KOSLI_POLICY_NAME}
+          #  --environment ${KOSLI_ENV}
 
   scan-aws-beta:
-    needs: []
+    needs: setup
     uses: ./.github/workflows/env_snyk_test.yml
     with:
-      kosli_env: aws-beta
-      kosli_flow: aws-beta-synk-vuln-ages
-      kosli_cat: aws-beta-synk-vuln-ages
+      kosli_env: ${{env.KOSLI_ENV}}
+      kosli_flow: ${{env.KOSLI_FLOW}}
+      kosli_cat: ${{env.KOSLI_ATTESTATION_TYPE_NAME}}
     secrets:
       snyk_token:      ${{secrets.SNYK_TOKEN}}
       kosli_api_token: ${{secrets.KOSLI_API_TOKEN}}

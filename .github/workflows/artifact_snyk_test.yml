@@ -192,13 +192,13 @@ jobs:
         run:
           cat ${ATTESTATION_DATA_FILENAME}
 
-      # - name: Attest custom to Kosli
-      #   run:
-      #     kosli attest custom ${{inputs.artifact_name}}
-      #       --attestation-data ${ATTESTATION_DATA_FILENAME}
-      #       --fingerprint ${{inputs.artifact_fingerprint}}
-      #       --name artifact.${{inputs.kosli_cat}}
-      #       --type ${{inputs.kosli_cat}}
+      - name: Attest custom to Kosli
+        run:
+          kosli attest custom ${{inputs.artifact_name}}
+            --attestation-data ${ATTESTATION_DATA_FILENAME}
+            --fingerprint ${{inputs.artifact_fingerprint}}
+            --name artifact.snyk-vuln
+            --type ${{inputs.kosli_cat}}
 
       - name: Attest evidence to Kosli
         run: |
@@ -275,13 +275,13 @@ jobs:
         run:
           cat ${ATTESTATION_DATA_FILENAME}
 
-      # - name: Attest custom to Kosli
-      #   run:
-      #     kosli attest custom ${{inputs.artifact_name}}
-      #       --attestation-data ${ATTESTATION_DATA_FILENAME}
-      #       --fingerprint ${{inputs.artifact_fingerprint}}
-      #       --name artifact.${{inputs.kosli_cat}}
-      #       --type ${{inputs.kosli_cat}}
+      - name: Attest custom to Kosli
+        run:
+          kosli attest custom ${{inputs.artifact_name}}
+            --attestation-data ${ATTESTATION_DATA_FILENAME}
+            --fingerprint ${{inputs.artifact_fingerprint}}
+            --name artifact.snyk-vuln
+            --type ${{inputs.kosli_cat}}
 
       - name: Attest evidence to Kosli
         run: |
