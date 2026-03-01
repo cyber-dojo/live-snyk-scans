@@ -28,6 +28,8 @@ artifact_snyk_test.yml
       NOTE: I am assuming that if there are multiple custom-attestations 
             on a trail, then any single red one will make the artifact red.
 
+      1. See if downloading docker image is required.
+      
       ?. Embed the date/time of the trail inside the json for each artifact
       TWICE, once as a string in human readable format, again as a number 
       in a form suitable for jq rule comparing with now.

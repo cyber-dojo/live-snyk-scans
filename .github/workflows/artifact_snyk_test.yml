@@ -179,7 +179,7 @@ jobs:
             --arg     severity      none
             --arg     url           ''
             --arg     expires       ''
-            ==argjson expires_ts    0
+            --argjson expires_ts    0
             --argjson first_seen_ts ${FIRST_SEEN_TS}
             '$ARGS.named' <<< '{}' > ${ATTESTATION_DATA_FILENAME}
 
