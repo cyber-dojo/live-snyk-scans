@@ -5,9 +5,9 @@ import sys
 import json
 import yaml
 
-def dt(dts):
-    date_format = '%Y-%m-%dT%H:%M:%S.%fZ'
-    return datetime.datetime.strptime(dts, date_format)
+# def dt(dt):
+#     date_format = '%Y-%m-%d %H:%M:%S'
+#     return datetime.datetime.strptime(str(dt), date_format)
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -54,7 +54,7 @@ if __name__ == "__main__":  # pragma: no cover
             'snyk_severity': values['severity'],
             'snyk_url': values['url'],
             'snyk_expires': values['expires'],
-            'snyk_expires_ts': dt(values['expires']).timestamp()
+            'snyk_expires_ts': values['expires'].timestamp()
         })
 
     print(json.dumps(flat, default=str))
