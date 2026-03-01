@@ -61,8 +61,8 @@ jobs:
     steps:
       - name: Show defaulted inputs
         run: |
-          echo "kosli_flow=":${inputs.kosli_flow}:"
-          echo "kosli_cat=":${inputs.kosli_cat}:"
+          echo "kosli_flow=":${{inputs.kosli_flow}}:"
+          echo "kosli_cat=":${{inputs.kosli_cat}}:"
           exit 42
 
 
