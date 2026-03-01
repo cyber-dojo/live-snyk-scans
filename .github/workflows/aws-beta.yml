@@ -23,9 +23,9 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      kosli_env: ${KOSLI_ENV}
-      kosli_flow: ${KOSLI_FLOW}
-      kosli_cat: ${KOSLI_CUSTOM_ATTESTATION_TYPE}
+      kosli_env: ${{steps.set-env.outputs.env}}
+      kosli_flow: ${{steps.set-flow.outputs.flow}}
+      kosli_cat: ${{steps.set-cat.outputs.cat}}
     env:
       KOSLI_API_TOKEN: ${{secrets.kosli_api_token}}
     steps:
@@ -55,6 +55,22 @@ jobs:
           echo TODO
           #kosli attach-policy ${KOSLI_POLICY_NAME}
           #  --environment ${KOSLI_ENV}
+
+      - name: Set env output
+        id: set-env
+        run:
+          echo "env=${KOSLI_ENV}" >> ${GITHUB_OUTPUT}
+
+      - name: Set flow output
+        id: set-flow
+        run:
+          echo "flow=${KOSLI_FLOW}" >> ${GITHUB_OUTPUT}
+
+      - name: Set cat output
+        id: set-cat
+        run:
+          echo "cat=${KOSLI_CUSTOM_ATTESTATION_TYPE}" >> ${GITHUB_OUTPUT}
+
 
   scan-aws-beta:
     needs: setup
