@@ -199,17 +199,6 @@ jobs:
             --name artifact.snyk-vuln
             --type ${{inputs.kosli_cat}}
 
-      # - name: Attest evidence to Kosli
-      #   run: |
-      #     echo ${{ inputs.artifact_name }}
-      #     echo ${{ inputs.artifact_fingerprint }}
-      #     echo ${{ inputs.repo_name }}
-      #     echo ${{ inputs.git_commit }}
-      #     echo ${{ inputs.commit_url }}
-      #     echo ${{ inputs.raw_snyk_policy_url }}
-      #     echo ${{ inputs.kosli_env }}
-      #     echo ${{ inputs.kosli_flow }}
-
 
   attest-snyk-vulns:
     needs: find-snyk-vulns
@@ -282,20 +271,3 @@ jobs:
             --fingerprint ${{inputs.artifact_fingerprint}}
             --name artifact.snyk-vuln
             --type ${{inputs.kosli_cat}}
-
-      # - name: Attest evidence to Kosli
-      #   run: |
-      #     echo ${{ inputs.artifact_name }}
-      #     echo ${{ inputs.artifact_fingerprint }}
-      #     echo ${{ inputs.repo_name }}
-      #     echo ${{ inputs.git_commit }}
-      #     echo ${{ inputs.commit_url }}
-      #     echo ${{ inputs.raw_snyk_policy_url }}
-      #     echo ${{ inputs.kosli_env }}
-      #     echo ${{ inputs.kosli_flow }}
-      #     echo ${{ matrix.snyk_id }}
-      #     echo ${{ matrix.snyk_url }}
-      #     echo ${{ matrix.snyk_severity }}
-      #     echo ${{ matrix.snyk_expires }}
-      #     echo ${{ matrix.snyk_expires_ts }}
-      #     echo ${FIRST_SEEN_TS}
