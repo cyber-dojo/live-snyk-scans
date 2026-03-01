@@ -141,7 +141,6 @@ jobs:
       ATTESTATION_DATA_FILENAME: custom.json
       KOSLI_API_TOKEN: ${{secrets.kosli_api_token}}
       KOSLI_FLOW: ${{inputs.kosli_flow}}
-      KOSLI_TRAIL: ${{inputs.repo_name}}-${{inputs.artifact_fingerprint}}-none
     steps:
       - uses: actions/checkout@v4
         with:
@@ -151,6 +150,13 @@ jobs:
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{vars.KOSLI_CLI_VERSION}}
+
+      - name: Set trail name
+        run: |
+          repo_name="${{inputs.repo_name}}"
+          digest="${{inputs.artifact_fingerprint}}"
+          snyk_id="${{inputs.snyk_id}}"
+          echo "KOSLI_TRAIL=${repo_name}-${digest:0:10}-none" >> "${GITHUB_ENV}"
 
       - name: Begin Kosli trail (idempotent)
         run:
@@ -215,7 +221,6 @@ jobs:
       ATTESTATION_DATA_FILENAME: custom.json
       KOSLI_API_TOKEN: ${{secrets.kosli_api_token}}
       KOSLI_FLOW: ${{inputs.kosli_flow}}
-      KOSLI_TRAIL: ${{inputs.repo_name}}-${{inputs.artifact_fingerprint}}-${{matrix.snyk_id}}
     strategy:
       matrix:
         include: ${{fromJSON(needs.find-snyk-vulns.outputs.vulns)}}
@@ -228,6 +233,13 @@ jobs:
         uses: kosli-dev/setup-cli-action@v2
         with:
           version: ${{vars.KOSLI_CLI_VERSION}}
+
+      - name: Set trail name
+        run: |
+          repo_name="${{inputs.repo_name}}"
+          digest="${{inputs.artifact_fingerprint}}"
+          snyk_id="${{inputs.snyk_id}}"
+          echo "KOSLI_TRAIL=${repo_name}-${digest:0:10}-${snyk_id}" >> "${GITHUB_ENV}"
 
       - name: Begin Kosli trail (idempotent)
         run:
