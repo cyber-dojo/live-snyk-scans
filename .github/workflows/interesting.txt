@@ -1,0 +1,29 @@
+
+The basic idea is that
+1. We'd like to have fidelity at the vuln severity level.
+   A critical vuln should definitely be non-compliant immediately
+   (in a live scan) and prevent a deployment (in a gate).
+   But it seems reasonable that a low one should be handled differently.
+2. We would like the resolution of low level vulns and regular
+   feature development to be orthogonal in terms of branches/pr/etc.
+
+o) If the cat is in the Env-policy
+   then you have to do cat when there are NO vulns.
+
+o) If the cat is in the Env-policy
+   then the cat has to ALSO be made in the repos main workflow 
+   before the kosli-attest gate for the target environment 
+
+o) To know how long a vuln has not been fixed I am
+   using the Trail creation timestamp. 
+
+o) You do the snyk scan WITHOUT using a .snyk policy file 
+   so that all vulns are reported.
+   A simple python program merges any expiry timestamps 
+   for matching vulns into the cat json data.
+
+o) You need separate cats for vulns in beta vs vulns in prod
+   if you want the rules to be different. Eg a vuln can remain
+   green in beta longer than in prod.
+   You also need a way to prevent the cats for beta affecting 
+   the compliance in prod and vice-versa.

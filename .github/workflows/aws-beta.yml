@@ -44,11 +44,10 @@ jobs:
             ${KOSLI_CUSTOM_ATTESTATION_TYPE}
             --jq '(.severity == "none") or
                   (now < .expires_ts) or
-                  ((.severity == "low")      and ((now - .first_seen_ts) < 7*24*60*60)) or
-                  ((.severity == "medium")   and ((now - .first_seen_ts) < 5*24*60*60)) or
+                  ((.severity == "low")      and ((now - .first_seen_ts) < 5*24*60*60)) or
+                  ((.severity == "medium")   and ((now - .first_seen_ts) < 2*24*60*60)) or
                   ((.severity == "high")     and ((now - .first_seen_ts) < 1*24*60*60)) or
                   ((.severity == "critical") and ((now - .first_seen_ts) < 0*24*60*60))'
-
             
       - name: Create environment-policy
         run: |

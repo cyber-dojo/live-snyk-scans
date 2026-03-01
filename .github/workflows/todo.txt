@@ -1,8 +1,26 @@
 
-main.yml
-      
-      1. Create custom attestation types
 
+Try with fake saver replaced with artifact that has some vulns. Eg web
+https://staging.app.kosli.com/cyber-dojo/flows/aws-snyk-scan/trails/web-e08d60d6c3ee4c66b5e27647608ac07fcecaa09bfa81c0b100748b1fdfcb7c36
+Ensure parallel jobs do not interfere with each other.
+
+aws-beta.yml
+      
+      0. Try calling this instead of snyk job in main workflow of each service repo.
+
+      1. Create custom attestation types. This is aws-beta
+
+  jq '(.severity == "none") or
+      (now < .expires_ts) or
+      ((.severity == "low")      and ((now - .first_seen_ts) < 5*24*60*60)) or
+      ((.severity == "medium")   and ((now - .first_seen_ts) < 2*24*60*60)) or
+      ((.severity == "high")     and ((now - .first_seen_ts) < 1*24*60*60)) or
+      ((.severity == "critical") and ((now - .first_seen_ts) < 0*24*60*60))' <<< $x
+
+      Could drop the last clause (.severity == "critical")
+      Writes tests for these.
+
+      2. Create env-policy
 
 env_snyk_test.yml
 
@@ -23,16 +41,12 @@ env_snyk_test.yml
 
 artifact_snyk_test.yml
 
-      NOTE: get-checkout is required for kosli-begin-trail!
-
-      NOTE: I am assuming that if there are multiple custom-attestations 
-            on a trail, then any single red one will make the artifact red.
-
-      0. when there are no vulns, the snyk-version is not being set in the cat.
+      NOTE: git-checkout is required for kosli-begin-trail!
 
       1. Add severity into trail-name?
+      2. Add days-left into trail-name?
 
-      2. See if downloading docker image is required.
+      3. See if downloading docker image is required.
             
       ?. Embed the date/time of the trail inside the json for each artifact
       TWICE, once as a string in human readable format, again as a number 
