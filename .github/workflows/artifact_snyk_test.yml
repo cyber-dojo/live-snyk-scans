@@ -154,7 +154,7 @@ jobs:
 
       - name: Begin Kosli trail (idempotent)
         run:
-          kosli begin trail ${{KOSLI_TRAIL}
+          kosli begin trail ${KOSLI_TRAIL}
 
       - name: Get trail info
         run:
