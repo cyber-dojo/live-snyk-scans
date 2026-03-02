@@ -6,6 +6,21 @@
         url="https://app.kosli.com/${KOSLI_ORG}/flows/${KOSLI_FLOW}/trails/${KOSLI_TRAIL}"
         echo "[Kosli Trail](${url})" > "${GITHUB_STEP_SUMMARY}"
 
+    Add --annotate flags to custom-attestations so key values are easy to see.
+      
+      days_since_first_seen="$(jq 
+        '(now - .first_seen_ts) / (24*60*60) | floor' 
+        <<< '{"first_seen_ts":1772222992}'
+      )"
+      
+      days_till_expires="$(jq
+        '(.expiry_ts - now) / (24*60*60) | floor'
+        <<< '{"expiry_ts:1772582992}'
+      )"
+
+      better is days_till_ignore_expires
+      meaning json field becomes ignore_expires_ts
+
 aws-beta.yml
       
       1. Create env-policy for aws-beta and attach to aws-beta.
