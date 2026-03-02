@@ -274,5 +274,5 @@ jobs:
           kosli attest custom ${{inputs.artifact_name}}
             --attestation-data ${ATTESTATION_DATA_FILENAME}
             --fingerprint ${{inputs.artifact_fingerprint}}
-            --name artifact.${{matrix.snyk_vuln}}
+            --name artifact.${{matrix.snyk_id}}
             --type ${{inputs.kosli_cat}}
