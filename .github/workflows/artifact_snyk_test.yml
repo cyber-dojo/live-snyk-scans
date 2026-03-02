@@ -73,7 +73,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: cyber-dojo/live-snyk-scans
           fetch-depth: 1
 
       - name: Load docker image from registry
