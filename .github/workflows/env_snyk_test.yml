@@ -41,8 +41,9 @@ jobs:
       - name: Create Kosli flow
         run:
           kosli create flow ${{inputs.kosli_flow}}
-            --description "Holds snyk vulnerability, severities, ages, and policies for Artifacts destined for, or running in, the '${{inputs.kosli_env}}' Environment"
+            --description "Holds snyk vulnerabilityfor Artifacts destined for, or running in, the '${{inputs.kosli_env}}' Environment"
             --use-empty-template
+
 
   find-artifacts:
     needs: setup
