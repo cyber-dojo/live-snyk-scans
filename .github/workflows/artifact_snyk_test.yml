@@ -140,6 +140,7 @@ jobs:
   attest-no-snyk-vulns:
     needs: find-snyk-vulns
     if: ${{needs.find-snyk-vulns.outputs.vulns == '[]'}}
+    if: ${{github.ref == 'refs/heads/main'}}
     runs-on: ubuntu-latest
     env:
       ATTESTATION_DATA_FILENAME: custom.json
@@ -211,6 +212,7 @@ jobs:
   attest-snyk-vulns:
     needs: find-snyk-vulns
     if: ${{needs.find-snyk-vulns.outputs.vulns != '[]'}}
+    if: ${{github.ref == 'refs/heads/main'}}
     runs-on: ubuntu-latest
     env:
       ATTESTATION_DATA_FILENAME: custom.json
