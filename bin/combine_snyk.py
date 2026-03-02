@@ -46,7 +46,7 @@ if __name__ == "__main__":  # pragma: no cover
     ignore = snyk_data.get('ignore', {})
     for id in ignore:
         if id in vulns:
-            vuln = vuln[id]
+            vuln = vulns[id]
             expires = ignore[id][0]['*']['expires']
             vuln['ignore_expires'] = expires
             vuln['ignore_expires_ts'] = expires.timestamp()
