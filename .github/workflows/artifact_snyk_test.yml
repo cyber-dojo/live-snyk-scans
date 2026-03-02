@@ -33,6 +33,10 @@ on:
         description: "URL of snyk policy file (in commit for artifact)"
         required: true
         type: string
+      aws_rolename:
+        description: "AWS rolename used to download artifact from its registry"
+        required: false
+        default: "gh_actions_live_snyk_scans"
       kosli_env:
         description: "Name of Kosli environment the artifact is running in"
         required: true
@@ -76,7 +80,7 @@ jobs:
         uses: cyber-dojo/load-image-from-registry@main
         with:
           image_name: ${{inputs.artifact_name}}
-          aws_rolename: gh_actions_live_snyk_scans
+          aws_rolename: ${{inputs.aws_rolename}}
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master
