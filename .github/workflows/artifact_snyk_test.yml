@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       vulns: ${{steps.set-vulns.outputs.vulns}}
-      snyk_version: ${{steps.set-version.outputs.version}}
+      version: ${{steps.set-version.outputs.version}}
     permissions:
       id-token: write
       contents: write
@@ -82,11 +82,6 @@ jobs:
         uses: snyk/actions/setup@master
         with:
           snyk-version: v1.1300.2
-
-      - name: Output snyk version
-        id: set-version
-        run:
-          echo "version=$(snyk --version)" >> ${GITHUB_OUTPUT}
 
       - name: Fail if the sarif file already exists
         run: |
@@ -120,7 +115,7 @@ jobs:
           curl "${{inputs.raw_snyk_policy_url}}" > ${SNYK_POLICY_FILENAME}
           cat ${SNYK_POLICY_FILENAME}
 
-      - name: Combine vulns in sarif and snyk policy file info
+      - name: Combine vulns in sarif file with snyk policy file
         id: set-vulns
         env:
           JSON_FILENAME: vulns.json
@@ -128,7 +123,12 @@ jobs:
           ./bin/combine_snyk.py ${SNYK_SARIF_FILENAME} ${SNYK_POLICY_FILENAME} > ${JSON_FILENAME}                  
           vulns="$(jq --compact-output . ${JSON_FILENAME})"
           jq . <<< "${vulns}"
-          echo "vulns=${vulns}" >> $GITHUB_OUTPUT
+          echo "vulns=${vulns}" >> ${GITHUB_OUTPUT}
+
+      - name: Output snyk version
+        id: set-version
+        run:
+          echo "version=$(snyk --version)" >> ${GITHUB_OUTPUT}
 
 
   attest-no-snyk-vulns:
@@ -178,7 +178,7 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg     version       "${{needs.find-snyk-vulns.outputs.snyk_version}}"
+            --arg     version       "${{needs.find-snyk-vulns.outputs.version}}"
             --arg     id            none
             --arg     severity      none
             --arg     url           ''
@@ -251,7 +251,7 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg     version       "${{needs.find-snyk-vulns.outputs.snyk_version}}"
+            --arg     version       "${{needs.find-snyk-vulns.outputs.version}}"
             --arg     id            "${{matrix.snyk_id}}"
             --arg     severity      "${{matrix.snyk_severity}}"
             --arg     url           "${{matrix.snyk_url}}"
