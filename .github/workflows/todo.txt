@@ -1,11 +1,22 @@
          
-    0. A failing snyk-test will not stop web's pipeline.
-       Only the sdlc-gate will see the failure.
+Conclusion:
+The build workflow and the live-env-scan workflows are sufficiently
+different that attempting to unify them into a single reusable workflow 
+is not a good idea. This leaves open the question of how you do 
+the live-env-scan workflow in such a way that its attestations are 
+not required by the kosli-assert-gate. For now I will assume the 
+policy will be tied to a specific Flow. eg like this:
 
-    0. Can we make web's (eg) main.yml attest to its own flow/trail?
-       I think this would mean the env-policy for aws-beta could be based 
-       solely on the custom-attestation-name. It would appear in the build
-       trail before deployment, and in the live-snyk-scan after deployment.
+  _schema: https://kosli.com/schemas/policy/environment/v1
+  # https://docs.kosli.com/getting_started/policies/
+  artifacts:
+    attestations:
+      - if: ${{ flow.name == "aws-snyk-scan" }}
+        name: '*'
+        type: snyk
+
+
+------------------------------------------------------------------------
 
     1. Add steps to write to github summary, eg from kosli-begin-trail
     - name: Write Trail URL to GitHub Step Summary
@@ -19,11 +30,6 @@
     4. You could add a snyk key for the age of the ignore entry (based on now)
        This could have a jq rule varying on severity.
 
-
-combine_snyk.py 
-
-      Add json entry for .snyk ignore entry that is for a vuln 
-      that the artifact does not have.
 
 aws-beta.yml
       
@@ -48,9 +54,6 @@ env_snyk_test.yml
 
 
 artifact_snyk_test.yml
-
-      0. git-checkout on line 76 is needed for bin/combine_snyk.py 
-         But when called from web repo, this checks out web.
 
       1. Call artifact_snyk_test.yml instead of snyk job in main workflow of 
          all service repos.
