@@ -75,7 +75,7 @@ jobs:
           echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}          
 
 
-  artifact-snyk:
+  artifact-snyk-test:
     needs: find-artifacts
     strategy:
       matrix:
