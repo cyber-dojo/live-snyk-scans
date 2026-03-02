@@ -271,6 +271,7 @@ jobs:
       - name: Attest custom to Kosli
         run:
           kosli attest custom ${{inputs.artifact_name}}
+            --annotate snyk_URL=${{matrix.snyk_url}}
             --attestation-data ${ATTESTATION_DATA_FILENAME}
             --fingerprint ${{inputs.artifact_fingerprint}}
             --name artifact.${{matrix.snyk_severity}}-${{matrix.snyk_id}}
