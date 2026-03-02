@@ -36,6 +36,7 @@ on:
       aws_rolename:
         description: "AWS rolename used to download artifact from its registry"
         required: false
+        type: string
         default: "gh_actions_live_snyk_scans"
       kosli_env:
         description: "Name of Kosli environment the artifact is running in"
