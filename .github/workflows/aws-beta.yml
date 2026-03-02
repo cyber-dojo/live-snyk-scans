@@ -43,10 +43,11 @@ jobs:
           kosli create attestation-type 
             ${KOSLI_CUSTOM_ATTESTATION_TYPE}
             --jq '24*60*60 as $day |
+                  .severity == "none" as $no_vulnerability |
                   now - .first_seen_ts as $age |
-                  now < .expires_ts as $expired |
-                  (.severity == "none") or
-                  $expired or
+                  now < .ignore_expires_ts as $ignore_till_expires |
+                  $no_vulnerability or
+                  $ignore_till_expires or
                   ((.severity == "low")      and ($age < 5 * $day)) or
                   ((.severity == "medium")   and ($age < 2 * $day)) or
                   ((.severity == "high")     and ($age < 1 * $day)) or

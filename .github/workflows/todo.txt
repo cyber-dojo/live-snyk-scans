@@ -20,6 +20,11 @@
 
     3. jq has ability to convert timestamp to/from iso8601 date string.
 
+    4. You could add a snyk key for the age of the ignore entry 
+       This could either be based on the created_at entry in the .snyk 
+       or it could be based on the trail .first_seen_at 
+
+
 combine_snyk.py 
 
       Add json entry for .snyk ignore entry that is for a vuln 
