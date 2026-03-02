@@ -1,22 +1,13 @@
-  
+         
+    0. A failing snyk-test will not stop web's pipeline.
+       Only the sdlc-gate will see the failure.
+
     1. Add steps to write to github summary, eg from kosli-begin-trail
     - name: Write Trail URL to GitHub Step Summary
       shell: bash
       run: |
         url="https://app.kosli.com/${KOSLI_ORG}/flows/${KOSLI_FLOW}/trails/${KOSLI_TRAIL}"
         echo "[Kosli Trail](${url})" > "${GITHUB_STEP_SUMMARY}"
-
-    2. Add --annotate flags to custom-attestations so key values are easy to see.
-      
-      days_since_first_seen="$(jq 
-        '(now - .first_seen_ts) / (24*60*60) | floor' 
-        <<< '{"first_seen_ts":1772222992}'
-      )"
-      
-      days_till_ignore_expires="$(jq
-        '(.ignore_expires_ts - now) / (24*60*60) | floor'
-        <<< '{"ignore_expires_ts:1772582992}'
-      )"
 
     3. jq has ability to convert timestamp to/from iso8601 date string.
 
@@ -53,6 +44,9 @@ env_snyk_test.yml
 
 artifact_snyk_test.yml
 
+      0. git-checkout on line 76 is needed for bin/combine_snyk.py 
+         But when called from web repo, this checks out web.
+
       1. Call artifact_snyk_test.yml instead of snyk job in main workflow of 
          all service repos.
          Should this attest to the build trail?
@@ -67,3 +61,19 @@ artifact_snyk_test.yml
       TWICE, once as a string in human readable format, again as a number 
       in a form suitable for jq rule comparing with now.
 
+
+
+
+-----------------------------------------------
+
+    ?Add --annotate flags to custom-attestations so key values are easy to see.
+      
+      days_since_first_seen="$(jq 
+        '(now - .first_seen_ts) / (24*60*60) | floor' 
+        <<< '{"first_seen_ts":1772222992}'
+      )"
+      
+      days_till_ignore_expires="$(jq
+        '(.ignore_expires_ts - now) / (24*60*60) | floor'
+        <<< '{"ignore_expires_ts:1772582992}'
+      )"
