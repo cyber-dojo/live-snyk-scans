@@ -28,14 +28,15 @@ if __name__ == "__main__":  # pragma: no cover
             short_text = rule['shortDescription']['text']
             #cvssv3_base_score = rule['properties']['cvssv3_baseScore'] # eg 6.8 can be None
             #security_severity = rule['properties']['security-severity'] # eg 6.8 can be None
-            severity = short_text.split(' ')[0]  # eg "Medium"
-            assert severity in ["Critical", "High", "Medium", "Low"]
+            severity = short_text.split(' ')[0].lower()  # eg "medium"
+            assert severity in ["critical", "high", "medium", "low"]
 
             vulns[id] = {
-                'severity': severity.lower(),
+                'severity': severity,
                 'url': url,
-                'expires': epoch_start,
-                'expires_ts': epoch_start.timestamp()
+                'ignore_expires': epoch_start,
+                'ignore_expires_ts': epoch_start.timestamp(),
+                "ignore_expires_exists": False
             }
 
     # Overwrite specific vulnerability expiry dates if found in snyk policy file (yaml)
@@ -45,7 +46,13 @@ if __name__ == "__main__":  # pragma: no cover
     ignore = snyk_data.get('ignore', {})
     for id in ignore:
         if id in vulns:
-            vulns[id]['expires'] = ignore[id][0]['*']['expires']
+            vuln = vuln[id]
+            expires = ignore[id][0]['*']['expires']
+            vuln['ignore_expires'] = expires
+            vuln['ignore_expires_ts'] = expires.timestamp()
+            vuln['ignore_expires_exists'] = True
+        # else:
+        #   .snyk has ignore entry for vuln that artifact does not have
 
     flat = []
     for id, values in vulns.items():
@@ -53,8 +60,9 @@ if __name__ == "__main__":  # pragma: no cover
             'snyk_id': id,
             'snyk_severity': values['severity'],
             'snyk_url': values['url'],
-            'snyk_expires': values['expires'],
-            'snyk_expires_ts': values['expires'].timestamp()
+            'snyk_ignore_expires': values['ignore_expires'],
+            'snyk_ignore_expires_ts': values['ignore_expires_ts'],
+            'snyk_ignore_expires_exists': values['ignore_expires_exists']
         })
 
     print(json.dumps(flat, default=str))

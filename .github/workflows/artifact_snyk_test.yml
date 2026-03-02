@@ -178,14 +178,16 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg     version       "${{needs.find-snyk-vulns.outputs.version}}"
-            --arg     id            none
-            --arg     severity      none
-            --arg     url           ''
-            --arg     expires       ''
-            --argjson expires_ts    0
-            --argjson first_seen_ts ${FIRST_SEEN_TS}
-            '$ARGS.named' <<< '{}' > ${ATTESTATION_DATA_FILENAME}
+            --arg     version                "${{needs.find-snyk-vulns.outputs.version}}"
+            --arg     id                      none
+            --arg     severity                none
+            --arg     url                     ''
+            --arg     ignore_expires_exists   false
+            --arg     ignore_expires          ''
+            --argjson ignore_expires_ts       0
+            --argjson first_seen_ts           ${FIRST_SEEN_TS}
+            '$ARGS.named' <<< '{}' 
+            > ${ATTESTATION_DATA_FILENAME}
 
       - name: Print custom attestation data
         run:
@@ -251,14 +253,16 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
-            --arg     version       "${{needs.find-snyk-vulns.outputs.version}}"
-            --arg     id            "${{matrix.snyk_id}}"
-            --arg     severity      "${{matrix.snyk_severity}}"
-            --arg     url           "${{matrix.snyk_url}}"
-            --arg     expires       "${{matrix.snyk_expires}}"
-            --argjson expires_ts    ${{matrix.snyk_expires_ts}}
-            --argjson first_seen_ts ${FIRST_SEEN_TS}
-            '$ARGS.named' <<< '{}' > ${ATTESTATION_DATA_FILENAME}
+            --arg     version              "${{needs.find-snyk-vulns.outputs.version}}"
+            --arg     id                   "${{matrix.snyk_id}}"
+            --arg     severity             "${{matrix.snyk_severity}}"
+            --arg     url                  "${{matrix.snyk_url}}"
+            --arg     ignore_expires_exists ${{matrix.snyk_ignore_expires_exists}}
+            --arg     ignore_expires       "${{matrix.snyk_ignore_expires}}"
+            --argjson ignore_expires_ts     ${{matrix.snyk_ignore_expires_ts}}
+            --argjson first_seen_ts         ${FIRST_SEEN_TS}
+            '$ARGS.named' <<< '{}' 
+            > ${ATTESTATION_DATA_FILENAME}
 
       - name: Print custom attestation data
         run:
