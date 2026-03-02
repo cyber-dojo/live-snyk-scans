@@ -157,8 +157,7 @@ jobs:
         run: |
           repo_name=${{inputs.repo_name}}
           digest=${{inputs.artifact_fingerprint}}
-          snyk_id=none
-          echo "KOSLI_TRAIL=${repo_name}-${digest:0:10}-${snyk_id}" >> "${GITHUB_ENV}"
+          echo "KOSLI_TRAIL=${repo_name}-${digest}" >> "${GITHUB_ENV}"
 
       - name: Begin Kosli trail (idempotent)
         run:
@@ -231,9 +230,7 @@ jobs:
         run: |
           repo_name=${{inputs.repo_name}}
           digest=${{inputs.artifact_fingerprint}}
-          snyk_id=${{matrix.snyk_id}}
-          severity=${{matrix.snyk_severity}}
-          echo "KOSLI_TRAIL=${repo_name}-${digest:0:10}-${severity}-${snyk_id}" >> "${GITHUB_ENV}"
+          echo "KOSLI_TRAIL=${repo_name}-${digest}" >> "${GITHUB_ENV}"
 
       - name: Begin Kosli trail (idempotent)
         run:
