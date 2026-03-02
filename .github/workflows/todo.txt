@@ -20,9 +20,8 @@
 
     3. jq has ability to convert timestamp to/from iso8601 date string.
 
-    4. You could add a snyk key for the age of the ignore entry 
-       This could either be based on the created_at entry in the .snyk 
-       or it could be based on the trail .first_seen_at 
+    4. You could add a snyk key for the age of the ignore entry (based on now)
+       This could have a jq rule varying on severity.
 
 
 combine_snyk.py 
