@@ -2,6 +2,11 @@
     0. A failing snyk-test will not stop web's pipeline.
        Only the sdlc-gate will see the failure.
 
+    0. Can we make web's (eg) main.yml attest to its own flow/trail?
+       I think this would mean the env-policy for aws-beta could be based 
+       solely on the custom-attestation-name. It would appear in the build
+       trail before deployment, and in the live-snyk-scan after deployment.
+
     1. Add steps to write to github summary, eg from kosli-begin-trail
     - name: Write Trail URL to GitHub Step Summary
       shell: bash
