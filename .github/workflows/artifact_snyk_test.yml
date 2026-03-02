@@ -33,23 +33,21 @@ on:
         description: "URL of snyk policy file (in commit for artifact)"
         required: true
         type: string
-      aws_rolename:
-        description: "AWS rolename used to download artifact from its registry"
-        required: false
-        type: string
-        default: "gh_actions_live_snyk_scans"
       kosli_env:
         description: "Name of Kosli environment the artifact is running in"
         required: true
         type: string
       kosli_flow:
         description: "Name of Kosli flow to attest evidence in"
-        required: true
+        required: false
         type: string
+        default: ${{input.kosli_env}}-synk-vuln-ages
       kosli_cat:
         description: "Name of custom attestion type"
         required: true
         type: string
+        default: ${{input.kosli_env}}-synk-vuln-ages
+
 
 env:
   KOSLI_DEBUG:   ${{vars.KOSLI_DEBUG}}   # true/false
@@ -79,7 +77,7 @@ jobs:
         uses: cyber-dojo/load-image-from-registry@main
         with:
           image_name: ${{inputs.artifact_name}}
-          aws_rolename: ${{inputs.aws_rolename}}
+          aws_rolename: gh_actions_live_snyk_scans
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master
@@ -136,7 +134,7 @@ jobs:
 
   attest-no-snyk-vulns:
     needs: find-snyk-vulns
-    if: ${{github.ref == 'refs/heads/main' && needs.find-snyk-vulns.outputs.vulns == '[]'}}
+    if: ${{needs.find-snyk-vulns.outputs.vulns == '[]'}}
     runs-on: ubuntu-latest
     env:
       ATTESTATION_DATA_FILENAME: custom.json
@@ -206,7 +204,7 @@ jobs:
 
   attest-snyk-vulns:
     needs: find-snyk-vulns
-    if: ${{github.ref == 'refs/heads/main' && needs.find-snyk-vulns.outputs.vulns != '[]'}}
+    if: ${{needs.find-snyk-vulns.outputs.vulns != '[]'}}
     runs-on: ubuntu-latest
     env:
       ATTESTATION_DATA_FILENAME: custom.json

@@ -89,8 +89,6 @@ jobs:
       commit_url:           ${{matrix.commit_url}}
       raw_snyk_policy_url:  ${{matrix.raw_snyk_policy_url}}
       kosli_env:            ${{inputs.kosli_env}}
-      kosli_flow:           ${{inputs.kosli_env}}-synk-vuln-ages
-      kosli_cat:            ${{inputs.kosli_env}}-synk-vuln-ages
     secrets:
       snyk_token:      ${{secrets.snyk_token}}
       kosli_api_token: ${{secrets.kosli_api_token}}
