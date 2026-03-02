@@ -1,17 +1,15 @@
 
+      Add steps to write to github summary, eg from kosli-begin-trail
+    - name: Write Trail URL to GitHub Step Summary
+      shell: bash
+      run: |
+        url="https://app.kosli.com/${KOSLI_ORG}/flows/${KOSLI_FLOW}/trails/${KOSLI_TRAIL}"
+        echo "[Kosli Trail](${url})" > "${GITHUB_STEP_SUMMARY}"
+
 aws-beta.yml
       
-      1. Call aws-beta.yml instead of snyk job in main workflow of all service repos.
-         Should this attest to the build trail?
-         The gate is not the trail compliance, it is the deployment gate to aws-beta.
-         So it is reasonable that it deploys to a different trail.
-         And that fits with the idea of fixing synk vulns being othogonal
-         (as much as possible) to deploying to aws-beta.
-
-         Issue: Is there going to be an OIDC problem?
-
-      2. Create env-policy for aws-beta and attach to aws-beta.
-      3. Write tests for custom attestation types.
+      1. Create env-policy for aws-beta and attach to aws-beta.
+      2. Write tests for custom attestation types.
 
 env_snyk_test.yml
 
@@ -31,7 +29,17 @@ env_snyk_test.yml
 
 
 artifact_snyk_test.yml
-            
+
+      1. Call artifact_snyk_test.yml instead of snyk job in main workflow of 
+         all service repos.
+         Should this attest to the build trail?
+         The gate is not the trail compliance, it is the deployment gate to aws-beta.
+         So it is reasonable that it deploys to a different trail.
+         And that fits with the idea of fixing synk vulns being othogonal
+         (as much as possible) to deploying to aws-beta.
+         Issue: Is there going to be an OIDC problem?
+         Yes. Need to make it a composite action.
+
       ?. Embed the date/time of the trail inside the json for each artifact
       TWICE, once as a string in human readable format, again as a number 
       in a form suitable for jq rule comparing with now.

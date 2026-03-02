@@ -42,12 +42,15 @@ jobs:
         run:
           kosli create attestation-type 
             ${KOSLI_CUSTOM_ATTESTATION_TYPE}
-            --jq '(.severity == "none") or
-                  (now < .expires_ts) or
-                  ((.severity == "low")      and ((now - .first_seen_ts) < 3*24*60*60)) or
-                  ((.severity == "medium")   and ((now - .first_seen_ts) < 1*24*60*60)) or
-                  ((.severity == "high")     and ((now - .first_seen_ts) < 0*24*60*60)) or
-                  ((.severity == "critical") and ((now - .first_seen_ts) < 0*24*60*60))'
+            --jq '24*60*60 as $day |
+                  now - .first_seen_ts as $age |
+                  now < .expires_ts as $expired |
+                  (.severity == "none") or
+                  $expired or
+                  ((.severity == "low")      and ($age < 3 * $day)) or
+                  ((.severity == "medium")   and ($age < 1 * $day)) or
+                  ((.severity == "high")     and ($age < 0 * $day)) or
+                  ((.severity == "critical") and ($age < 0 * $day))'
             
       - name: Create environment-policy
         run: |
