@@ -1,11 +1,11 @@
 [
    {
-        "artifact_name": "244531986313.dkr.ecr.eu-central-1.amazonaws.com/runner:a5ac332",
-        "artifact_fingerprint": "9445aa8fac9fd42a13b404c1a9a23b1b59027d40b21be4ae01ed3ab4a9dc70f9",
+        "artifact_name": "244531986313.dkr.ecr.eu-central-1.amazonaws.com/runner:3b4139e",
+        "artifact_fingerprint": "f311d25bb8e1d960f2fef83cfaef6747902fa021db836c17fcb62c8199811fd8",
         "repo_name": "runner",
-        "git_commit": "a5ac3326558bdad4640e5d43f3756411cf924e99",
-        "commit_url": "https://github.com/cyber-dojo/runner/commit/a5ac3326558bdad4640e5d43f3756411cf924e99",
-        "raw_snyk_policy_url": "https://raw.githubusercontent.com/cyber-dojo/runner/a5ac3326558bdad4640e5d43f3756411cf924e99/.snyk"
+        "git_commit": "3b4139ed778087ec2ddfcd81096cc15134bbd654",
+        "commit_url": "https://github.com/cyber-dojo/runner/commit/3b4139ed778087ec2ddfcd81096cc15134bbd654",
+        "raw_snyk_policy_url": "https://raw.githubusercontent.com/cyber-dojo/runner/3b4139ed778087ec2ddfcd81096cc15134bbd654/.snyk"
     },
     {
         "artifact_name": "244531986313.dkr.ecr.eu-central-1.amazonaws.com/web:6023a15",
