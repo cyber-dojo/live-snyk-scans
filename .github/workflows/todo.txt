@@ -27,9 +27,12 @@ policy will be tied to a specific Flow. eg like this:
 
     3. jq has ability to convert timestamp to/from iso8601 date string.
 
-    4. You could add a snyk key for the age of the ignore entry (based on now)
+    4. You could add a snyk key for the age of the ignore entry?
+       (based on its created_at entry and jq'now')?
        This could have a jq rule varying on severity.
 
+    5. You can know if a vuln is a new one by checking if the 
+       trail exists before creating it.
 
 aws-beta.yml
       
