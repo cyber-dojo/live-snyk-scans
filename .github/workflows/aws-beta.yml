@@ -96,9 +96,9 @@ jobs:
     needs: setup
     uses: ./.github/workflows/env_snyk_test.yml
     with:
-      kosli_env:  ${{needs.setup.outputs.kosli_env}}
-      kosli_flow: ${{needs.setup.outputs.kosli_flow}}
-      kosli_cat:  ${{needs.setup.outputs.kosli_cat}}
+      kosli_env:  "${{needs.setup.outputs.kosli_env}}"
+      kosli_flow: "${{needs.setup.outputs.kosli_flow}}"
+      kosli_cat:  "${{needs.setup.outputs.kosli_cat}}"
     secrets:
       snyk_token:      ${{secrets.SNYK_TOKEN}}
       kosli_api_token: ${{secrets.KOSLI_API_TOKEN}}
