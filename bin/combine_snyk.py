@@ -43,16 +43,17 @@ if __name__ == "__main__":  # pragma: no cover
     with open(snyk_policy_filename) as snyk_file:
         snyk_data = yaml.safe_load(snyk_file)
 
-    ignore = snyk_data.get('ignore', {})
-    for id in ignore:
-        if id in vulns:
-            vuln = vulns[id]
-            expires = ignore[id][0]['*']['expires']
-            vuln['ignore_expires'] = expires
-            vuln['ignore_expires_ts'] = expires.timestamp()
-            vuln['ignore_expires_exists'] = True
-        # else:
-        #   .snyk has ignore entry for vuln that artifact does not have
+    if snyk_data:
+        ignore = snyk_data.get('ignore', {})
+        for id in ignore:
+            if id in vulns:
+                vuln = vulns[id]
+                expires = ignore[id][0]['*']['expires']
+                vuln['ignore_expires'] = expires
+                vuln['ignore_expires_ts'] = expires.timestamp()
+                vuln['ignore_expires_exists'] = True
+            # else:
+            #   .snyk has ignore entry for vuln that artifact does not have
 
     flat = []
     for id, values in vulns.items():
