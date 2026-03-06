@@ -41,21 +41,6 @@ aws-beta.yml
 
 env_snyk_test.yml
 
-      1. For release, remove use of fake-data
-      - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
-        id: set-artifacts
-        run: |
-          # FAKE getting snapshot from kosli_env so we only do 1 snyk-container-test
-          artifacts="$(jq --compact-output . ./fake-data/artifacts-${{ inputs.kosli_env }}.json)"
-          echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}          
-
-      2. For release, comment in id: of step using real data
-      - name: Generate JSON for each Artifact in KOSLI_ENV for following job's strategy:matrix:include
-        #id: set-artifacts
-        run: |
-          artifacts="$(make artifacts | jq --raw-output --compact-output .)"
-
-
 artifact_snyk_test.yml
 
       1. Call artifact_snyk_test.yml instead of snyk job in main workflow of 
