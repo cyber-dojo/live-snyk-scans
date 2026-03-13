@@ -1,0 +1,99 @@
+name: Live Snyk Test
+
+on:
+  #workflow_dispatch:
+  push:
+  #schedule: # At 08:00 every day
+  #  - cron: '0 8 * * *'
+
+env:
+  KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+  KOSLI_DEBUG:     ${{ vars.KOSLI_DEBUG }}          # true/false
+  KOSLI_DRY_RUN:   ${{ vars.KOSLI_DRY_RUN }}        # true/false
+  KOSLI_HOST:      ${{ vars.KOSLI_HOST }}           # https://app.kosli.com
+  KOSLI_ORG:       ${{ vars.KOSLI_ORG }}            # cyber-dojo
+
+jobs:
+  setup:
+    needs: []
+    runs-on: ubuntu-latest
+    outputs:
+      kosli_trail: ${{ steps.set-kosli-trail.outputs.kosli_trail }}
+    steps:
+      - name: Output kosli-trail
+        id: set-kosli-trail
+        run:
+          echo "kosli_trail=$(date +%Y-%m-%dT%H:%M:%S)" >> ${GITHUB_OUTPUT}
+
+
+  aws-beta-snyk-scan:
+    needs: [setup]
+    uses: ./.github/workflows/snyk_env_test.yml
+    with:
+      kosli_env:   aws-beta
+      kosli_trail: ${{ needs.setup.outputs.kosli_trail }}
+    secrets:
+      snyk_token:      ${{ secrets.SNYK_TOKEN }}
+      kosli_api_token: ${{ secrets.KOSLI_API_TOKEN }}
+
+
+  aws-beta-trail-names:
+    needs: [aws-beta-snyk-scan]
+    runs-on: ubuntu-latest
+    outputs:
+      current_trail:  ${{ steps.set-trail-names.outputs.current_trail }}
+      previous_trail: ${{ steps.set-trail-names.outputs.previous_trail }}
+    steps:
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
+
+      - name: Find most recent Trails in Flow aws-beta-all-snyk-vulns
+        id: set-trail-names
+        env:
+          KOSLI_FLOW:    aws-beta-all-snyk-vulns-TEST
+          JSON_FILENAME: trail.json
+        run: |
+          kosli list trails \
+            --output=json \
+            --page=1 \
+            --page-limit=2 > ${JSON_FILENAME}
+          current_trail="$(jq --raw-output '.data[0].name' ${JSON_FILENAME})"
+          echo current_trail="${current_trail}" >> ${GITHUB_OUTPUT}
+          trail_count="$(jq '.data | length' ${JSON_FILENAME})"
+          if [ "${trail_count}" != '1' ]; then
+            echo previous_trail="${current_trail}" >> ${GITHUB_OUTPUT}
+          else
+            previous_trail="$(jq --raw-output '.data[1].name' ${JSON_FILENAME})"
+            echo previous_trail="${previous_trail}" >> ${GITHUB_OUTPUT}
+          fi
+
+
+  aws-beta-new-snyk-vulns:
+    needs: [setup, aws-beta-trail-names]
+    runs-on: ubuntu-latest
+    if: ${{ needs.aws-beta-trail-names.outputs.current_trail != needs.aws-beta-trail-names.outputs.previous_trail }}
+    steps:
+      - name: Find new vulns by comparing previous_trail and current_trail
+        run:
+          echo TODO
+
+# and compares two trails to find new-vulns
+# and then attests to:
+#      KOSLI_FLOW: ${{ inputs.kosli_env }}-new-snyk-vulns
+#      KOSLI_TRAIL: ${{ inputs.repo_name }}-${{ inputs.kosli_fingerprint }}
+
+
+
+
+  # trigger-aws-prod:
+  #   needs: [setup]
+  #   uses: ./.github/workflows/env_snyk_test.yml
+  #   with:
+  #     kosli_env:   aws-prod
+  #     kosli_trail: ${{ needs.setup.outputs.kosli_trail }}
+  #   secrets:
+  #     snyk_token:      ${{ secrets.SNYK_TOKEN }}
+  #     kosli_api_token: ${{ secrets.KOSLI_API_TOKEN }}
+

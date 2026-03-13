@@ -1,0 +1,10 @@
+[
+    {
+        "snyk_id": "SNYK-A4",
+        "snyk_severity": "Medium"
+    },
+    {
+        "snyk_id": "SNYK-A7",
+        "snyk_severity": "Low"
+    }
+]
