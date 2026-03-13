@@ -23,7 +23,7 @@ jobs:
       - name: Output kosli-trail
         id: set-kosli-trail
         run:
-          echo "kosli_trail=$(date +%Y-%m-%dT%H:%M:%S)" >> ${GITHUB_OUTPUT}
+          echo "kosli_trail=$(date +%Y-%m-%dT%H.%M.%S)" >> ${GITHUB_OUTPUT}
 
 
   aws-beta-snyk-scan:
