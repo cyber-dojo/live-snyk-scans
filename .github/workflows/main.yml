@@ -62,7 +62,7 @@ jobs:
           current_trail="$(jq --raw-output '.data[0].name' ${JSON_FILENAME})"
           echo current_trail="${current_trail}" >> ${GITHUB_OUTPUT}
           trail_count="$(jq '.data | length' ${JSON_FILENAME})"
-          if [ "${trail_count}" != '1' ]; then
+          if [ "${trail_count}" == '1' ]; then
             echo previous_trail="${current_trail}" >> ${GITHUB_OUTPUT}
           else
             previous_trail="$(jq --raw-output '.data[1].name' ${JSON_FILENAME})"
@@ -93,6 +93,7 @@ jobs:
       - name: Find new vulns by comparing previous_trail and current_trail
         run:
           echo TODO
+
 
 # and compares two trails to find new-vulns
 # and then attests to:
