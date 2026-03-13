@@ -1,10 +1,12 @@
 [
     {
-        "snyk_id": "SNYK-A4",
-        "snyk_severity": "Medium"
+        "snyk_id": "SNYK-GOLANG-GITHUBCOMGOVIPERMAPSTRUCTUREV2-10558294",
+        "snyk_severity": "Medium",
+        "snyk_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMGOVIPERMAPSTRUCTUREV2-10558294"
     },
     {
-        "snyk_id": "SNYK-A7",
-        "snyk_severity": "Low"
+        "snyk_id": "SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804",
+        "snyk_severity": "Medium",
+        "snyk_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804"
     }
 ]
