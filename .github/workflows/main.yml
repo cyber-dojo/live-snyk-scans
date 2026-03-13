@@ -68,30 +68,20 @@ jobs:
             previous_trail="$(jq --raw-output '.data[1].name' ${JSON_FILENAME})"
             echo previous_trail="${previous_trail}" >> ${GITHUB_OUTPUT}
           fi
-          echo "current_trail=:${current_trail}:"
-          echo "previous_trail=:${previous_trail}:"
 
 
-  print-trail-names:
-    needs: [setup, aws-beta-trail-names]
+  aws-beta-new-snyk-vulns:
+    needs: [aws-beta-trail-names]
     runs-on: ubuntu-latest
+    if: ${{ needs.aws-beta-trail-names.outputs.current_trail != needs.aws-beta-trail-names.outputs.previous_trail }}
     env:
       CURRENT_TRAIL: ${{ needs.aws-beta-trail-names.outputs.current_trail }}
       PREVIOUS_TRAIL: ${{ needs.aws-beta-trail-names.outputs.previous_trail }}
     steps:
-      - name: Print trail names
+      - name: Find new vulns by comparing previous_trail and current_trail
         run: |
           echo "CURRENT_TRAIL=:${CURRENT_TRAIL}:"
           echo "PREVIOUS_TRAIL=:${PREVIOUS_TRAIL}:"
-
-
-  aws-beta-new-snyk-vulns:
-    needs: [setup, aws-beta-trail-names]
-    runs-on: ubuntu-latest
-    if: ${{ needs.aws-beta-trail-names.outputs.current_trail != needs.aws-beta-trail-names.outputs.previous_trail }}
-    steps:
-      - name: Find new vulns by comparing previous_trail and current_trail
-        run:
           echo TODO
 
 
@@ -99,7 +89,6 @@ jobs:
 # and then attests to:
 #      KOSLI_FLOW: ${{ inputs.kosli_env }}-new-snyk-vulns
 #      KOSLI_TRAIL: ${{ inputs.repo_name }}-${{ inputs.kosli_fingerprint }}
-
 
 
 
