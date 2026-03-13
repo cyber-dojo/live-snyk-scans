@@ -55,19 +55,12 @@ jobs:
           KOSLI_FLOW:    aws-beta-all-snyk-vulns-TEST
           JSON_FILENAME: trail.json
         run: |
-          kosli list trails \
-            --output=json \
-            --page=1 \
-            --page-limit=2 > ${JSON_FILENAME}
-          current_trail="$(jq --raw-output '.data[0].name' ${JSON_FILENAME})"
-          echo current_trail="${current_trail}" >> ${GITHUB_OUTPUT}
-          trail_count="$(jq '.data | length' ${JSON_FILENAME})"
-          if [ "${trail_count}" == '1' ]; then
-            echo previous_trail="${current_trail}" >> ${GITHUB_OUTPUT}
-          else
-            previous_trail="$(jq --raw-output '.data[1].name' ${JSON_FILENAME})"
-            echo previous_trail="${previous_trail}" >> ${GITHUB_OUTPUT}
-          fi
+          # On the first run, .data[1].name will fail, but that is ok.
+          kosli list trails --output=json > ${JSON_FILENAME}
+           current_trail="$(jq --raw-output '.data[0].name' ${JSON_FILENAME})"
+          previous_trail="$(jq --raw-output '.data[1].name' ${JSON_FILENAME})"
+          echo  current_trail="${current_trail}" >> ${GITHUB_OUTPUT}
+          echo previous_trail="${previous_trail}" >> ${GITHUB_OUTPUT}
 
 
   aws-beta-new-snyk-vulns:
