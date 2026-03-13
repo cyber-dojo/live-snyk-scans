@@ -152,9 +152,8 @@ jobs:
 
       - name: Attest no-vulns to Kosli
         run:
-          kosli attest generic ${{ inputs.artifact_name }}
+          kosli attest generic
             --user-data ${ATTESTATION_DATA_FILENAME}
-            --fingerprint ${{ inputs.artifact_fingerprint }}
             --name ${{ inputs.repo_name }}-none-SNYK
 
 
