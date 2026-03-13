@@ -55,7 +55,8 @@ jobs:
           KOSLI_FLOW:    aws-beta-all-snyk-vulns-TEST
           JSON_FILENAME: trail.json
         run: |
-          # On the first run, .data[1].name will fail, but that is ok.
+          # NOTE: On the first run, .data[1].name will be null, which is not
+          # the name of a trail, so dependent jobs will fail, which is ok
           kosli list trails --output=json > ${JSON_FILENAME}
            current_trail="$(jq --raw-output '.data[0].name' ${JSON_FILENAME})"
           previous_trail="$(jq --raw-output '.data[1].name' ${JSON_FILENAME})"
@@ -66,9 +67,8 @@ jobs:
   aws-beta-new-snyk-vulns:
     needs: [aws-beta-trail-names]
     runs-on: ubuntu-latest
-    if: ${{ needs.aws-beta-trail-names.outputs.current_trail != needs.aws-beta-trail-names.outputs.previous_trail }}
     env:
-      CURRENT_TRAIL: ${{ needs.aws-beta-trail-names.outputs.current_trail }}
+      CURRENT_TRAIL:  ${{ needs.aws-beta-trail-names.outputs.current_trail }}
       PREVIOUS_TRAIL: ${{ needs.aws-beta-trail-names.outputs.previous_trail }}
     steps:
       - name: Find new vulns by comparing previous_trail and current_trail
@@ -79,7 +79,7 @@ jobs:
 
 
 # and compares two trails to find new-vulns
-# and then attests to:
+# and then attests them to:
 #      KOSLI_FLOW: ${{ inputs.kosli_env }}-new-snyk-vulns
 #      KOSLI_TRAIL: ${{ inputs.repo_name }}-${{ inputs.kosli_fingerprint }}
 
