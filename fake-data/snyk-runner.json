@@ -3,18 +3,12 @@
         "snyk_full_id": "SNYK-GOLANG-GITHUBCOMGOVIPERMAPSTRUCTUREV2-10558294",
         "snyk_short_id": "10558294",
         "snyk_severity": "medium",
-        "snyk_vuln_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMGOVIPERMAPSTRUCTUREV2-10558294",
-        "snyk_ignore_expires_exists": true,
-        "snyk_ignore_expires": "2026-03-09T10:53:10.182Z",
-        "snyk_ignore_expires_ts": 1773053590
+        "snyk_vuln_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMGOVIPERMAPSTRUCTUREV2-10558294"
     },
     {
         "snyk_full_id": "SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804",
         "snyk_short_id": "14059804",
         "snyk_severity": "medium",
-        "snyk_vuln_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804",
-        "snyk_ignore_expires_exists": false,
-        "snyk_ignore_expires": "",
-        "snyk_ignore_expires_ts": 0
+        "snyk_vuln_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804"
     }
 ]

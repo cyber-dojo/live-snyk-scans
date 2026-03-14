@@ -44,14 +44,16 @@ jobs:
       #   id: set-artifacts
       #   env:
       #     KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
-      #   run:
-      #     echo "artifacts=$(make artifacts | jq --raw-output --compact-output .)" >> ${GITHUB_OUTPUT}
+      #   run: |
+      #     artifacts="$(make artifacts | jq --raw-output --compact-output .)"
+      #     echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}
 
       # Fake getting snapshot from kosli_env
       - id: set-artifacts
         run: |
           artifacts="$(jq --compact-output . fake-data/artifacts-${{ inputs.kosli_env }}.json)"
           echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}
+
 
   env-artifact-snyk:
     needs: find-env-artifacts
@@ -65,7 +67,6 @@ jobs:
       repo_name:            ${{ matrix.repo_name }}
       git_commit:           ${{ matrix.git_commit }}
       commit_url:           ${{ matrix.commit_url }}
-      snyk_policy_url:      ${{ matrix.snyk_policy_url }}
       kosli_env:            ${{ inputs.kosli_env }}
       kosli_trail:          ${{ inputs.kosli_trail }}
     secrets:
