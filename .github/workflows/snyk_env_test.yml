@@ -49,7 +49,7 @@ jobs:
       # Fake getting snapshot from kosli_env
       - id: set-artifacts
         run: |
-          artifacts="$(jq --compact-output . artifacts-${{ inputs.kosli_env }}.json)"
+          artifacts="$(jq --compact-output . fake-data/artifacts-${{ inputs.kosli_env }}.json)"
           echo "artifacts=${artifacts}" >> ${GITHUB_OUTPUT}
 
   env-artifact-snyk:

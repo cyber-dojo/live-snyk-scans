@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "description": "Schema for single snyk vulnerability",
+  "properties": {
+    "repo_name": {
+      "type": "string",
+      "description": "Repo whose workflow built the Artifact with the vuln"
+    },
+    "git_commit": {
+      "type": "string",
+      "description": "40 character git commit whose workflow built the Artifact with the vuln"
+    },
+    "commit_url": {
+      "type": "string",
+      "description": "Full git commit URL built the Artifact with the vuln"
+    },
+    "artifact_name": {
+      "type": "string",
+      "description": "The name of the Artifact with the vulnerability"
+    },
+    "artifact_fingerprint": {
+      "type": "string",
+      "description": "64 character digest of the Artifact"
+    },
+    "snyk_version": {
+      "type": "string",
+      "description": "The version of snyk that found the vulnerability"
+    },
+    "snyk_id": {
+      "type": "string",
+      "description": "The identifier of snyk vulnerability"
+    },
+    "snyk_severity": {
+      "type": "string",
+      "description": "The severity of the vulnerability, eg high"
+    },
+    "snyk_url": {
+      "type": "string",
+      "description": "The URL of the snyk vulnerability"
+    }
+  },
+  "required": [
+    "repo_name",
+    "git_commit",
+    "commit_url",
+    "artifact_name",
+    "artifact_fingerprint",
+    "snyk_version",
+    "snyk_id",
+    "snyk_severity",
+    "snyk_url"    
+  ]
+}

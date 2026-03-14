@@ -109,7 +109,7 @@ jobs:
         env:
           JSON_FILENAME: vulns.json
         run: |
-          cp snyk-${{ inputs.repo_name }}.json ${JSON_FILENAME}
+          cp fake-data/snyk-${{ inputs.repo_name }}.json ${JSON_FILENAME}
           vulns="$(jq --compact-output . ${JSON_FILENAME})"
           jq . <<< "${vulns}"
           echo "vulns=${vulns}" >> ${GITHUB_OUTPUT}
@@ -141,19 +141,23 @@ jobs:
       - name: Create file containing attestation data
         run:
           jq
+            --arg repo_name            "${{ inputs.repo_name }}"
+            --arg git_commit           "${{ inputs.git_commit }}"
+            --arg commit_url           "${{ inputs.commit_url }}"
             --arg artifact_name        "${{ inputs.artifact_name }}"
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}"
-            --arg snyk_version          "${{ needs.find-all-snyk-vulns.outputs.version }}"
-            --arg snyk_id               none
-            --arg snyk_severity         none
-            --arg snyk_url              ''
+            --arg snyk_version         "${{ needs.find-all-snyk-vulns.outputs.version }}"
+            --arg snyk_id              none
+            --arg snyk_severity        none
+            --arg snyk_url             ''
             '$ARGS.named' <<< '{}' 
             > ${ATTESTATION_DATA_FILENAME}
 
       - name: Attest no-vulns to Kosli
         run:
-          kosli attest generic
-            --user-data ${ATTESTATION_DATA_FILENAME}
+          kosli attest custom
+            --type single-snyk-vuln
+            --attestation-data ${ATTESTATION_DATA_FILENAME}
             --name ${{ inputs.repo_name }}-none-SNYK
 
 
@@ -182,6 +186,9 @@ jobs:
       - name: Create file containing custom attestation data
         run:
           jq
+            --arg repo_name            "${{ inputs.repo_name }}"
+            --arg git_commit           "${{ inputs.git_commit }}"
+            --arg commit_url           "${{ inputs.commit_url }}"
             --arg artifact_name        "${{ inputs.artifact_name }}"
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}"
             --arg snyk_version         "${{ needs.find-all-snyk-vulns.outputs.version }}"
@@ -197,7 +204,8 @@ jobs:
 
       - name: Attest custom to Kosli
         run:
-          kosli attest generic 
+          kosli attest custom
+            --type single-snyk-vuln
             --annotate snyk_URL=${{ matrix.snyk_url }}
-            --user-data ${ATTESTATION_DATA_FILENAME}
+            --attestation-data ${ATTESTATION_DATA_FILENAME}
             --name ${{ inputs.repo_name }}-${{ matrix.snyk_severity }}-${{ matrix.snyk_id }}

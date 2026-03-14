@@ -20,6 +20,20 @@ jobs:
     outputs:
       kosli_trail: ${{ steps.set-kosli-trail.outputs.kosli_trail }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
+
+      - name: Create single-snyk-vulnerability custom attestation type
+        run:
+          kosli create attestation-type single-snyk-vuln
+            --schema=single-snyk-vuln.schema.json
+
       - name: Output kosli-trail
         id: set-kosli-trail
         run:
