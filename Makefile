@@ -6,7 +6,7 @@ run_tests:
 	@${PWD}/tests/run_tests.sh
 
 artifacts:
-	@${PWD}/bin/get_snapshot_json.sh | python3 ${PWD}/bin/artifacts.py
+	@${PWD}/bin/kosli_get_snapshot_json.sh | python3 ${PWD}/bin/artifacts.py
 
-
-
+trail:
+	@${PWD}/bin/kosli_get_trail_json.sh	

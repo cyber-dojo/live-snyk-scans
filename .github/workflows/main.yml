@@ -84,13 +84,17 @@ jobs:
     needs: [aws-beta-trail-names]
     runs-on: ubuntu-latest
     env:
-      CURRENT_TRAIL:  ${{ needs.aws-beta-trail-names.outputs.current_trail }}
-      PREVIOUS_TRAIL: ${{ needs.aws-beta-trail-names.outputs.previous_trail }}
+      KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+      KOSLI_FLOW:      aws-beta-all-snyk-vulns-TEST
+      CURRENT_TRAIL:   ${{ needs.aws-beta-trail-names.outputs.current_trail }}
+      PREVIOUS_TRAIL:  ${{ needs.aws-beta-trail-names.outputs.previous_trail }}
     steps:
       - name: Find new vulns by comparing previous_trail and current_trail
         run: |
-          echo "CURRENT_TRAIL=:${CURRENT_TRAIL}:"
-          echo "PREVIOUS_TRAIL=:${PREVIOUS_TRAIL}:"
+          export KOSLI_TRAIL="${CURRENT_TRAIL}"
+          make trail_json > current_trail.json
+          export KOSLI_TRAIL="${PREVIOUS_TRAIL}"
+          make trail_json > previous_trail.json
           echo TODO
 
 
