@@ -134,7 +134,7 @@ jobs:
         with:
           version: ${{ vars.KOSLI_CLI_VERSION }}
       
-      - name: Create file containing attestation data
+      - name: Create file containing custom attestation data
         run:
           jq
             --arg repo_name            "${{ inputs.repo_name }}"
@@ -158,7 +158,7 @@ jobs:
           kosli attest custom
             --type single-snyk-vuln
             --attestation-data ${ATTESTATION_DATA_FILENAME}
-            --name ${{ inputs.repo_name }}-none-SNYK
+            --name ${{ inputs.repo_name }}-none
 
 
   some-snyk-vulns:
