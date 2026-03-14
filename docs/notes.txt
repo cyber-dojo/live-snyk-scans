@@ -1,5 +1,4 @@
 
-
 #kosli get trail 24730df6a063e1b3c9ee9bbaca3b10e1a8aab234 \
   --flow=differ-ci \
   --org=cyber-dojo \
