@@ -8,5 +8,5 @@ run_tests:
 artifacts:
 	@${PWD}/bin/kosli_get_snapshot_json.sh | python3 ${PWD}/bin/artifacts.py
 
-trail:
+trail_json:
 	@${PWD}/bin/kosli_get_trail_json.sh	

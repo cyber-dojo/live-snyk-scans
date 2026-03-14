@@ -95,6 +95,8 @@ jobs:
           make trail_json > current_trail.json
           export KOSLI_TRAIL="${PREVIOUS_TRAIL}"
           make trail_json > previous_trail.json
+          jq . current_trail.json
+          jq . previous_trail.json
           echo TODO
 
 
