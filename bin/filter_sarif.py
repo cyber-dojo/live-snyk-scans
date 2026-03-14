@@ -14,8 +14,9 @@ if __name__ == "__main__":  # pragma: no cover
     vulns = []
     for run in sarif_data['runs']:
         for rule in run['tool']['driver']['rules']:
-            id = rule['id']
-            url = f"https://security.snyk.io/vuln/{id}"
+            full_id = rule['id'] # SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804
+            short_id = full_id.split('-')[-1] # 14059804
+            url = f"https://security.snyk.io/vuln/{full_id}"
             short_text = rule['shortDescription']['text']
             #cvssv3_base_score = rule['properties']['cvssv3_baseScore'] # eg 6.8 can be None
             #security_severity = rule['properties']['security-severity'] # eg 6.8 can be None
@@ -23,7 +24,8 @@ if __name__ == "__main__":  # pragma: no cover
             assert severity in ["critical", "high", "medium", "low"]
 
             vulns.append({
-                'id': id,
+                'full_id': full_id,
+                'short_id': short_id,
                 'severity': severity,
                 'url': url
             })

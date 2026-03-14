@@ -1,7 +1,8 @@
 [
     {
-        "snyk_id": "SNYK-ALPINE321-RUBY-14100871",
-        "snyk_severity": "Low",
+        "snyk_full_id": "SNYK-ALPINE321-RUBY-14100871",
+        "snyk_short_id": "14100871",
+        "snyk_severity": "low",
         "snyk_url": "https://security.snyk.io/vuln/SNYK-ALPINE321-RUBY-14100871"
     }
 ]

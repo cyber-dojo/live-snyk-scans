@@ -143,8 +143,9 @@ jobs:
             --arg artifact_name        "${{ inputs.artifact_name }}"
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}"
             --arg snyk_version         "${{ needs.find-all-snyk-vulns.outputs.version }}"
-            --arg snyk_id              none
-            --arg snyk_severity        none
+            --arg snyk_full_id         ''
+            --arg snyk_short_id        ''
+            --arg snyk_severity        ''
             --arg snyk_url             ''
             '$ARGS.named' <<< '{}' 
             > ${ATTESTATION_DATA_FILENAME}
@@ -189,7 +190,8 @@ jobs:
             --arg artifact_name        "${{ inputs.artifact_name }}"
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}"
             --arg snyk_version         "${{ needs.find-all-snyk-vulns.outputs.version }}"
-            --arg snyk_id              "${{ matrix.snyk_id }}"
+            --arg snyk_full_id         "${{ matrix.snyk_full_id }}"
+            --arg snyk_short_id        "${{ matrix.snyk_short_id }}"
             --arg snyk_severity        "${{ matrix.snyk_severity }}"
             --arg snyk_url             "${{ matrix.snyk_url }}"
             '$ARGS.named' <<< '{}' 
@@ -205,4 +207,4 @@ jobs:
             --type single-snyk-vuln
             --annotate snyk_URL=${{ matrix.snyk_url }}
             --attestation-data ${ATTESTATION_DATA_FILENAME}
-            --name ${{ inputs.repo_name }}-${{ matrix.snyk_severity }}-${{ matrix.snyk_id }}
+            --name ${{ inputs.repo_name }}-${{ matrix.snyk_severity }}-${{ matrix.snyk_short_id }}
