@@ -49,15 +49,15 @@
     },
     "snyk_ignore_expires": {
       "type": "string",
-      "description": ""
+      "description": "The date+time of the ignore-expiry in the Snyk policy file, for this vulnerability, if it exists"
     },
     "snyk_ignore_expires_ts": {
       "type": "number",
-      "description": ""
+      "description": "The timestamp of the ignore-expiry in the Snyk policy file, for this vulnerability, if it exists"
     },
     "snyk_ignore_expires_exists": {
       "type": "boolean",
-      "description": ""
+      "description": "Whether there is an ignore-expiry in the Snyk policy file for this vulnerability"
     }
   },
   "required": [
