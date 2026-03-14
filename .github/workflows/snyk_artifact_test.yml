@@ -69,10 +69,10 @@ jobs:
       #     image_name: "${{ inputs.artifact_name }}"
       #     aws_rolename: "gh_actions_live_snyk_scans"
 
-      # - name: Setup Snyk
-      #   uses: snyk/actions/setup@master
-      #   with:
-      #     snyk-version: v1.1300.2
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+        with:
+          snyk-version: v1.1300.2
 
       # - name: Set empty .snyk policy file
       #   run:
