@@ -39,11 +39,10 @@ on:
         type: string
 
 env:
-  KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
-  KOSLI_DEBUG:     ${{ vars.KOSLI_DEBUG }}          # true/false
-  KOSLI_DRY_RUN:   ${{ vars.KOSLI_DRY_RUN }}        # true/false
-  KOSLI_HOST:      ${{ vars.KOSLI_HOST }}           # https://app.kosli.com
-  KOSLI_ORG:       ${{ vars.KOSLI_ORG }}            # cyber-dojo
+  KOSLI_DEBUG:   ${{ vars.KOSLI_DEBUG }}   # true/false
+  KOSLI_DRY_RUN: ${{ vars.KOSLI_DRY_RUN }} # true/false
+  KOSLI_HOST:    ${{ vars.KOSLI_HOST }}    # https://app.kosli.com
+  KOSLI_ORG:     ${{ vars.KOSLI_ORG }}     # cyber-dojo
 
 
 jobs:
@@ -124,10 +123,7 @@ jobs:
     if: ${{ needs.find-all-snyk-vulns.outputs.vulns == '[]' }}
     runs-on: ubuntu-latest
     env:
-      ATTESTATION_DATA_FILENAME: custom.json
-      KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
-      KOSLI_FLOW: ${{ inputs.kosli_env }}-all-snyk-vulns-TEST
-      KOSLI_TRAIL: ${{ inputs.kosli_trail }}
+      ATTESTATION_DATA_FILENAME: no-snyk-vuln.json
     steps:
       - uses: actions/checkout@v6
         with:
@@ -154,6 +150,10 @@ jobs:
             > ${ATTESTATION_DATA_FILENAME}
 
       - name: Attest no-vulns to Kosli
+        env:
+          KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+          KOSLI_FLOW:      ${{ inputs.kosli_env }}-all-snyk-vulns-TEST
+          KOSLI_TRAIL:     ${{ inputs.kosli_trail }}
         run:
           kosli attest custom
             --type single-snyk-vuln
@@ -166,10 +166,7 @@ jobs:
     if: ${{ needs.find-all-snyk-vulns.outputs.vulns != '[]' }}
     runs-on: ubuntu-latest
     env:
-      ATTESTATION_DATA_FILENAME: custom.json
-      KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
-      KOSLI_FLOW: ${{ inputs.kosli_env }}-all-snyk-vulns-TEST
-      KOSLI_TRAIL: ${{ inputs.kosli_trail }}
+      ATTESTATION_DATA_FILENAME: single-snyk-vuln.json
     strategy:
       matrix:
         include: ${{ fromJSON(needs.find-all-snyk-vulns.outputs.vulns) }}
@@ -198,11 +195,11 @@ jobs:
             '$ARGS.named' <<< '{}' 
             > ${ATTESTATION_DATA_FILENAME}
 
-      - name: Print custom attestation data
-        run:
-          jq . ${ATTESTATION_DATA_FILENAME}
-
-      - name: Attest custom to Kosli
+      - name: Attest single-snyk-vuln to Kosli
+        env:
+          KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+          KOSLI_FLOW:      ${{ inputs.kosli_env }}-all-snyk-vulns-TEST
+          KOSLI_TRAIL:     ${{ inputs.kosli_trail }}
         run:
           kosli attest custom
             --type single-snyk-vuln

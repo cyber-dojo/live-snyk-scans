@@ -7,11 +7,10 @@ on:
   #  - cron: '0 8 * * *'
 
 env:
-  KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
-  KOSLI_DEBUG:     ${{ vars.KOSLI_DEBUG }}          # true/false
-  KOSLI_DRY_RUN:   ${{ vars.KOSLI_DRY_RUN }}        # true/false
-  KOSLI_HOST:      ${{ vars.KOSLI_HOST }}           # https://app.kosli.com
-  KOSLI_ORG:       ${{ vars.KOSLI_ORG }}            # cyber-dojo
+  KOSLI_DEBUG:   ${{ vars.KOSLI_DEBUG }}   # true/false
+  KOSLI_DRY_RUN: ${{ vars.KOSLI_DRY_RUN }} # true/false
+  KOSLI_HOST:    ${{ vars.KOSLI_HOST }}    # https://app.kosli.com
+  KOSLI_ORG:     ${{ vars.KOSLI_ORG }}     # cyber-dojo
 
 jobs:
   setup:
@@ -30,6 +29,8 @@ jobs:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
       - name: Create single-snyk-vulnerability custom attestation type
+        env:
+          KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
         run:
           kosli create attestation-type single-snyk-vuln
             --schema=single-snyk-vuln.schema.json
@@ -66,8 +67,9 @@ jobs:
       - name: Find most recent Trails in Flow aws-beta-all-snyk-vulns
         id: set-trail-names
         env:
-          KOSLI_FLOW:    aws-beta-all-snyk-vulns-TEST
-          JSON_FILENAME: trail.json
+          KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+          KOSLI_FLOW:      aws-beta-all-snyk-vulns-TEST
+          JSON_FILENAME:   trail.json
         run: |
           # NOTE: On the first run, .data[1].name will be null, which is not
           # the name of a trail, so dependent jobs will fail, which is ok
