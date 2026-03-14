@@ -34,6 +34,7 @@ jobs:
         run:
           kosli create attestation-type single-snyk-vuln
             --schema=single-snyk-vuln.schema.json
+            --jq '.snyk_full_id == ""'
 
       - name: Output kosli-trail
         id: set-kosli-trail

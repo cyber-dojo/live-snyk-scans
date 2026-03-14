@@ -54,6 +54,6 @@
     "snyk_full_id",
     "snyk_short_id",
     "snyk_severity",
-    "snyk_url"    
+    "snyk_url"
   ]
 }
