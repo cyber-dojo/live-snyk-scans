@@ -65,6 +65,7 @@ jobs:
       repo_name:            ${{ matrix.repo_name }}
       git_commit:           ${{ matrix.git_commit }}
       commit_url:           ${{ matrix.commit_url }}
+      snyk_policy_url:      ${{ matrix.snyk_policy_url }}
       kosli_env:            ${{ inputs.kosli_env }}
       kosli_trail:          ${{ inputs.kosli_trail }}
     secrets:

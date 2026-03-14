@@ -21,7 +21,8 @@ def print_help():
               "repo_name": "languages-start-points",
               "snapshot_index": 3600,
               "snapshot_artifact_url": "https://app.kosli.com/cyber-dojo/environments/aws-prod/snapshots/3600?fingerprint=1d7fc67092bee8492e5019ca0175edf5189e4fc71a4b3a21976c64070def810a",
-              "environment_name": "aws-prod"
+              "environment_name": "aws-prod",
+              "snyk_policy_url": "https://raw.githubusercontent.com/cyber-dojo/languages-start-points/commit/88366281011d1aa83c5db4280aa8a6daa0be8541/.snyk"          
             },          
             ...
           ]
@@ -53,10 +54,30 @@ def artifacts():
                         "repo_name": repo_name,
                         "snapshot_index": snapshot_index,
                         "snapshot_artifact_url": f"{html_url}?fingerprint={fingerprint}",
-                        "environment_name": "aws-prod"
+                        "environment_name": "aws-prod",
+                        "snyk_policy_url": snyk_policy_url(commit_url)
                     })
 
     return result
+
+
+def snyk_policy_url(commit_url):
+    commit_sha = commit_url[-40:]
+    if commit_url.startswith("https://github.com"):
+        # https://github.com/cyber-dojo/languages-start-points/commit/88366281011d1aa83c5db4280aa8a6daa0be8541
+        cut_suffix = "/commit/88366281011d1aa83c5db4280aa8a6daa0be8541"
+        prefix_url = commit_url[len("https://github.com/"):-len(cut_suffix)]
+        # eg prefix_url = cyber-dojo/languages-start-points/commit
+        return f"https://raw.githubusercontent.com/{prefix_url}/{commit_sha}/.snyk"
+    elif commit_url.startswith("https://gitlab.com"):
+        # https://gitlab.com/cyber-dojo/creator/-/commit/dca5d2f7571f9b63d651088c2b38946091853083
+        cut_suffix = "/-/commit/dca5d2f7571f9b63d651088c2b38946091853083"
+        prefix_url = commit_url[:-len(cut_suffix)]
+        # eg prefix_url = https://gitlab.com/cyber-dojo/creator
+        return f"{prefix_url}/-/raw/{commit_sha}/.snyk"
+    else:
+        stderr(f"Unknown CI system {commit_url}")
+        sys.exit(42)
 
 
 def excluded_flow(flow_name):

@@ -29,6 +29,10 @@ on:
         description: "Artifact commit URL"
         required: true
         type: string
+      snyk_policy_url:
+        description: "URL of snyk policy file (in commit for artifact)"
+        required: true
+        type: string
       kosli_env:
         description: "Name of Kosli environment the artifact is running in"
         required: true
@@ -73,9 +77,9 @@ jobs:
         with:
           snyk-version: v1.1300.2
 
-      # - name: Set empty .snyk policy file
-      #   run:
-      #     echo '' > "${SNYK_POLICY_FILENAME}"
+      - name: Set empty .snyk policy file
+        run:
+          echo '' > "${SNYK_POLICY_FILENAME}"
 
       # - name: Run Snyk container test
       #   env:
@@ -93,17 +97,22 @@ jobs:
       #       exit 43
       #     fi
 
-      # - name: Extract snyk vulns into JSON list
+      - name: Get the real .snyk file
+        run: |
+          curl "${{ inputs.snyk_policy_url}}" > ${SNYK_POLICY_FILENAME}
+          cat ${SNYK_POLICY_FILENAME}
+
+      # - name: Combine Snyk vulns from sarif file with ignore-expiries in Snyk policy file
       #   id: set-vulns
       #   env:
       #     JSON_FILENAME: vulns.json
       #   run: |
-      #     ./bin/filter_sarif.py ${SNYK_SARIF_FILENAME} > ${JSON_FILENAME}                  
+      #     ./bin/combine_snyk.py ${SNYK_SARIF_FILENAME} ${SNYK_POLICY_FILENAME} > ${JSON_FILENAME}
       #     vulns="$(jq --compact-output . ${JSON_FILENAME})"
       #     jq . <<< "${vulns}"
       #     echo "vulns=${vulns}" >> ${GITHUB_OUTPUT}
 
-      - name: Fake running snyk and extracting json from sarif file
+      - name: Fake combining snyk vulns from sarif file with ignore-expiries in Snyk policy file
         id: set-vulns
         env:
           JSON_FILENAME: vulns.json
@@ -142,11 +151,15 @@ jobs:
             --arg commit_url           "${{ inputs.commit_url }}"
             --arg artifact_name        "${{ inputs.artifact_name }}"
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}"
-            --arg snyk_version         "${{ needs.find-all-snyk-vulns.outputs.version }}"
-            --arg snyk_full_id         ''
-            --arg snyk_short_id        ''
-            --arg snyk_severity        ''
-            --arg snyk_url             ''
+            --arg     snyk_version              "${{ needs.find-all-snyk-vulns.outputs.version }}"
+            --arg     snyk_policy_url           "${{ inputs.snyk_policy_url }}"
+            --arg     snyk_full_id               ''
+            --arg     snyk_short_id              ''
+            --arg     snyk_severity              ''
+            --arg     snyk_vuln_url              ''
+            --argjson snyk_ignore_expires_exists false
+            --argjson snyk_ignore_expires_ts     0
+            --arg     snyk_ignore_expires        ''
             '$ARGS.named' <<< '{}' 
             > ${ATTESTATION_DATA_FILENAME}
 
@@ -189,11 +202,15 @@ jobs:
             --arg commit_url           "${{ inputs.commit_url }}"
             --arg artifact_name        "${{ inputs.artifact_name }}"
             --arg artifact_fingerprint "${{ inputs.artifact_fingerprint }}"
-            --arg snyk_version         "${{ needs.find-all-snyk-vulns.outputs.version }}"
-            --arg snyk_full_id         "${{ matrix.snyk_full_id }}"
-            --arg snyk_short_id        "${{ matrix.snyk_short_id }}"
-            --arg snyk_severity        "${{ matrix.snyk_severity }}"
-            --arg snyk_url             "${{ matrix.snyk_url }}"
+            --arg     snyk_version               "${{ needs.find-all-snyk-vulns.outputs.version }}"
+            --arg     snyk_policy_url            "${{ inputs.snyk_policy_url }}"
+            --arg     snyk_full_id               "${{ matrix.snyk_full_id }}"
+            --arg     snyk_short_id              "${{ matrix.snyk_short_id }}"
+            --arg     snyk_severity              "${{ matrix.snyk_severity }}"
+            --arg     snyk_vuln_url              "${{ matrix.snyk_vuln_url }}"
+            --argjson snyk_ignore_expires_exists "${{ matrix.snyk_ignore_expires_exists }}"
+            --argjson snyk_ignore_expires_ts     "${{ matrix.snyk_ignore_expires_ts }}"
+            --arg     snyk_ignore_expires        "${{ matrix.snyk_ignore_expires }}"
             '$ARGS.named' <<< '{}' 
             > ${ATTESTATION_DATA_FILENAME}
 

@@ -27,6 +27,10 @@
       "type": "string",
       "description": "The version of Snyk that found the vulnerability, eg 1.1300.2"
     },
+    "snyk_policy_url": {
+      "type": "string",
+      "description": "The URL of the Snyk policy file in git_commit"
+    },
     "snyk_full_id": {
       "type": "string",
       "description": "The full identifier of the vulnerability, eg SNYK-ALPINE321-RUBY-14100871"
@@ -39,9 +43,21 @@
       "type": "string",
       "description": "The severity of the vulnerability, eg high"
     },
-    "snyk_url": {
+    "snyk_vuln_url": {
       "type": "string",
       "description": "The URL of the vulnerability"
+    },
+    "snyk_ignore_expires": {
+      "type": "string",
+      "description": ""
+    },
+    "snyk_ignore_expires_ts": {
+      "type": "number",
+      "description": ""
+    },
+    "snyk_ignore_expires_exists": {
+      "type": "boolean",
+      "description": ""
     }
   },
   "required": [
@@ -51,9 +67,13 @@
     "artifact_name",
     "artifact_fingerprint",
     "snyk_version",
+    "snyk_policy_url",
     "snyk_full_id",
     "snyk_short_id",
     "snyk_severity",
-    "snyk_url"
+    "snyk_vuln_url",
+    "snyk_ignore_expires",
+    "snyk_ignore_expires_ts",
+    "snyk_ignore_expires_exists"
   ]
 }
