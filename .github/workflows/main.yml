@@ -89,7 +89,7 @@ jobs:
       CURRENT_TRAIL:   ${{ needs.aws-beta-trail-names.outputs.current_trail }}
       PREVIOUS_TRAIL:  ${{ needs.aws-beta-trail-names.outputs.previous_trail }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
