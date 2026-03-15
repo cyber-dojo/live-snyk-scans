@@ -81,9 +81,11 @@ jobs:
           echo previous_trail_name="${previous_trail_name}" >> ${GITHUB_OUTPUT}
 
 
-  aws-beta-new-snyk-vulns:
+  aws-beta-find-new-snyk-vulns:
     needs: [aws-beta-trail-names]
     runs-on: ubuntu-latest
+    outputs:
+      new_vulns:  ${{ steps.set-new-vulns.outputs.new_vulns }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -95,6 +97,7 @@ jobs:
           version: ${{ vars.KOSLI_CLI_VERSION }}
 
       - name: Find new vulns by comparing previous_trail and current_trail
+        id: set-new-vulns
         env:
           KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
           KOSLI_FLOW:      aws-beta-all-snyk-vulns-TEST
@@ -111,21 +114,27 @@ jobs:
             ${CURRENT_VULNS_FILENAME} \
             > ${NEW_VULNS_FILENAME}
 
-          jq . "${NEW_VULNS_FILENAME}"
-
-# attest new vulns to:
-#      KOSLI_FLOW: ${{ inputs.kosli_env }}-new-snyk-vulns
-#      KOSLI_TRAIL: ${{ inputs.repo_name }}-${{ inputs.kosli_fingerprint }}
+          new_vulns="$(jq --compact-output . ${NEW_VULNS_FILENAME})"
+          echo "new_vulns=${new_vulns}" >> ${GITHUB_OUTPUT}
 
 
+aws-beta-attest-new-snyk-vulns:
+    needs: [aws-beta-find-new-snyk-vulns]
+    if: ${{ needs.aws-beta-find-new-snyk-vulns.outputs.new_vulns != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.aws-beta-find-new-snyk-vulns.outputs.new_vulns) }}
+    env:
+      KOSLI_FLOW: ${{ inputs.kosli_env }}-new-snyk-vulns-TEST
+      KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
+    steps:
+      - name: Print env-vars
+        run: |
+          echo "KOSLI_FLOW=:${KOSLI_FLOW}:"
+          echo "KOSLI_TRAIL=:${KOSLI_TRAIL}:"
 
-  # trigger-aws-prod:
-  #   needs: [setup]
-  #   uses: ./.github/workflows/env_snyk_test.yml
-  #   with:
-  #     kosli_env:   aws-prod
-  #     kosli_trail: ${{ needs.setup.outputs.kosli_trail }}
-  #   secrets:
-  #     snyk_token:      ${{ secrets.SNYK_TOKEN }}
-  #     kosli_api_token: ${{ secrets.KOSLI_API_TOKEN }}
+      - name: Print new vuln
+        run:
+          jq . <<< "${{ matrix }}"
 
