@@ -26,10 +26,10 @@ if __name__ == "__main__":
     new_vulns = []
 
     for fingerprint, current_vulns in current_data.items():
-        previous_vulns = previous_data.get(fingerprint, {})
-        for current_vuln_id, current_vuln in current_vulns.items():
-            if current_vuln_id not in previous_vulns:
-                new_vulns.append(current_vuln)
+        if fingerprint in previous_data:
+            for current_vuln_id, current_vuln in current_vulns.items():
+                if current_vuln_id not in previous_data[fingerprint]:
+                    new_vulns.append(current_vuln)
 
     print(json.dumps(new_vulns, default=str))
 
