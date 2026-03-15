@@ -16,7 +16,7 @@ if __name__ == "__main__":
     with open(trail_filename) as trail_file:
         trail_json = json.load(trail_file)
 
-    atts = defaultdict(lambda: defaultdict(list))
+    atts = defaultdict(lambda: defaultdict())
 
     for event in trail_json['events']:
         if event['type'] == 'trail_attestation_reported':
@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 snyk_full_id = att_data_json['snyk_full_id']
                 if snyk_full_id != '':
                     fingerprint = att_data_json['artifact_fingerprint']
-                    atts[fingerprint][snyk_full_id].append(att_data_json)
+                    atts[fingerprint][snyk_full_id] = att_data_json
             else:
                 print(result.stderr)
                 sys.exit(result.returncode)
