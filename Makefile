@@ -10,3 +10,7 @@ artifacts:
 
 trail_json:
 	@${PWD}/bin/kosli_get_trail_json.sh	
+
+get_vulns:
+	@${PWD}/bin/kosli_get_trail_json.sh	> /tmp/trail.json
+	@${PWD}/bin/get_all_vulns_attestations.py /tmp/trail.json
