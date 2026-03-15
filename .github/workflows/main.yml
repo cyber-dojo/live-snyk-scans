@@ -109,13 +109,13 @@ jobs:
         run: |
           KOSLI_TRAIL="${PREVIOUS_TRAIL_NAME}" make get_vulns | jq . > ${PREVIOUS_VULNS_FILENAME}
           KOSLI_TRAIL="${CURRENT_TRAIL_NAME}"  make get_vulns | jq . > ${CURRENT_VULNS_FILENAME}
+
           ./bin/get_new_vulns.py \
             ${PREVIOUS_VULNS_FILENAME} \
             ${CURRENT_VULNS_FILENAME} \
             > ${NEW_VULNS_FILENAME}
 
           new_vulns="$(jq --compact-output . ${NEW_VULNS_FILENAME})"
-          jq . <<< "${new_vulns}"
           echo "new_vulns=${new_vulns}" >> ${GITHUB_OUTPUT}
 
 
@@ -136,6 +136,9 @@ jobs:
           echo "KOSLI_TRAIL=:${KOSLI_TRAIL}:"
 
       - name: Print new vuln
-        run:
-          jq . <<< "${{ matrix }}"
+        run: |
+          echo "${{ matrix.snyl_full_id }}"
+          echo "${{ matrix.snyl_short_id }}"
+          echo "${{ matrix.snyl_severity }}"
+          echo "${{ matrix.snyl_vuln_url }}"
 
