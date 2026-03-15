@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 
-# Reads the json output from a call to
+# Reads the file containing the json output from a call to
 #   kosli get trail "${KOSLI_TRAIL} --output=json
 # and gets the json custom-attestation-data in each attestation.
 
