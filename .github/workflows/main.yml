@@ -116,6 +116,7 @@ jobs:
             > ${NEW_VULNS_FILENAME}
 
           new_vulns="$(jq --compact-output . ${NEW_VULNS_FILENAME})"
+          jq . <<< "${new_vulns}"
           echo "new_vulns=${new_vulns}" >> ${GITHUB_OUTPUT}
 
 
@@ -127,7 +128,7 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.aws-beta-find-new-snyk-vulns.outputs.new_vulns) }}
     env:
-      KOSLI_FLOW: ${{ inputs.kosli_env }}-new-snyk-vulns-TEST
+      KOSLI_FLOW: aws-beta-new-snyk-vulns-TEST
       KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
     steps:
       - name: Print env-vars
@@ -137,8 +138,8 @@ jobs:
 
       - name: Print new vuln
         run: |
-          echo "${{ matrix.snyl_full_id }}"
-          echo "${{ matrix.snyl_short_id }}"
-          echo "${{ matrix.snyl_severity }}"
-          echo "${{ matrix.snyl_vuln_url }}"
+          echo "${{ matrix.snyk_full_id }}"
+          echo "${{ matrix.snyk_short_id }}"
+          echo "${{ matrix.snyk_severity }}"
+          echo "${{ matrix.snyk_vuln_url }}"
 
