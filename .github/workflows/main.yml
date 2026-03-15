@@ -85,7 +85,7 @@ jobs:
     needs: [aws-beta-trail-names]
     runs-on: ubuntu-latest
     outputs:
-      new_vulns:  ${{ steps.set-new-vulns.outputs.new_vulns }}
+      new_vulns: ${{ steps.set-new-vulns.outputs.new_vulns }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -115,6 +115,7 @@ jobs:
             > ${NEW_VULNS_FILENAME}
 
           new_vulns="$(jq --compact-output . ${NEW_VULNS_FILENAME})"
+          jq . <<< "${new_vulns}"
           echo "new_vulns=${new_vulns}" >> ${GITHUB_OUTPUT}
 
 
