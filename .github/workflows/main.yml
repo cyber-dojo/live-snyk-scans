@@ -118,7 +118,7 @@ jobs:
           echo "new_vulns=${new_vulns}" >> ${GITHUB_OUTPUT}
 
 
-aws-beta-attest-new-snyk-vulns:
+  aws-beta-attest-new-snyk-vulns:
     needs: [aws-beta-find-new-snyk-vulns]
     if: ${{ needs.aws-beta-find-new-snyk-vulns.outputs.new_vulns != '[]' }}
     runs-on: ubuntu-latest
