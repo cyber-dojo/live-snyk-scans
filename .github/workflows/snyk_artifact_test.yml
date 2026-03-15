@@ -98,7 +98,7 @@ jobs:
       #   env:
       #     JSON_FILENAME: vulns.json
       #   run: |
-      #     ./bin/get_vulns.py ${SNYK_SARIF_FILENAME} > ${JSON_FILENAME}
+      #     ./bin/get_sarif_vulns.py ${SNYK_SARIF_FILENAME} > ${JSON_FILENAME}
       #     vulns="$(jq --compact-output . ${JSON_FILENAME})"
       #     echo "vulns=${vulns}" >> ${GITHUB_OUTPUT}
 
