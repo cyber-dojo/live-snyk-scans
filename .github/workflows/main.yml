@@ -102,9 +102,8 @@ jobs:
       - name: Find new vulns by comparing previous_trail and current_trail
         run: |
           KOSLI_TRAIL="${PREVIOUS_TRAIL}" make get_vulns | jq . > previous_vulns.json
-          cat previous_vulns.json
-
           KOSLI_TRAIL="${CURRENT_TRAIL}" make get_vulns | jq . > current_vulns.json
+          cat previous_vulns.json
           cat current_vulns.json
 
           echo TODO
