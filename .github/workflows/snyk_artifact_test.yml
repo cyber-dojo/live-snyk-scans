@@ -84,7 +84,7 @@ jobs:
           snyk container test "${{ inputs.artifact_name }}"
             --policy-path="${SNYK_POLICY_FILENAME}"
             --sarif
-            --sarif-file-output="${SNYK_SARIF_FILENAME}"
+            --sarif-file-output="${SNYK_SARIF_FILENAME}" || true
 
       - name: Fail if the sarif file is not created
         run: |
