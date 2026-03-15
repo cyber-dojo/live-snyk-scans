@@ -6,6 +6,9 @@ import os
 import subprocess
 import sys
 
+# Reads the json output from a call to
+#   kosli get trail "${KOSLI_TRAIL} --output=json
+# and gets the json custom-attestation-data in each attestation.
 
 if __name__ == "__main__":
     trail_filename = sys.argv[1]
@@ -22,6 +25,7 @@ if __name__ == "__main__":
                 f"--attestation-id={id}",
                 '--org=cyber-dojo',
                 '--api-token=read-only',
+                '--debug=false',
                 '--output=json'
             ]
 
@@ -41,14 +45,7 @@ if __name__ == "__main__":
                     atts[fingerprint].append(att_data_json)
             else:
                 print(result.stderr)
-                sys.exit(42)
+                sys.exit(result.returncode)
 
     print(json.dumps(atts, default=str))
 
-
-#   Severity. CVSS v3 Rating
-#   ------------------------
-#   Critical. 9.0 - 10.0
-#   High	  7.0 -  8.9
-#   Medium	  4.0 -  6.9
-#   Low	      0.1 -  3.9

@@ -16,11 +16,9 @@ KOSLI_ENV="${KOSLI_ENV:-aws-prod}"
 
 exit_non_zero_unless_installed kosli jq
 
-json="$(kosli get snapshot "${KOSLI_ENV}" \
+kosli get snapshot "${KOSLI_ENV}" \
     --host="${KOSLI_HOST}" \
     --org="${KOSLI_ORG}" \
     --api-token="${KOSLI_API_TOKEN}" \
     --debug=false \
-    --output=json)"
-
-jq --raw-output . <<< "${json}"
+    --output=json

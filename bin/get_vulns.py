@@ -3,6 +3,8 @@
 import sys
 import json
 
+# Extracts the name and severity of all vulnerabilities 
+# in a SARIF file created from `snyk container test`.
 
 if __name__ == "__main__":
     sarif_filename = sys.argv[1]

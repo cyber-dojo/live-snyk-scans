@@ -17,12 +17,10 @@ KOSLI_TRAIL="${KOSLI_TRAIL}"
 
 exit_non_zero_unless_installed kosli jq
 
-json="$(kosli get trail "${KOSLI_TRAIL}" \
+kosli get trail "${KOSLI_TRAIL}" \
     --host="${KOSLI_HOST}" \
     --org="${KOSLI_ORG}" \
     --api-token="${KOSLI_API_TOKEN}" \
     --debug=false \
     --flow="${KOSLI_FLOW}" \
-    --output=json)"
-
-jq --raw-output . <<< "${json}"
+    --output=json

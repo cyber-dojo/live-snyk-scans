@@ -1,4 +1,0 @@
-
-A new runner Artifact will have a new digest.
-So the .snyk policy needs to be read, (even though not used)
-so we can know what vulns are not "new" in that sense.
