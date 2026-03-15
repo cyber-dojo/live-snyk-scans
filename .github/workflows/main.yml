@@ -127,14 +127,15 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJSON(needs.aws-beta-find-new-snyk-vulns.outputs.new_vulns) }}
-    env:
-      KOSLI_FLOW: aws-beta-new-snyk-vulns-TEST
-      KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
     steps:
-      - name: Print env-vars
-        run: |
-          echo "KOSLI_FLOW=:${KOSLI_FLOW}:"
-          echo "KOSLI_TRAIL=:${KOSLI_TRAIL}:"
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Kosli CLI
+        uses: kosli-dev/setup-cli-action@v2
+        with:
+          version: ${{ vars.KOSLI_CLI_VERSION }}
 
       - name: Print new vuln
         run: |
@@ -147,4 +148,15 @@ jobs:
           echo "${{ matrix.repo_name }}"
           echo "${{ matrix.git_commit }}"
           echo "${{ matrix.commit_url}}"
+
+      - name: Attest new vuln
+        env:
+          KOSLI_API_TOKEN: ${{ secrets.kosli_api_token }}
+          KOSLI_FLOW: aws-beta-new-snyk-vulns-TEST
+          KOSLI_TRAIL: ${{ matrix.repo_name }}-${{ matrix.artifact_fingerprint }}
+        run:
+          kosli attest artifact "${{ matrix.artifact_name }}"
+            --fingerprint "${{ matrix.artifact_fingerprint }}"
+            --name artifact
+            --dry-run
 
