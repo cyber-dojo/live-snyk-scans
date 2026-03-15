@@ -4,7 +4,7 @@ import sys
 import json
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     sarif_filename = sys.argv[1]
 
     # Extract ids and severities of each vulnerability in sarif file
