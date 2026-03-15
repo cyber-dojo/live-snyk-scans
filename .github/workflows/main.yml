@@ -102,16 +102,14 @@ jobs:
       - name: Find new vulns by comparing previous_trail and current_trail
         run: |
           export KOSLI_TRAIL="${PREVIOUS_TRAIL}"
-          export KOSLI_TRAIL="${CURRENT_TRAIL}"
-
           make trail_json > previous_trail.json
-          make trail_json > current_trail.json
-
           ./bin/get_all_vulns_attestations.py previous_trail.json > previous_trail_with_attestation_data.json
-          ./bin/get_all_vulns_attestations.py  current_trail.json >  current_trail_with_attestation_data.json
+          # jq . previous_trail_with_attestation_data.json
 
-          jq . previous_trail_with_attestation_data.json
-          jq .  current_trail_with_attestation_data.json
+          export KOSLI_TRAIL="${CURRENT_TRAIL}"
+          make trail_json > current_trail.json
+          ./bin/get_all_vulns_attestations.py  current_trail.json >  current_trail_with_attestation_data.json
+          # jq .  current_trail_with_attestation_data.json
 
           echo TODO
 # compares two trails to find new-vulns
