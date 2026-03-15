@@ -110,8 +110,8 @@ jobs:
           ./bin/get_all_vulns_attestations.py previous_trail.json > previous_trail_with_attestation_data.json
           ./bin/get_all_vulns_attestations.py  current_trail.json >  current_trail_with_attestation_data.json
 
-          jq . previous_trail_with_attestation_data
-          jq .  current_trail_with_attestation_data
+          jq . previous_trail_with_attestation_data.json
+          jq .  current_trail_with_attestation_data.json
 
           echo TODO
 # compares two trails to find new-vulns
