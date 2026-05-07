@@ -407,7 +407,7 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          pattern: vuln-*.json
+          pattern: vuln-${{inputs.repo_name}}-*.json
           merge-multiple: true
 
       - uses: actions/download-artifact@v8
