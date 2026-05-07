@@ -304,6 +304,12 @@ jobs:
       - name: Add time vuln first seen in the repo
         run: |
           kosli create flow ${KOSLI_FLOW}
+          WORKFLOW_PATH=$(echo "${{github.workflow_ref}}" | sed 's|.*/.github|/.github|' | sed 's|@.*||')
+          WORKFLOW_URL="${{github.server_url}}/${{github.repository}}/blob/${{github.ref_name}}${WORKFLOW_PATH}"
+          kosli tag flow ${KOSLI_FLOW} \
+            --set kind=run \
+            --set ci=github \
+            --set workflow_url="${WORKFLOW_URL}"
           # Ensure trail has empty template regardless of flow history
           echo "version: 1" > /tmp/empty-template.yml
           kosli begin trail ${KOSLI_TRAIL} --template-file /tmp/empty-template.yml # idempotent
