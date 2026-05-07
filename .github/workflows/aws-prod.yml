@@ -12,7 +12,7 @@ env:
   KOSLI_ORG: ${{vars.KOSLI_ORG}}         # cyber-dojo
 
   KOSLI_ENV: aws-prod
-  KOSLI_FLOW: snyk-vulns-aws-prod
+  KOSLI_FLOW: snyk-aws-prod-per-artifact
 
 jobs:
   setup-flow:

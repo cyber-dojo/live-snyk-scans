@@ -31,13 +31,20 @@ The inner trail-level attestations (one per Snyk vulnerability) _always_ take pl
 Triggered daily at 01:00 UTC or manually via `workflow_dispatch`. Calls
 `env_snyk_test.yml` for the target environment.
 
-| Workflow | Kosli flow |
-|---|---|
-| `aws-beta.yml` | `snyk-vulns-aws-beta` |
-| `aws-prod.yml` | `snyk-vulns-aws-prod` |
+| Workflow | Kosli flow (per-artifact) | Kosli flow (per-vuln) |
+|---|---|---|
+| `aws-beta.yml` | `snyk-aws-beta-per-artifact` | `snyk-aws-beta-per-vuln` |
+| `aws-prod.yml` | `snyk-aws-prod-per-artifact` | `snyk-aws-prod-per-vuln` |
 
-Each flow holds one trail per artifact currently running in the environment. Trail names have
-the form `{repo_name}-{artifact_fingerprint}`. Each trail contains one `generic` artifact-level attestation named `{repo_name}.snyk-container-scan` with the sarif output, Rego policy file, Rego params file, and `.snyk` policy file attached.
+The per-artifact flow holds one trail per artifact currently running in the environment. Trail
+names have the form `{repo_name}-{artifact_fingerprint}`. Each trail contains one `generic`
+artifact-level attestation named `{repo_name}.snyk-container-scan` with the sarif output, Rego
+policy file, Rego params file, and `.snyk` policy file attached.
+
+The per-vuln flow holds one trail per vulnerability found across all scanned artifacts. Trail
+names have the form `{repo_name}-{severity}-{CVE_ID}`. Each trail contains one `snyk` custom
+data attestation and is evaluated independently by `kosli evaluate trail`. The per-artifact
+attestation aggregates these results.
 
 ## Rego compliance params
 

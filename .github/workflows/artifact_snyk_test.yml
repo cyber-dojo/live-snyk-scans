@@ -180,12 +180,6 @@ jobs:
           ARTIFACT="${{inputs.artifact_name}}"
           ARTIFACT="${ARTIFACT%%@sha256:*}"
 
-          echo "ARTIFACT=:${ARTIFACT}:"
-
-          kosli fingerprint "${ARTIFACT}" \
-            --artifact-type=oci \
-            --debug=false
-
           FINGERPRINT="$(kosli fingerprint "${ARTIFACT}" \
             --artifact-type=oci \
             --debug=false \
@@ -288,7 +282,7 @@ jobs:
     env:
       VULN_JSON: ${{toJSON(matrix)}}
       VULN_FILENAME: vuln-${{matrix.trail_name}}.json
-      KOSLI_FLOW: snyk-vulns-${{inputs.kosli_env}}
+      KOSLI_FLOW: snyk-${{inputs.kosli_env}}-per-vuln
       KOSLI_TRAIL: ${{matrix.trail_name}}
     strategy:
       matrix:
