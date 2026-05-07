@@ -303,7 +303,8 @@ jobs:
 
       - name: Add time vuln first seen in the repo
         run: |
-          kosli create flow ${KOSLI_FLOW}
+          kosli create flow ${KOSLI_FLOW} \
+            --description "Individual Snyk vuln trails for ${{inputs.kosli_env}} artifacts"
           WORKFLOW_URL="https://github.com/cyber-dojo/snyk-scanning/blob/main/.github/workflows/artifact_snyk_test.yml"
           kosli tag flow ${KOSLI_FLOW} \
             --set kind=run \
