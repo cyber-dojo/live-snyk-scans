@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   schedule: # At 01:00 UTC every day; cron delays of a few hours are not unusual in high load
     - cron: '0 1 * * *'
+  push:
+    branches: [main]
+    paths:
+      - snyk-vuln-compliance.rego
+      - rego.params.aws-beta.json
 
 env:
   KOSLI_DEBUG: ${{vars.KOSLI_DEBUG}}     # false
