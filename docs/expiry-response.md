@@ -10,6 +10,15 @@ Mechanism: dot_snyk_expiry
 --------------------------
 The .snyk ignore entry for this vuln is about to expire.
 
+Example step summary entry:
+
+  | Level | Days remaining | Mechanism       | Vuln ID |
+  |-------|----------------|-----------------|---------|
+  | high  | 3              | dot_snyk_expiry | [SNYK-ALPINE322-ZLIB-16078399](https://security.snyk.io/vuln/SNYK-ALPINE322-ZLIB-16078399) |
+
+  The .snyk file contains an ignore entry for this vuln whose expiry
+  date is 3 days away.
+
 Options:
 - Fix the underlying dependency (removes the vuln entirely)
 - Extend the expiry date in .snyk (if fixing is not yet feasible)
@@ -21,6 +30,16 @@ Mechanism: rego_limit
 ----------------------
 The vuln has been open long enough to approach the policy age limit
 defined in the rego params for that environment.
+
+Example step summary entry:
+
+  | Level | Days remaining | Mechanism  | Vuln ID |
+  |-------|----------------|------------|---------|
+  | high  | 6              | rego_limit | [SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822](https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822) |
+
+  There is no .snyk ignore entry. The vuln has been open for 1 day
+  against a 7-day limit for high severity in aws-beta (7 - 1 = 6
+  days remaining).
 
 Options:
 - Fix the underlying dependency (removes the vuln entirely)

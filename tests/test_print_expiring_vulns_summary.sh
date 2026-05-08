@@ -41,6 +41,7 @@ run_summary()
   python3 "${my_dir}/../bin/print_expiring_vulns_summary.py" \
     --beta "${1}" \
     --prod  "${2}" \
+    --today "2025-06-01" \
     >${stdoutF} 2>${stderrF}
   echo $? >${statusF}
 }

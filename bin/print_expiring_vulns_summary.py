@@ -5,6 +5,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import date, timedelta
 
 
 SEVERITY_ORDER = ["critical", "high", "medium", "low"]
@@ -24,12 +25,23 @@ def severity_sort_key(vuln):
     return (rank, vuln["days_remaining"])
 
 
-def format_env_section(env_label, vulns):
+def max_expiry_line(env, today_str):
+    """Return a formatted string showing the maximum pasteable .snyk expiry date for env."""
+    with open(f"rego.params.{env}.json") as f:
+        params = json.load(f)
+    max_days = params["max_ignore_expiry_days"]
+    max_date = date.fromisoformat(today_str) + timedelta(days=max_days)
+    return f"Maximum .snyk ignore expiry: {max_date}T00:00:00.000Z ({max_days} days from today)"
+
+
+def format_env_section(env_label, vulns, expiry_line):
     """Return a list of Markdown lines for one environment's section."""
     if not vulns:
         return [f"## {env_label} (Count=0)", ""]
 
     lines = [f"## {env_label}", ""]
+    lines.append(expiry_line)
+    lines.append("")
 
     artifacts = {}
     for v in vulns:
@@ -56,14 +68,16 @@ def main():
     parser = argparse.ArgumentParser(description="Print Markdown expiry summary.")
     parser.add_argument("--beta", required=True, help="JSON array of expiring vulns for aws-beta")
     parser.add_argument("--prod", required=True, help="JSON array of expiring vulns for aws-prod")
+    parser.add_argument("--today", default=date.today().isoformat(),
+                        help="Today's date as YYYY-MM-DD (default: system date)")
     args = parser.parse_args()
 
     beta_vulns = json.loads(args.beta)
     prod_vulns = json.loads(args.prod)
 
     lines = []
-    lines.extend(format_env_section("aws-beta", beta_vulns))
-    lines.extend(format_env_section("aws-prod", prod_vulns))
+    lines.extend(format_env_section("aws-beta", beta_vulns, max_expiry_line("aws-beta", args.today)))
+    lines.extend(format_env_section("aws-prod", prod_vulns, max_expiry_line("aws-prod", args.today)))
     print("\n".join(lines).rstrip("\n"))
 
 
