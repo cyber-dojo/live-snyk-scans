@@ -1,4 +1,4 @@
-## aws-beta
+## aws-beta (Snyk vulns nearing expiry: Count=3)
 
 Maximum .snyk ignore expiry: 2025-07-01T00:00:00.000Z (30 days from today)
 

@@ -37,9 +37,9 @@ def max_expiry_line(env, today_str):
 def format_env_section(env_label, vulns, expiry_line):
     """Return a list of Markdown lines for one environment's section."""
     if not vulns:
-        return [f"## {env_label} (Count=0)", ""]
+        return [f"## {env_label} (Snyk vulns nearing expiry: Count=0)", ""]
 
-    lines = [f"## {env_label}", ""]
+    lines = [f"## {env_label} (Snyk vulns nearing expiry: Count={len(vulns)})", ""]
     lines.append(expiry_line)
     lines.append("")
 
