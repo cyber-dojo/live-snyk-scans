@@ -11,12 +11,12 @@ on:
       - rego.params.aws-beta.json
 
 env:
-  KOSLI_DEBUG: ${{vars.KOSLI_DEBUG}}     # false
+  KOSLI_DEBUG:   ${{vars.KOSLI_DEBUG}}   # false
   KOSLI_DRY_RUN: ${{vars.KOSLI_DRY_RUN}} # false
-  KOSLI_HOST: ${{vars.KOSLI_HOST}}       # https://app.kosli.com
-  KOSLI_ORG: ${{vars.KOSLI_ORG}}         # cyber-dojo
+  KOSLI_HOST:    ${{vars.KOSLI_HOST}}    # https://app.kosli.com
+  KOSLI_ORG:     ${{vars.KOSLI_ORG}}     # cyber-dojo
 
-  KOSLI_ENV: aws-beta
+  KOSLI_ENV:  aws-beta
   KOSLI_FLOW: snyk-aws-beta-per-artifact
 
 jobs:
