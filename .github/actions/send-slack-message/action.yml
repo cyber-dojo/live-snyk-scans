@@ -1,0 +1,31 @@
+name: Send Slack Message
+description: Send Slack message to cyber-dojo-alerts channel
+
+inputs:
+  message:
+    required: true
+  slack_url:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        MESSAGE=$(cat <<EOF
+        {
+          "text": "Snyk expiry check",
+          "blocks": [
+            {
+              "type": "section",
+              "text": { "type": "mrkdwn", "text": "${{ inputs.message }}" }
+            }
+          ]
+        }
+        EOF
+        )
+        curl -X POST \
+          -H 'Content-type: application/json' \
+          --data "${MESSAGE}" \
+          --fail \
+          "${{ inputs.slack_url }}"

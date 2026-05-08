@@ -1,0 +1,11 @@
+## aws-beta
+
+### creator (Count=3)
+
+| Level | Days remaining | Mechanism | Vuln ID |
+|-------|----------------|-----------|---------|
+| high | 1 | explicit_expiry | [SNYK-GOLANG-GOLANG-3208976](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANG-3208976) |
+| high | 5 | rego_limit | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
+| medium | 6 | rego_limit | [SNYK-GOLANG-GOLANGORGJWTV4-3180456](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGJWTV4-3180456) |
+
+## aws-prod (Count=0)
