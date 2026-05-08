@@ -227,7 +227,13 @@ jobs:
       - name: Get the real .snyk file
         run: |
           URL="${{inputs.raw_snyk_policy_url}}"
-          curl --fail-with-body "${URL}" > "${SNYK_POLICY_FILENAME}"
+          if curl --fail-with-body "${URL}" > "${SNYK_POLICY_FILENAME}" 2>/dev/null ; then
+            echo "Using .snyk policy file from ${URL}"
+          else
+            echo > "${SNYK_POLICY_FILENAME}"
+            echo "WARNING: could not fetch .snyk policy file from ${URL} - falling back to empty policy" \
+              | tee -a "${GITHUB_STEP_SUMMARY}"
+          fi
 
       - name: Debug print policy file
         if: env.KOSLI_DEBUG == 'true'
@@ -437,7 +443,14 @@ jobs:
       - name: Get the rego files
         run: |
           curl --fail-with-body "${REGO_POLICY_URL}" > ${REGO_POLICY_FILENAME}
-          curl --fail-with-body "${{inputs.raw_snyk_policy_url}}" > ${SNYK_POLICY_FILENAME}
+          URL="${{inputs.raw_snyk_policy_url}}"
+          if curl --fail-with-body "${URL}" > "${SNYK_POLICY_FILENAME}" 2>/dev/null ; then
+            echo "Using .snyk policy file from ${URL}"
+          else
+            echo > "${SNYK_POLICY_FILENAME}"
+            echo "WARNING: could not fetch .snyk policy file from ${URL} - falling back to empty policy" \
+              | tee -a "${GITHUB_STEP_SUMMARY}"
+          fi
           curl --fail-with-body "${REGO_PARAMS_URL}" > ${REGO_PARAMS_FILENAME}
 
       - name: Force trail to have empty template regardless of flow history
