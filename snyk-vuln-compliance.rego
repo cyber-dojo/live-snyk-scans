@@ -13,20 +13,26 @@ seconds_per_day := 60 * 60 * 24
 
 age_days(vuln) := (vuln.now_ts - vuln.first_seen_ts) / seconds_per_day
 
+# Use < so that critical (max=0) is non-compliant on day zero
+age_within_limit(vuln) if {
+    vuln.ignore_expires_exists == false
+    age_days(vuln) < max_days_by_severity[vuln.severity]
+}
+
 ignore_has_expired(vuln) if {
     vuln.ignore_expires_exists == true
     vuln.ignore_expires_ts < vuln.now_ts
 }
 
-ignore_expiry_within_limit(vuln) if {
+ignore_too_far_ahead(vuln) if {
     vuln.ignore_expires_exists == true
-    vuln.ignore_expires_ts <= vuln.now_ts + (max_ignore_expiry_days * seconds_per_day)
+    vuln.ignore_expires_ts > vuln.now_ts + (max_ignore_expiry_days * seconds_per_day)
 }
 
 ignore_is_active(vuln) if {
     vuln.ignore_expires_exists == true
     vuln.ignore_expires_ts >= vuln.now_ts
-    ignore_expiry_within_limit(vuln)
+    vuln.ignore_expires_ts <= vuln.now_ts + (max_ignore_expiry_days * seconds_per_day)
 }
 
 # allow is driven by a positive assertion (every trail must be compliant) rather
@@ -35,22 +41,34 @@ ignore_is_active(vuln) if {
 # produce a compliant result. See https://github.com/open-policy-agent/opa/issues/1857
 
 # Case 1: no ignore entry -- age determines compliance
-# Use < so that critical (max=0) is non-compliant on day zero
-age_within_limit(vuln) if {
-    vuln.ignore_expires_exists == false
-    age_days(vuln) < max_days_by_severity[vuln.severity]
-}
-
 trail_is_compliant(trail) if age_within_limit(vuln_of(trail))
 
-# Case 2: active (not yet expired) ignore entry -- compliant regardless of age
+# Case 2: ignore entry exists and is active (not expired and expiry date not too far in the future) -- compliant regardless of age
 trail_is_compliant(trail) if ignore_is_active(vuln_of(trail))
 
 allow if trail_is_compliant(input.trail)
 
 # Violations provide diagnostics only -- they do not drive the allow decision.
 
-# rule-1: no ignore entry and vulnerability age exceeds the threshold for its severity
+inactive_ignore_msg(trail) := msg if {
+    vuln := vuln_of(trail)
+    ignore_has_expired(vuln)
+    msg := sprintf(
+        "trail '%v': %v snyk ignore entry expired at %v",
+        [trail.name, vuln.full_id, vuln.ignore_expires],
+    )
+}
+
+inactive_ignore_msg(trail) := msg if {
+    vuln := vuln_of(trail)
+    ignore_too_far_ahead(vuln)
+    msg := sprintf(
+        "trail '%v': %v snyk ignore entry expiry %v is more than %d days ahead",
+        [trail.name, vuln.full_id, vuln.ignore_expires, max_ignore_expiry_days],
+    )
+}
+
+# Case 1 violation: no ignore entry and vulnerability age exceeds the threshold for its severity
 violations contains msg if {
     vuln := vuln_of(input.trail)
     vuln.ignore_expires_exists == false
@@ -61,23 +79,10 @@ violations contains msg if {
     )
 }
 
-# rule-2: vulnerability has an ignore entry whose expiry is in the past
-violations contains msg if {
-    vuln := vuln_of(input.trail)
-    ignore_has_expired(vuln)
-    msg := sprintf(
-        "trail '%v': %v snyk ignore entry expired at %v",
-        [input.trail.name, vuln.full_id, vuln.ignore_expires],
-    )
-}
-
-# rule-3: vulnerability has an ignore entry whose expiry is too far in the future
+# Case 2 violation: ignore entry exists but is not active
 violations contains msg if {
     vuln := vuln_of(input.trail)
     vuln.ignore_expires_exists == true
-    vuln.ignore_expires_ts > vuln.now_ts + (max_ignore_expiry_days * seconds_per_day)
-    msg := sprintf(
-        "trail '%v': %v snyk ignore entry expiry %v is more than %d days ahead",
-        [input.trail.name, vuln.full_id, vuln.ignore_expires, max_ignore_expiry_days],
-    )
+    not ignore_is_active(vuln)
+    msg := inactive_ignore_msg(input.trail)
 }
