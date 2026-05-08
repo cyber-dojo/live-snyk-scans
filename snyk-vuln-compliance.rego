@@ -2,7 +2,8 @@ package policy
 
 import rego.v1
 
-max_days_by_severity := data.params.max_days_by_severity
+max_days_by_severity    := data.params.max_days_by_severity
+max_ignore_expiry_days  := data.params.max_ignore_expiry_days
 
 default allow := false
 
@@ -17,9 +18,15 @@ ignore_has_expired(vuln) if {
     vuln.ignore_expires_ts < vuln.now_ts
 }
 
+ignore_expiry_within_limit(vuln) if {
+    vuln.ignore_expires_exists == true
+    vuln.ignore_expires_ts <= vuln.now_ts + (max_ignore_expiry_days * seconds_per_day)
+}
+
 ignore_is_active(vuln) if {
     vuln.ignore_expires_exists == true
     vuln.ignore_expires_ts >= vuln.now_ts
+    ignore_expiry_within_limit(vuln)
 }
 
 # allow is driven by a positive assertion (every trail must be compliant) rather
@@ -61,5 +68,16 @@ violations contains msg if {
     msg := sprintf(
         "trail '%v': %v snyk ignore entry expired at %v",
         [input.trail.name, vuln.full_id, vuln.ignore_expires],
+    )
+}
+
+# rule-3: vulnerability has an ignore entry whose expiry is too far in the future
+violations contains msg if {
+    vuln := vuln_of(input.trail)
+    vuln.ignore_expires_exists == true
+    vuln.ignore_expires_ts > vuln.now_ts + (max_ignore_expiry_days * seconds_per_day)
+    msg := sprintf(
+        "trail '%v': %v snyk ignore entry expiry %v is more than %d days ahead",
+        [input.trail.name, vuln.full_id, vuln.ignore_expires, max_ignore_expiry_days],
     )
 }

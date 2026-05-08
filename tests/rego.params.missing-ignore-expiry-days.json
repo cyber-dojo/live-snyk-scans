@@ -5,6 +5,5 @@
         "high":     7,
         "medium":   30,
         "low":      90
-    },
-    "max_ignore_expiry_days": 30
+    }
 }
