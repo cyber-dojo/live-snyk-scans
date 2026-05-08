@@ -6,7 +6,7 @@ check the GitHub step summary (linked in the message) to see which vulns
 are approaching expiry and which mechanism applies.
 
 
-Mechanism: explicit_expiry
+Mechanism: dot_snyk_expiry
 --------------------------
 The .snyk ignore entry for this vuln is about to expire.
 
@@ -24,7 +24,7 @@ defined in the rego params for that environment.
 
 Options:
 - Fix the underlying dependency (removes the vuln entirely)
-- Add an explicit .snyk ignore entry (shifts it to explicit_expiry
+- Add an explicit .snyk ignore entry (shifts it to dot_snyk_expiry
   and buys more time)
 
 Relevant files:

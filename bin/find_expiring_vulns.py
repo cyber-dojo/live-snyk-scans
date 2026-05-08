@@ -42,7 +42,7 @@ def kosli_get_attestation_data(flow, trail_name):
     return items[0]["attestation_data"]
 
 
-def check_explicit_expiry(data, env, warning_days, now_ts):
+def check_dot_snyk_expiry(data, env, warning_days, now_ts):
     """Return a result dict if the explicit .snyk ignore entry is approaching expiry, else None."""
     if not data.get("ignore_expires_exists"):
         return None
@@ -55,7 +55,7 @@ def check_explicit_expiry(data, env, warning_days, now_ts):
             "full_id": data["full_id"],
             "severity": data["severity"],
             "vuln_url": data["vuln_url"],
-            "mechanism": "explicit_expiry",
+            "mechanism": "dot_snyk_expiry",
             "days_remaining": secs_remaining / 86400,
             "ignore_expires": data["ignore_expires"],
             "age_days": None,
@@ -109,7 +109,7 @@ def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
             if trail["last_modified_at"] < cutoff_ts:
                 continue
             data = kosli_get_attestation_data(flow, trail["name"])
-            result = check_explicit_expiry(data, env, warning_days, now_ts)
+            result = check_dot_snyk_expiry(data, env, warning_days, now_ts)
             if result:
                 results.append(result)
             result = check_rego_limit(data, env, warning_days, now_ts, max_days)

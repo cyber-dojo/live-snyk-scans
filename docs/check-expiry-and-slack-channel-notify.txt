@@ -223,7 +223,7 @@ vuln:
     "full_id":            "SNYK-GOLANG-...",
     "severity":           "high",
     "vuln_url":           "https://security.snyk.io/vuln/...",
-    "mechanism":          "explicit_expiry" | "rego_limit",
+    "mechanism":          "dot_snyk_expiry" | "rego_limit",
     "days_remaining":     3,
     "ignore_expires":     "2026-05-14 00:00:00+00:00" | null,
     "age_days":           4,
@@ -259,7 +259,7 @@ Algorithm:
                  --output json
                -> take first element -> .attestation_data
 
-        check_explicit_expiry(data, env, warning_days, now_ts)
+        check_dot_snyk_expiry(data, env, warning_days, now_ts)
         check_rego_limit(data, env, warning_days, now_ts, max_days)
 
       oldest_ts = min(trail["last_modified_at"] for trail in page)
@@ -277,7 +277,7 @@ Mechanism 1 check (explicit .snyk expiry approaching):
   if data["ignore_expires_exists"] is True:
     secs_remaining = data["ignore_expires_ts"] - now_ts
     if 0 < secs_remaining <= WARNING_SECS:
-      append result with mechanism="explicit_expiry",
+      append result with mechanism="dot_snyk_expiry",
                          days_remaining = secs_remaining / 86400,
                          ignore_expires = data["ignore_expires"]
 
@@ -338,7 +338,7 @@ Example output:
   |----------|----------------|-----------------|---------|
   | critical | 2              | rego_limit      | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
   | critical | 5              | rego_limit      | [SNYK-GOLANG-GOLANG-3208976](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANG-3208976) |
-  | high     | 1              | explicit_expiry | [SNYK-ALPINE322-ZLIB-16078399](https://security.snyk.io/vuln/SNYK-ALPINE322-ZLIB-16078399) |
+  | high     | 1              | dot_snyk_expiry | [SNYK-ALPINE322-ZLIB-16078399](https://security.snyk.io/vuln/SNYK-ALPINE322-ZLIB-16078399) |
   | medium   | 6              | rego_limit      | [SNYK-GOLANG-GOLANGORGJWTV4-3180456](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGJWTV4-3180456) |
 
   ### runner (Count=3)
@@ -398,7 +398,7 @@ Content:
   are approaching expiry and which mechanism applies.
 
 
-  Mechanism: explicit_expiry
+  Mechanism: dot_snyk_expiry
   --------------------------
   The .snyk ignore entry for this vuln is about to expire.
 

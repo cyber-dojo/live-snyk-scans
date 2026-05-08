@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit tests for check_explicit_expiry and check_rego_limit."""
+"""Unit tests for check_dot_snyk_expiry and check_rego_limit."""
 
 import os
 import sys
@@ -28,7 +28,7 @@ def _high_vuln_no_ignore(first_seen_ts=None):
     }
 
 
-class TestCheckExplicitExpiry(unittest.TestCase):
+class TestCheckDotSnykExpiry(unittest.TestCase):
 
     def test_returns_result_when_expiry_within_warning_window(self):
         """Expiry 3 days out with a 7-day warning window produces a result."""
@@ -36,9 +36,9 @@ class TestCheckExplicitExpiry(unittest.TestCase):
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS + 3 * 86400,
                 "ignore_expires": "2025-06-04 00:00:00+00:00"}
-        result = find_expiring_vulns.check_explicit_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
+        result = find_expiring_vulns.check_dot_snyk_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
         self.assertIsNotNone(result)
-        self.assertEqual(result["mechanism"], "explicit_expiry")
+        self.assertEqual(result["mechanism"], "dot_snyk_expiry")
         self.assertAlmostEqual(result["days_remaining"], 3.0, places=5)
         self.assertEqual(result["env"], "aws-prod")
 
@@ -48,7 +48,7 @@ class TestCheckExplicitExpiry(unittest.TestCase):
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS + 10 * 86400,
                 "ignore_expires": "2025-06-11 00:00:00+00:00"}
-        result = find_expiring_vulns.check_explicit_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
+        result = find_expiring_vulns.check_dot_snyk_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
         self.assertIsNone(result)
 
     def test_returns_none_when_expiry_already_passed(self):
@@ -57,12 +57,12 @@ class TestCheckExplicitExpiry(unittest.TestCase):
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS - 1,
                 "ignore_expires": "2025-05-31 23:59:59+00:00"}
-        result = find_expiring_vulns.check_explicit_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
+        result = find_expiring_vulns.check_dot_snyk_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
         self.assertIsNone(result)
 
     def test_returns_none_when_no_ignore_entry(self):
-        """check_explicit_expiry does not apply when there is no .snyk ignore entry."""
-        result = find_expiring_vulns.check_explicit_expiry(
+        """check_dot_snyk_expiry does not apply when there is no .snyk ignore entry."""
+        result = find_expiring_vulns.check_dot_snyk_expiry(
             _high_vuln_no_ignore(), "aws-prod", WARNING_DAYS, NOW_TS)
         self.assertIsNone(result)
 
@@ -96,7 +96,7 @@ class TestCheckRegoLimit(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_returns_none_when_ignore_entry_exists(self):
-        """check_rego_limit does not apply when a .snyk ignore entry exists (check_explicit_expiry handles it)."""
+        """check_rego_limit does not apply when a .snyk ignore entry exists (check_dot_snyk_expiry handles it)."""
         data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS - 4 * 86400),
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS + 3 * 86400}
