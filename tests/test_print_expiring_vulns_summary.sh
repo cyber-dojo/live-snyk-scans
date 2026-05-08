@@ -2,33 +2,33 @@
 
 readonly my_dir="$(cd "$(dirname "${0}")" && pwd)"
 
-test_both_envs_empty()
+test_env_empty()
 {
-  run_summary '[]' '[]'
+  run_summary aws-beta '[]'
   assert_status_equals 0
-  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/both-empty.txt")"
+  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/env-empty.txt")"
   assert_stderr_equals ""
 }
 
-test_one_beta_vuln_prod_empty()
+test_one_beta_vuln()
 {
-  run_summary "${ONE_CREATOR_HIGH_BETA}" '[]'
+  run_summary aws-beta "${ONE_CREATOR_HIGH_BETA}"
   assert_status_equals 0
-  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/one-beta-vuln-prod-empty.txt")"
+  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/one-beta-vuln.txt")"
   assert_stderr_equals ""
 }
 
-test_beta_empty_one_prod_vuln()
+test_one_prod_vuln()
 {
-  run_summary '[]' "${ONE_CREATOR_HIGH_PROD}"
+  run_summary aws-prod "${ONE_CREATOR_HIGH_PROD}"
   assert_status_equals 0
-  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/beta-empty-one-prod-vuln.txt")"
+  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/one-prod-vuln.txt")"
   assert_stderr_equals ""
 }
 
 test_sorted_by_severity_then_days_remaining()
 {
-  run_summary "${CREATOR_MIXED_BETA}" '[]'
+  run_summary aws-beta "${CREATOR_MIXED_BETA}"
   assert_status_equals 0
   assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/sorted-by-severity-and-days.txt")"
   assert_stderr_equals ""
@@ -39,8 +39,8 @@ test_sorted_by_severity_then_days_remaining()
 run_summary()
 {
   python3 "${my_dir}/../bin/print_expiring_vulns_summary.py" \
-    --beta "${1}" \
-    --prod  "${2}" \
+    --env   "${1}" \
+    --vulns "${2}" \
     --today "2025-06-01" \
     >${stdoutF} 2>${stderrF}
   echo $? >${statusF}

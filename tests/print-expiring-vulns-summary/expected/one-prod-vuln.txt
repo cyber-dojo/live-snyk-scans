@@ -1,4 +1,4 @@
-## aws-beta
+## aws-prod
 
 Maximum .snyk ignore expiry: 2025-07-01T00:00:00.000Z (30 days from today)
 
@@ -7,5 +7,3 @@ Maximum .snyk ignore expiry: 2025-07-01T00:00:00.000Z (30 days from today)
 | Level | Days remaining | Mechanism | Vuln ID |
 |-------|----------------|-----------|---------|
 | high | 2 | rego_limit | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
-
-## aws-prod (Count=0)

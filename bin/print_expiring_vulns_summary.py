@@ -64,20 +64,16 @@ def format_env_section(env_label, vulns, expiry_line):
 
 
 def main():
-    """Parse --beta and --prod JSON arrays and print a Markdown step summary to stdout."""
+    """Parse --env and --vulns JSON array and print a Markdown step summary to stdout."""
     parser = argparse.ArgumentParser(description="Print Markdown expiry summary.")
-    parser.add_argument("--beta", required=True, help="JSON array of expiring vulns for aws-beta")
-    parser.add_argument("--prod", required=True, help="JSON array of expiring vulns for aws-prod")
+    parser.add_argument("--env",   required=True, help="Environment name, e.g. aws-beta")
+    parser.add_argument("--vulns", required=True, help="JSON array of expiring vulns for the environment")
     parser.add_argument("--today", default=date.today().isoformat(),
                         help="Today's date as YYYY-MM-DD (default: system date)")
     args = parser.parse_args()
 
-    beta_vulns = json.loads(args.beta)
-    prod_vulns = json.loads(args.prod)
-
-    lines = []
-    lines.extend(format_env_section("aws-beta", beta_vulns, max_expiry_line("aws-beta", args.today)))
-    lines.extend(format_env_section("aws-prod", prod_vulns, max_expiry_line("aws-prod", args.today)))
+    vulns = json.loads(args.vulns)
+    lines = format_env_section(args.env, vulns, max_expiry_line(args.env, args.today))
     print("\n".join(lines).rstrip("\n"))
 
 

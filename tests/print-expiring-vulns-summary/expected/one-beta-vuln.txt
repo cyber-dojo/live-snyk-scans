@@ -1,6 +1,4 @@
-## aws-beta (Count=0)
-
-## aws-prod
+## aws-beta
 
 Maximum .snyk ignore expiry: 2025-07-01T00:00:00.000Z (30 days from today)
 
