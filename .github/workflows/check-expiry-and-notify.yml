@@ -2,7 +2,7 @@ name: Check Expiry and Notify
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '47 6 * * *'
   workflow_dispatch:
   push:
     branches: [main]
