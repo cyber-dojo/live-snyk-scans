@@ -2,6 +2,13 @@ name: Check Expiry and Notify
 
 on:
   workflow_dispatch:
+    inputs:
+      kosli_env:
+        required: true
+        type: choice
+        options:
+          - aws-beta
+          - aws-prod
   workflow_call:
     inputs:
       kosli_env:
@@ -23,10 +30,6 @@ env:
 jobs:
   check-expiry:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        env: ${{ github.event_name == 'workflow_call' && fromJson(format('["{0}"]', inputs.kosli_env)) || fromJson('["aws-beta","aws-prod"]') }}
     steps:
       - uses: actions/checkout@v6
 
@@ -38,7 +41,7 @@ jobs:
       - name: Find vulns
         run: |
           RESULT=$(./bin/find_expiring_vulns.py \
-            --envs ${{ matrix.env }})
+            --envs ${{ inputs.kosli_env }})
           {
             echo "VULNS_JSON<<EOF"
             echo "${RESULT}" | jq --compact-output '.vulns'
@@ -59,7 +62,7 @@ jobs:
         uses: ./.github/actions/send-slack-message
         with:
           slack_url: ${{secrets.SLACK_WEBHOOK_URL}}
-          message: "${{ matrix.env }}: ${SLACK_MESSAGE}"
+          message: "${{ inputs.kosli_env }}: ${SLACK_MESSAGE}"
 
       - name: Send Slack -- workflow failure
         if: failure()
@@ -71,6 +74,6 @@ jobs:
       - name: Write GitHub step summary
         run: |
           ./bin/print_expiring_vulns_summary.py \
-            --env   "${{ matrix.env }}" \
+            --env   "${{ inputs.kosli_env }}" \
             --vulns "${VULNS_JSON}" \
             >> "${GITHUB_STEP_SUMMARY}"
