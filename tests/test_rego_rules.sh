@@ -13,6 +13,11 @@ readonly PARAMS_BETA="${rego_dir}/rego.params.aws-beta.json"
 readonly PARAMS_PROD="${rego_dir}/rego.params.aws-prod.json"
 readonly PARAMS_MISSING_IGNORE_EXPIRY="${my_dir}/rego.params.missing-ignore-expiry-days.json"
 
+readonly MEDIUM_LIMIT_BETA="$(jq '.max_days_by_severity.medium' "${PARAMS_BETA}")"
+readonly CRITICAL_LIMIT_BETA="$(jq '.max_days_by_severity.critical' "${PARAMS_BETA}")"
+readonly CRITICAL_LIMIT_PROD="$(jq '.max_days_by_severity.critical' "${PARAMS_PROD}")"
+readonly MAX_IGNORE_EXPIRY_DAYS="$(jq '.max_ignore_expiry_days' "${PARAMS_BETA}")"
+
 # Fixed point in time for all tests: 2025-05-31 00:00:00 UTC
 readonly NOW_TS=1748736000
 readonly SECONDS_PER_DAY=86400
@@ -22,8 +27,8 @@ readonly SECONDS_PER_DAY=86400
 
 test_allow_vuln_with_active_ignore()
 {
-  # 35 days old (over the 30-day medium limit) but has an active ignore -- age does not matter
-  local -r first_seen_ts=$((NOW_TS - 35 * SECONDS_PER_DAY))
+  # over the medium limit but has an active ignore -- age does not matter
+  local -r first_seen_ts=$((NOW_TS - (MEDIUM_LIMIT_BETA + 5) * SECONDS_PER_DAY))
   local -r ignore_expires_ts=$((NOW_TS + SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "medium" "${first_seen_ts}" true "${ignore_expires_ts}" "2025-06-01 00:00:00+00:00")
@@ -36,8 +41,8 @@ test_allow_vuln_with_active_ignore()
 
 test_allow_medium_vuln_within_age_limit()
 {
-  # 29 days old: below the 30-day medium threshold
-  local -r first_seen_ts=$((NOW_TS - 29 * SECONDS_PER_DAY))
+  # one day below the medium limit: within threshold
+  local -r first_seen_ts=$((NOW_TS - (MEDIUM_LIMIT_BETA - 1) * SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "medium" "${first_seen_ts}" false 0 "")
   evaluate_rego "${input}" "${PARAMS_BETA}"
@@ -46,8 +51,8 @@ test_allow_medium_vuln_within_age_limit()
 
 test_allow_critical_vuln_within_age_limit_on_beta()
 {
-  # 2 days old: below the 3-day critical threshold on aws-beta
-  local -r first_seen_ts=$((NOW_TS - 2 * SECONDS_PER_DAY))
+  # one day below the critical limit on aws-beta: within threshold
+  local -r first_seen_ts=$((NOW_TS - (CRITICAL_LIMIT_BETA - 1) * SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "critical" "${first_seen_ts}" false 0 "")
   evaluate_rego "${input}" "${PARAMS_BETA}"
@@ -59,7 +64,7 @@ test_allow_critical_vuln_within_age_limit_on_beta()
 
 test_deny_vuln_with_expired_ignore()
 {
-  # 5 days old (within the 30-day medium limit) but ignore has expired -- age does not matter
+  # 5 days old but ignore has expired -- age does not matter
   local -r first_seen_ts=$((NOW_TS - 5 * SECONDS_PER_DAY))
   local -r ignore_expires_ts=$((NOW_TS - SECONDS_PER_DAY))
   local input
@@ -74,22 +79,21 @@ test_deny_vuln_with_expired_ignore()
 
 test_deny_vuln_with_ignore_expiry_too_far_ahead()
 {
-  # 5 days old (within the 30-day medium limit) but ignore expires 31 days
-  # from now, which exceeds the 30-day max_ignore_expiry_days flat limit
+  # 5 days old but ignore expires one day beyond the max_ignore_expiry_days limit
   local -r first_seen_ts=$((NOW_TS - 5 * SECONDS_PER_DAY))
-  local -r ignore_expires_ts=$((NOW_TS + 31 * SECONDS_PER_DAY))
+  local -r ignore_expires_ts=$((NOW_TS + (MAX_IGNORE_EXPIRY_DAYS + 1) * SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "medium" "${first_seen_ts}" true "${ignore_expires_ts}" "2026-07-01 00:00:00+00:00")
   evaluate_rego "${input}" "${PARAMS_BETA}"
   assert_deny
-  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 snyk ignore entry expiry 2026-07-01 00:00:00+00:00 is more than 30 days ahead"
+  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 snyk ignore entry expiry 2026-07-01 00:00:00+00:00 is more than ${MAX_IGNORE_EXPIRY_DAYS} days ahead"
 }
 
 test_allow_vuln_with_ignore_expiry_at_limit()
 {
-  # 5 days old, ignore expires exactly 30 days from now -- at the limit, so compliant
+  # 5 days old, ignore expires exactly at the max_ignore_expiry_days limit -- compliant
   local -r first_seen_ts=$((NOW_TS - 5 * SECONDS_PER_DAY))
-  local -r ignore_expires_ts=$((NOW_TS + 30 * SECONDS_PER_DAY))
+  local -r ignore_expires_ts=$((NOW_TS + MAX_IGNORE_EXPIRY_DAYS * SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "medium" "${first_seen_ts}" true "${ignore_expires_ts}" "2025-06-30 00:00:00+00:00")
   evaluate_rego "${input}" "${PARAMS_BETA}"
@@ -117,24 +121,24 @@ test_deny_active_ignore_when_max_ignore_expiry_days_param_is_missing()
 
 test_deny_medium_vuln_at_age_limit()
 {
-  # 30 days old: at the 30-day medium threshold (>= means non-compliant)
-  local -r first_seen_ts=$((NOW_TS - 30 * SECONDS_PER_DAY))
+  # at the medium age limit: non-compliant
+  local -r first_seen_ts=$((NOW_TS - MEDIUM_LIMIT_BETA * SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "medium" "${first_seen_ts}" false 0 "")
   evaluate_rego "${input}" "${PARAMS_BETA}"
   assert_deny
-  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 severity vuln age 30 days exceeds 30 day limit for severity medium"
+  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 severity vuln age ${MEDIUM_LIMIT_BETA} days exceeds ${MEDIUM_LIMIT_BETA} day limit for severity medium"
 }
 
 test_deny_critical_vuln_at_age_limit_on_beta()
 {
-  # 3 days old: at the 3-day critical threshold on aws-beta
-  local -r first_seen_ts=$((NOW_TS - 3 * SECONDS_PER_DAY))
+  # at the critical age limit on aws-beta: non-compliant
+  local -r first_seen_ts=$((NOW_TS - CRITICAL_LIMIT_BETA * SECONDS_PER_DAY))
   local input
   input=$(make_input "test-trail" "critical" "${first_seen_ts}" false 0 "")
   evaluate_rego "${input}" "${PARAMS_BETA}"
   assert_deny
-  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 severity vuln age 3 days exceeds 3 day limit for severity critical"
+  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 severity vuln age ${CRITICAL_LIMIT_BETA} days exceeds ${CRITICAL_LIMIT_BETA} day limit for severity critical"
 }
 
 test_deny_critical_vuln_on_prod_day_zero()
@@ -144,7 +148,7 @@ test_deny_critical_vuln_on_prod_day_zero()
   input=$(make_input "test-trail" "critical" "${NOW_TS}" false 0 "")
   evaluate_rego "${input}" "${PARAMS_PROD}"
   assert_deny
-  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 severity vuln age 0 days exceeds 0 day limit for severity critical"
+  assert_violation_message "trail 'test-trail': SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-14059804 severity vuln age 0 days exceeds ${CRITICAL_LIMIT_PROD} day limit for severity critical"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -158,7 +162,7 @@ test_deny_vuln_over_age_limit_but_with_wrong_field_name_in_input()
   # input means vuln.full_id is undefined in the rego, violations stays null
   # (no diagnostic). allow is still correctly false because trail_is_compliant
   # does not reference full_id.
-  local -r first_seen_ts=$((NOW_TS - 30 * SECONDS_PER_DAY))
+  local -r first_seen_ts=$((NOW_TS - (MEDIUM_LIMIT_BETA + 1) * SECONDS_PER_DAY))
   local input
   input=$(jq -n \
     --argjson now_ts        "${NOW_TS}" \
