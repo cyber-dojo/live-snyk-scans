@@ -9,6 +9,9 @@ on:
       kosli_api_token:
         required: true
 
+      slack_webhook_url:
+        required: true
+
     inputs:
       kosli_env:
         description: "Name of Kosli environment to find artifact running in"
@@ -81,3 +84,11 @@ jobs:
       snyk_token: ${{secrets.snyk_token}}
       kosli_api_token: ${{secrets.kosli_api_token}}
 
+  check-expiry:
+    needs: [artifact-snyk-test]
+    uses: ./.github/workflows/check-expiry-and-notify.yml
+    with:
+      kosli_env: ${{inputs.kosli_env}}
+    secrets:
+      KOSLI_API_TOKEN:    ${{secrets.kosli_api_token}}
+      SLACK_WEBHOOK_URL:  ${{secrets.slack_webhook_url}}

@@ -69,5 +69,6 @@ jobs:
       kosli_env: ${{needs.setup-flow.outputs.kosli_env}}
       kosli_flow: ${{needs.setup-flow.outputs.kosli_flow}}
     secrets:
-      snyk_token: ${{secrets.SNYK_TOKEN}}
-      kosli_api_token: ${{secrets.KOSLI_API_TOKEN}}
+      snyk_token:        ${{secrets.SNYK_TOKEN}}
+      kosli_api_token:   ${{secrets.KOSLI_API_TOKEN}}
+      slack_webhook_url: ${{secrets.SLACK_WEBHOOK_URL}}

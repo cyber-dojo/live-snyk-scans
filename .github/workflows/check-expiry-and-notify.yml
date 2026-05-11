@@ -1,9 +1,17 @@
 name: Check Expiry and Notify
 
 on:
-  schedule:
-    - cron: '47 6 * * *'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      kosli_env:
+        required: true
+        type: string
+    secrets:
+      KOSLI_API_TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
   push:
     branches: [main]
     paths:
@@ -25,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [aws-beta, aws-prod]
+        env: ${{ github.event_name == 'workflow_call' && fromJson(format('["{0}"]', inputs.kosli_env)) || fromJson('["aws-beta","aws-prod"]') }}
     steps:
       - uses: actions/checkout@v6
 
