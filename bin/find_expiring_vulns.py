@@ -3,9 +3,18 @@
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
+
+
+def extract_artifact_name(trail_name):
+    """Extract artifact name by taking the trail_name segment before the first -severity- part."""
+    match = re.search(r'-(critical|high|medium|low)-', trail_name)
+    if match:
+        return trail_name[:match.start()]
+    return trail_name
 
 
 def kosli_list_trails(flow, page, page_limit):
@@ -88,8 +97,53 @@ def check_rego_limit(data, env, warning_days, now_ts, max_days):
     return None
 
 
+def _next_up_candidates(data, env, warning_days, now_ts, max_days):
+    """Return result dicts for future expiries outside the warning window on this trail."""
+    candidates = []
+    warning_secs = warning_days * 86400
+
+    if data.get("ignore_expires_exists"):
+        secs_remaining = data["ignore_expires_ts"] - now_ts
+        if secs_remaining > warning_secs:
+            candidates.append({
+                "env": env,
+                "trail_name": data["trail_name"],
+                "full_id": data["full_id"],
+                "severity": data["severity"],
+                "vuln_url": data["vuln_url"],
+                "mechanism": "dot_snyk_expiry",
+                "days_remaining": secs_remaining / 86400,
+                "ignore_expires": data["ignore_expires"],
+                "age_days": None,
+                "limit_days": None,
+                "artifact": extract_artifact_name(data["trail_name"]),
+            })
+    else:
+        severity = data["severity"]
+        limit = max_days.get(severity, 0)
+        if limit > 0:
+            age_days = (now_ts - data["first_seen_ts"]) / 86400
+            days_remaining = limit - age_days
+            if days_remaining > warning_days:
+                candidates.append({
+                    "env": env,
+                    "trail_name": data["trail_name"],
+                    "full_id": data["full_id"],
+                    "severity": data["severity"],
+                    "vuln_url": data["vuln_url"],
+                    "mechanism": "rego_limit",
+                    "days_remaining": days_remaining,
+                    "ignore_expires": None,
+                    "age_days": age_days,
+                    "limit_days": limit,
+                    "artifact": extract_artifact_name(data["trail_name"]),
+                })
+
+    return candidates
+
+
 def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
-    """Return a list of approaching-expiry vuln dicts for a single environment."""
+    """Return (expiring_list, next_up_or_None) for a single environment."""
     params_file = f"rego.params.{env}.json"
     with open(params_file) as f:
         params = json.load(f)
@@ -97,6 +151,7 @@ def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
 
     flow = f"snyk-{env}-per-vuln"
     results = []
+    next_up_candidates = []
     page = 1
 
     while True:
@@ -115,6 +170,7 @@ def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
             result = check_rego_limit(data, env, warning_days, now_ts, max_days)
             if result:
                 results.append(result)
+            next_up_candidates.extend(_next_up_candidates(data, env, warning_days, now_ts, max_days))
 
         oldest_ts = min(t["last_modified_at"] for t in trails)
         if oldest_ts < cutoff_ts:
@@ -124,7 +180,8 @@ def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
             break
         page += 1
 
-    return results
+    next_up_candidates.sort(key=lambda c: c["days_remaining"])
+    return results, next_up_candidates[0] if next_up_candidates else None
 
 
 def main():
@@ -140,11 +197,17 @@ def main():
     cutoff_ts = now_ts - 48 * 3600
     envs = [e.strip() for e in args.envs.split(",")]
 
-    results = []
+    expiring = []
+    env_next_ups = []
     for env in envs:
-        results.extend(find_expiring_vulns_for_env(env, args.warning_days, now_ts, cutoff_ts))
+        env_results, env_next_up = find_expiring_vulns_for_env(env, args.warning_days, now_ts, cutoff_ts)
+        expiring.extend(env_results)
+        if env_next_up is not None:
+            env_next_ups.append(env_next_up)
 
-    print(json.dumps(results))
+    env_next_ups.sort(key=lambda c: c["days_remaining"])
+    next_up = env_next_ups[0] if env_next_ups else None
+    print(json.dumps({"expiring": expiring, "next_up": next_up}))
     sys.exit(0)
 
 

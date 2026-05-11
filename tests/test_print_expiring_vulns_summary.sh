@@ -4,9 +4,17 @@ readonly my_dir="$(cd "$(dirname "${0}")" && pwd)"
 
 test_env_empty()
 {
-  run_summary aws-beta '[]'
+  run_summary aws-beta '[]' "${NEXT_UP_RUNNER_HIGH_BETA}"
   assert_status_equals 0
   assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/env-empty.txt")"
+  assert_stderr_equals ""
+}
+
+test_env_empty_no_next_up()
+{
+  run_summary aws-beta '[]'
+  assert_status_equals 0
+  assert_stdout_equals "$(cat "${my_dir}/print-expiring-vulns-summary/expected/env-empty-no-next-up.txt")"
   assert_stderr_equals ""
 }
 
@@ -39,12 +47,15 @@ test_sorted_by_severity_then_days_remaining()
 run_summary()
 {
   python3 "${my_dir}/../bin/print_expiring_vulns_summary.py" \
-    --env   "${1}" \
-    --vulns "${2}" \
-    --today "2025-06-01" \
+    --env     "${1}" \
+    --vulns   "${2}" \
+    --next-up "${3:-null}" \
+    --today   "2025-06-01" \
     >${stdoutF} 2>${stderrF}
   echo $? >${statusF}
 }
+
+NEXT_UP_RUNNER_HIGH_BETA='{"env":"aws-beta","trail_name":"runner-high-SNYK-JS-AXIOS-1094390","full_id":"SNYK-JS-AXIOS-1094390","severity":"high","vuln_url":"https://security.snyk.io/vuln/SNYK-JS-AXIOS-1094390","mechanism":"rego_limit","days_remaining":15.0,"ignore_expires":null,"age_days":null,"limit_days":7,"artifact":"runner"}'
 
 ONE_CREATOR_HIGH_BETA='[{"env":"aws-beta","trail_name":"creator-high-SNYK-GOLANG-NETHTTP-3321444","full_id":"SNYK-GOLANG-NETHTTP-3321444","severity":"high","vuln_url":"https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444","mechanism":"rego_limit","days_remaining":2.3,"ignore_expires":null,"age_days":4.7,"limit_days":7}]'
 

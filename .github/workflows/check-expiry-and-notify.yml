@@ -36,11 +36,18 @@ jobs:
 
       - name: Find expiring vulns
         run: |
+          RESULT=$(./bin/find_expiring_vulns.py \
+            --warning-days ${WARNING_DAYS} \
+            --envs ${{ matrix.env }})
           {
             echo "EXPIRING_VULNS<<EOF"
-            ./bin/find_expiring_vulns.py \
-              --warning-days ${WARNING_DAYS} \
-              --envs ${{ matrix.env }}
+            echo "${RESULT}" | jq --compact-output '.expiring'
+            echo "EOF"
+            echo "NEXT_UP_JSON<<EOF"
+            echo "${RESULT}" | jq --compact-output '.next_up'
+            echo "EOF"
+            echo "NEXT_UP_LINE<<EOF"
+            echo "${RESULT}" | jq --raw-output 'if .next_up == null then "No Snyk vulnerabilities at all!" else "Next expiry: \(.next_up.full_id) on \(.next_up.artifact) in \(.next_up.days_remaining | round) days (\(if .next_up.mechanism == "rego_limit" then "rego" else ".snyk" end))" end'
             echo "EOF"
           } >> ${GITHUB_ENV}
 
@@ -49,7 +56,7 @@ jobs:
         uses: ./.github/actions/send-slack-message
         with:
           slack_url: ${{secrets.SLACK_WEBHOOK_URL}}
-          message: "${{ matrix.env }}: No Snyk vulnerabilities approaching expiry :-)"
+          message: "${{ matrix.env }}: No Snyk vulnerabilities approaching expiry :-)\n${NEXT_UP_LINE}"
 
       - name: Send Slack -- vulns expiring soon
         if: env.EXPIRING_VULNS != '[]'
@@ -68,6 +75,7 @@ jobs:
       - name: Write GitHub step summary
         run: |
           ./bin/print_expiring_vulns_summary.py \
-            --env "${{ matrix.env }}" \
-            --vulns "${EXPIRING_VULNS}" \
+            --env     "${{ matrix.env }}" \
+            --vulns   "${EXPIRING_VULNS}" \
+            --next-up "${NEXT_UP_JSON}" \
             >> "${GITHUB_STEP_SUMMARY}"

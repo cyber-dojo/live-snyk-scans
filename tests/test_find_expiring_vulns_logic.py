@@ -114,5 +114,50 @@ class TestCheckRegoLimit(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class TestNextUpCandidates(unittest.TestCase):
+
+    def test_b4e91c01(self):
+        """Dot-snyk ignore 10 days out (outside 7-day window) is a next_up candidate."""
+        data = {**_high_vuln_no_ignore(),
+                "ignore_expires_exists": True,
+                "ignore_expires_ts": NOW_TS + 10 * 86400,
+                "ignore_expires": "2025-06-11 00:00:00+00:00"}
+        candidates = find_expiring_vulns._next_up_candidates(
+            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
+        self.assertEqual(len(candidates), 1)
+        self.assertAlmostEqual(candidates[0]["days_remaining"], 10.0, places=5)
+        self.assertEqual(candidates[0]["mechanism"], "dot_snyk_expiry")
+        self.assertEqual(candidates[0]["artifact"], "creator")
+
+    def test_b4e91c02(self):
+        """Dot-snyk ignore within the warning window is not a next_up candidate."""
+        data = {**_high_vuln_no_ignore(),
+                "ignore_expires_exists": True,
+                "ignore_expires_ts": NOW_TS + 3 * 86400,
+                "ignore_expires": "2025-06-04 00:00:00+00:00"}
+        candidates = find_expiring_vulns._next_up_candidates(
+            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
+        self.assertEqual(candidates, [])
+
+    def test_b4e91c03(self):
+        """Rego-limited medium vuln 1 day old against a 30-day limit (29 days remaining) is a next_up candidate."""
+        data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS - 1 * 86400),
+                "severity": "medium",
+                "trail_name": "creator-medium-SNYK-GOLANG-NETHTTP-3321444"}
+        candidates = find_expiring_vulns._next_up_candidates(
+            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
+        self.assertEqual(len(candidates), 1)
+        self.assertAlmostEqual(candidates[0]["days_remaining"], 29.0, places=5)
+        self.assertEqual(candidates[0]["mechanism"], "rego_limit")
+        self.assertEqual(candidates[0]["artifact"], "creator")
+
+    def test_b4e91c04(self):
+        """Rego-limited vuln already within the warning window is not a next_up candidate."""
+        data = _high_vuln_no_ignore(first_seen_ts=NOW_TS - 4 * 86400)
+        candidates = find_expiring_vulns._next_up_candidates(
+            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
+        self.assertEqual(candidates, [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

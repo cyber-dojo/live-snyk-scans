@@ -40,10 +40,10 @@ ignore_is_active(vuln) if {
 # generating a diagnostic string, it can only lose a message -- it cannot silently
 # produce a compliant result. See https://github.com/open-policy-agent/opa/issues/1857
 
-# Case 1: no ignore entry -- age determines compliance
+# Case 1: no .snyk ignore entry -- age determines compliance
 trail_is_compliant(trail) if age_within_limit(vuln_of(trail))
 
-# Case 2: ignore entry exists and is active (not expired and expiry date not too far in the future) -- compliant regardless of age
+# Case 2: .snyk ignore entry exists and is active (not expired and expiry date not too far in the future) -- compliant regardless of age
 trail_is_compliant(trail) if ignore_is_active(vuln_of(trail))
 
 allow if trail_is_compliant(input.trail)
