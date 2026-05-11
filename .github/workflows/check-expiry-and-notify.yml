@@ -49,7 +49,7 @@ jobs:
               then "No Snyk vulnerabilities :-)"
               else
                 .vulns[0] as $v |
-                ($v.days_remaining | round) as $d |
+                ($v.days_remaining | ceil) as $d |
                 "Next: \($v.full_id) (\($v.severity)) on \($v.artifact) will cause non-compliance in \($d) \(if $d == 1 then "day" else "days" end) (\(if $v.mechanism == "rego_limit" then "rego" else ".snyk" end))\nResponse guide: \(env.RESPONSE_GUIDE_URL)"
               end'
             echo "EOF"
