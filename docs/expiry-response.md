@@ -35,11 +35,11 @@ Example step summary entry:
 
   | Level | Days remaining | Mechanism  | Vuln ID |
   |-------|----------------|------------|---------|
-  | high  | 6              | rego_limit | [SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822](https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822) |
+  | high  | 1              | rego_limit | [SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822](https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822) |
 
   There is no .snyk ignore entry. The vuln has been open for 1 day
-  against a 7-day limit for high severity in aws-beta (7 - 1 = 6
-  days remaining).
+  against a 2-day limit for high severity in aws-beta (2 - 1 = 1
+  day remaining).
 
 Options:
 - Fix the underlying dependency (removes the vuln entirely)

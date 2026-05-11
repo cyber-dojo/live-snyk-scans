@@ -49,7 +49,7 @@ attestation aggregates these results.
 ## Rego compliance params
 
 Each environment has a `rego.params.{env}.json` file that sets the maximum number of days a
-vulnerability may exist in that environment before it is considered non-compliant, by severity. aws-prod has a stricter limit for critical vulnerabilities (0 days — any critical vuln is immediately non-compliant), reflecting the higher risk of a production environment.
+vulnerability may exist in that environment before it is considered non-compliant, by severity. aws-prod has a slightly stricter limit for critical vulnerabilities (0 days — any critical vuln is immediately non-compliant), reflecting the higher risk of a production environment.
 
 Example — `rego.params.aws-prod.json`:
 
@@ -58,12 +58,15 @@ Example — `rego.params.aws-prod.json`:
     "max_days_by_severity":
     {
         "critical": 0,
-        "high":     7,
-        "medium":   30,
-        "low":      90
+        "high":     2,
+        "medium":   4,
+        "low":      6
     }
 }
 ```
+
+What this means: when a new low severity vulnerability appears in aws-prod then you have 6 days to either fix it, or to add entries to the relevant .snyk files.
+
 
 ### `env_snyk_test.yml` (reusable)
 

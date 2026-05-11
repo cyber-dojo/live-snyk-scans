@@ -26,8 +26,8 @@ contains these fields (from bin/combine_snyk.py):
 The rego policy (snyk-vuln-compliance.rego) uses max_days_by_severity from
 rego.params.{env}.json:
 
-  aws-beta:  critical=0, high=7, medium=30, low=90
-  aws-prod:  critical=3, high=7, medium=30, low=90
+  aws-beta:  critical=1, high=2, medium=4, low=6
+  aws-prod:  critical=0, high=2, medium=4, low=6
 
 Two mechanisms by which a currently-compliant vuln can become non-compliant:
 
@@ -224,10 +224,10 @@ vuln:
     "severity":           "high",
     "vuln_url":           "https://security.snyk.io/vuln/...",
     "mechanism":          "dot_snyk_expiry" | "rego_limit",
-    "days_remaining":     3,
+    "days_remaining":     1,
     "ignore_expires":     "2026-05-14 00:00:00+00:00" | null,
-    "age_days":           4,
-    "limit_days":         7
+    "age_days":           1,
+    "limit_days":         2
   }
 
 Exits 0 in all cases (the caller decides what to do with the list).

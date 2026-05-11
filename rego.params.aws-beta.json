@@ -1,10 +1,10 @@
 {
     "max_days_by_severity":
     {
-        "critical": 3,
-        "high":     7,
-        "medium":   30,
-        "low":      90
+        "critical": 1,
+        "high":     2,
+        "medium":   4,
+        "low":      6
     },
     "max_ignore_expiry_days": 30
 }
