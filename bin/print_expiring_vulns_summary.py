@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print a Markdown summary of expiring Snyk vulnerabilities for the GitHub step summary."""
+"""Print a Markdown summary of tracked Snyk vulnerabilities for the GitHub step summary."""
 
 import argparse
 import json
@@ -34,19 +34,12 @@ def max_expiry_line(env, today_str):
     return f"Maximum .snyk ignore expiry: {max_date}T00:00:00.000Z ({max_days} days from today)"
 
 
-def format_env_section(env_label, vulns, expiry_line, next_up=None):
+def format_env_section(env_label, vulns, expiry_line):
     """Return a list of Markdown lines for one environment's section."""
     if not vulns:
-        lines = [f"## {env_label} (Snyk vulns nearing expiry: Count=0)", ""]
-        if next_up is None:
-            lines.append("No Snyk vulnerabilities at all!")
-        else:
-            kind = "rego" if next_up["mechanism"] == "rego_limit" else ".snyk"
-            days = int(round(next_up["days_remaining"]))
-            lines.append(f"Next expiry: {next_up['full_id']} on {next_up['artifact']} in {days} days ({kind})")
-        return lines
+        return [f"## {env_label} (Snyk vulns tracked: Count=0)", "", "No Snyk vulnerabilities :-)"]
 
-    lines = [f"## {env_label} (Snyk vulns nearing expiry: Count={len(vulns)})", ""]
+    lines = [f"## {env_label} (Snyk vulns tracked: Count={len(vulns)})", ""]
     lines.append(expiry_line)
     lines.append("")
 
@@ -72,18 +65,15 @@ def format_env_section(env_label, vulns, expiry_line, next_up=None):
 
 def main():
     """Parse --env and --vulns JSON array and print a Markdown step summary to stdout."""
-    parser = argparse.ArgumentParser(description="Print Markdown expiry summary.")
-    parser.add_argument("--env",     required=True, help="Environment name, e.g. aws-beta")
-    parser.add_argument("--vulns",   required=True, help="JSON array of expiring vulns for the environment")
-    parser.add_argument("--next-up", default="null",
-                        help="JSON object for the nearest upcoming vuln outside the warning window, or 'null'")
-    parser.add_argument("--today",   default=date.today().isoformat(),
+    parser = argparse.ArgumentParser(description="Print Markdown vuln summary.")
+    parser.add_argument("--env",   required=True, help="Environment name, e.g. aws-beta")
+    parser.add_argument("--vulns", required=True, help="JSON array of tracked vulns for the environment")
+    parser.add_argument("--today", default=date.today().isoformat(),
                         help="Today's date as YYYY-MM-DD (default: system date)")
     args = parser.parse_args()
 
     vulns = json.loads(args.vulns)
-    next_up = json.loads(args.next_up)
-    lines = format_env_section(args.env, vulns, max_expiry_line(args.env, args.today), next_up)
+    lines = format_env_section(args.env, vulns, max_expiry_line(args.env, args.today))
     print("\n".join(lines).rstrip("\n"))
 
 

@@ -1,3 +1,0 @@
-## aws-beta (Snyk vulns nearing expiry: Count=0)
-
-No Snyk vulnerabilities at all!

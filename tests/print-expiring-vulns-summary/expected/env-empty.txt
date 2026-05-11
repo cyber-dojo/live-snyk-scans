@@ -1,3 +1,3 @@
-## aws-beta (Snyk vulns nearing expiry: Count=0)
+## aws-beta (Snyk vulns tracked: Count=0)
 
-Next expiry: SNYK-JS-AXIOS-1094390 on runner in 15 days (rego)
+No Snyk vulnerabilities :-)

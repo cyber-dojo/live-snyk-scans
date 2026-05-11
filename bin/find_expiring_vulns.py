@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Find Snyk vulnerabilities approaching their compliance expiry."""
+"""Find Snyk vulnerabilities that have not yet caused non-compliance."""
 
 import argparse
 import json
@@ -51,107 +51,64 @@ def kosli_get_attestation_data(flow, trail_name):
     return items[0]["attestation_data"]
 
 
-def check_dot_snyk_expiry(data, env, warning_days, now_ts):
-    """Return a result dict if the explicit .snyk ignore entry is approaching expiry, else None."""
+def dot_snyk_result(data, env, now_ts):
+    """Return a result dict if the .snyk ignore entry has a future expiry, else None."""
     if not data.get("ignore_expires_exists"):
         return None
-    warning_secs = warning_days * 86400
     secs_remaining = data["ignore_expires_ts"] - now_ts
-    if 0 < secs_remaining <= warning_secs:
-        return {
-            "env": env,
-            "trail_name": data["trail_name"],
-            "full_id": data["full_id"],
-            "severity": data["severity"],
-            "vuln_url": data["vuln_url"],
-            "mechanism": "dot_snyk_expiry",
-            "days_remaining": secs_remaining / 86400,
-            "ignore_expires": data["ignore_expires"],
-            "age_days": None,
-            "limit_days": None,
-        }
-    return None
+    if secs_remaining <= 0:
+        return None
+    return {
+        "env": env,
+        "trail_name": data["trail_name"],
+        "full_id": data["full_id"],
+        "severity": data["severity"],
+        "vuln_url": data["vuln_url"],
+        "mechanism": "dot_snyk_expiry",
+        "days_remaining": secs_remaining / 86400,
+        "ignore_expires": data["ignore_expires"],
+        "age_days": None,
+        "limit_days": None,
+        "artifact": extract_artifact_name(data["trail_name"]),
+    }
 
 
-def check_rego_limit(data, env, warning_days, now_ts, max_days):
-    """Return a result dict if the vuln is approaching the rego age limit, else None."""
+def rego_result(data, env, now_ts, max_days):
+    """Return a result dict if the vuln is still within its rego age limit, else None."""
     if data.get("ignore_expires_exists"):
         return None
     severity = data["severity"]
-    limit = max_days[severity]
+    limit = max_days.get(severity, 0)
+    if limit <= 0:
+        return None
     age_days = (now_ts - data["first_seen_ts"]) / 86400
     days_remaining = limit - age_days
-    if 0 < days_remaining <= warning_days:
-        return {
-            "env": env,
-            "trail_name": data["trail_name"],
-            "full_id": data["full_id"],
-            "severity": data["severity"],
-            "vuln_url": data["vuln_url"],
-            "mechanism": "rego_limit",
-            "days_remaining": days_remaining,
-            "ignore_expires": None,
-            "age_days": age_days,
-            "limit_days": limit,
-        }
-    return None
+    if days_remaining <= 0:
+        return None
+    return {
+        "env": env,
+        "trail_name": data["trail_name"],
+        "full_id": data["full_id"],
+        "severity": data["severity"],
+        "vuln_url": data["vuln_url"],
+        "mechanism": "rego_limit",
+        "days_remaining": days_remaining,
+        "ignore_expires": None,
+        "age_days": age_days,
+        "limit_days": limit,
+        "artifact": extract_artifact_name(data["trail_name"]),
+    }
 
 
-def _next_up_candidates(data, env, warning_days, now_ts, max_days):
-    """Return result dicts for future expiries outside the warning window on this trail."""
-    candidates = []
-    warning_secs = warning_days * 86400
-
-    if data.get("ignore_expires_exists"):
-        secs_remaining = data["ignore_expires_ts"] - now_ts
-        if secs_remaining > warning_secs:
-            candidates.append({
-                "env": env,
-                "trail_name": data["trail_name"],
-                "full_id": data["full_id"],
-                "severity": data["severity"],
-                "vuln_url": data["vuln_url"],
-                "mechanism": "dot_snyk_expiry",
-                "days_remaining": secs_remaining / 86400,
-                "ignore_expires": data["ignore_expires"],
-                "age_days": None,
-                "limit_days": None,
-                "artifact": extract_artifact_name(data["trail_name"]),
-            })
-    else:
-        severity = data["severity"]
-        limit = max_days.get(severity, 0)
-        if limit > 0:
-            age_days = (now_ts - data["first_seen_ts"]) / 86400
-            days_remaining = limit - age_days
-            if days_remaining > warning_days:
-                candidates.append({
-                    "env": env,
-                    "trail_name": data["trail_name"],
-                    "full_id": data["full_id"],
-                    "severity": data["severity"],
-                    "vuln_url": data["vuln_url"],
-                    "mechanism": "rego_limit",
-                    "days_remaining": days_remaining,
-                    "ignore_expires": None,
-                    "age_days": age_days,
-                    "limit_days": limit,
-                    "artifact": extract_artifact_name(data["trail_name"]),
-                })
-
-    return candidates
-
-
-def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
-    """Return (expiring_list, next_up_or_None) for a single environment."""
+def find_vulns_for_env(env, now_ts, cutoff_ts):
+    """Return all currently-compliant vulns sorted by days_remaining for a single environment."""
     params_file = f"rego.params.{env}.json"
     with open(params_file) as f:
         params = json.load(f)
     max_days = params["max_days_by_severity"]
 
     flow = f"snyk-{env}-per-vuln"
-    results = []
-    next_up_candidates = []
+    vulns = []
     page = 1
 
     while True:
@@ -164,13 +121,12 @@ def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
             if trail["last_modified_at"] < cutoff_ts:
                 continue
             data = kosli_get_attestation_data(flow, trail["name"])
-            result = check_dot_snyk_expiry(data, env, warning_days, now_ts)
+            result = dot_snyk_result(data, env, now_ts)
             if result:
-                results.append(result)
-            result = check_rego_limit(data, env, warning_days, now_ts, max_days)
+                vulns.append(result)
+            result = rego_result(data, env, now_ts, max_days)
             if result:
-                results.append(result)
-            next_up_candidates.extend(_next_up_candidates(data, env, warning_days, now_ts, max_days))
+                vulns.append(result)
 
         oldest_ts = min(t["last_modified_at"] for t in trails)
         if oldest_ts < cutoff_ts:
@@ -180,15 +136,13 @@ def find_expiring_vulns_for_env(env, warning_days, now_ts, cutoff_ts):
             break
         page += 1
 
-    next_up_candidates.sort(key=lambda c: c["days_remaining"])
-    return results, next_up_candidates[0] if next_up_candidates else None
+    vulns.sort(key=lambda v: v["days_remaining"])
+    return vulns
 
 
 def main():
-    """Parse args, find expiring vulns for all specified envs, print JSON to stdout."""
-    parser = argparse.ArgumentParser(description="Find Snyk vulns approaching expiry.")
-    parser.add_argument("--warning-days", type=int, required=True,
-                        help="Warn if expiry is within this many days.")
+    """Parse args, find all currently-compliant vulns, print JSON to stdout."""
+    parser = argparse.ArgumentParser(description="Find Snyk vulns with time remaining before non-compliance.")
     parser.add_argument("--envs", required=True,
                         help="Comma-separated list of environments, e.g. aws-beta,aws-prod")
     args = parser.parse_args()
@@ -197,17 +151,12 @@ def main():
     cutoff_ts = now_ts - 48 * 3600
     envs = [e.strip() for e in args.envs.split(",")]
 
-    expiring = []
-    env_next_ups = []
+    all_vulns = []
     for env in envs:
-        env_results, env_next_up = find_expiring_vulns_for_env(env, args.warning_days, now_ts, cutoff_ts)
-        expiring.extend(env_results)
-        if env_next_up is not None:
-            env_next_ups.append(env_next_up)
+        all_vulns.extend(find_vulns_for_env(env, now_ts, cutoff_ts))
 
-    env_next_ups.sort(key=lambda c: c["days_remaining"])
-    next_up = env_next_ups[0] if env_next_ups else None
-    print(json.dumps({"expiring": expiring, "next_up": next_up}))
+    all_vulns.sort(key=lambda v: v["days_remaining"])
+    print(json.dumps({"vulns": all_vulns}))
     sys.exit(0)
 
 

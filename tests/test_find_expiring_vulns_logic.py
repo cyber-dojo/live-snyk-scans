@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit tests for check_dot_snyk_expiry and check_rego_limit."""
+"""Unit tests for dot_snyk_result and rego_result."""
 
 import os
 import sys
@@ -9,9 +9,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'bin'))
 import find_expiring_vulns  # noqa: E402
 
 NOW_TS = 1748736000.0   # 2025-06-01 00:00:00 UTC
-WARNING_DAYS = 7
-PROD_MAX_DAYS = {"critical": 3, "high": 7, "medium": 30, "low": 90}
-BETA_MAX_DAYS = {"critical": 0, "high": 7, "medium": 30, "low": 90}
+PROD_MAX_DAYS = {"critical": 0, "high": 2, "medium": 4, "low": 6}
+BETA_MAX_DAYS = {"critical": 1, "high": 2, "medium": 4, "low": 6}
 
 
 def _high_vuln_no_ignore(first_seen_ts=None):
@@ -24,139 +23,77 @@ def _high_vuln_no_ignore(first_seen_ts=None):
         "ignore_expires_exists": False,
         "ignore_expires_ts": 0,
         "ignore_expires": "",
-        "first_seen_ts": first_seen_ts if first_seen_ts is not None else NOW_TS - 4 * 86400,
+        "first_seen_ts": first_seen_ts if first_seen_ts is not None else NOW_TS - 1 * 86400,
     }
 
 
-class TestCheckDotSnykExpiry(unittest.TestCase):
+class TestDotSnykResult(unittest.TestCase):
 
-    def test_returns_result_when_expiry_within_warning_window(self):
-        """Expiry 3 days out with a 7-day warning window produces a result."""
+    def test_c7f2a301(self):
+        """Returns a result dict when a future .snyk ignore entry exists."""
         data = {**_high_vuln_no_ignore(),
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS + 3 * 86400,
                 "ignore_expires": "2025-06-04 00:00:00+00:00"}
-        result = find_expiring_vulns.check_dot_snyk_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
+        result = find_expiring_vulns.dot_snyk_result(data, "aws-prod", NOW_TS)
         self.assertIsNotNone(result)
         self.assertEqual(result["mechanism"], "dot_snyk_expiry")
         self.assertAlmostEqual(result["days_remaining"], 3.0, places=5)
         self.assertEqual(result["env"], "aws-prod")
+        self.assertEqual(result["artifact"], "creator")
+        self.assertIsNone(result["age_days"])
+        self.assertIsNone(result["limit_days"])
 
-    def test_returns_none_when_expiry_beyond_warning_window(self):
-        """Expiry 10 days out is not yet close enough to warn."""
-        data = {**_high_vuln_no_ignore(),
-                "ignore_expires_exists": True,
-                "ignore_expires_ts": NOW_TS + 10 * 86400,
-                "ignore_expires": "2025-06-11 00:00:00+00:00"}
-        result = find_expiring_vulns.check_dot_snyk_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
+    def test_c7f2a302(self):
+        """Returns None when ignore_expires_exists is False."""
+        result = find_expiring_vulns.dot_snyk_result(_high_vuln_no_ignore(), "aws-prod", NOW_TS)
         self.assertIsNone(result)
 
-    def test_returns_none_when_expiry_already_passed(self):
-        """An already-expired ignore is non-compliant, not approaching-expiry."""
+    def test_c7f2a303(self):
+        """Returns None when the .snyk ignore entry has already expired."""
         data = {**_high_vuln_no_ignore(),
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS - 1,
                 "ignore_expires": "2025-05-31 23:59:59+00:00"}
-        result = find_expiring_vulns.check_dot_snyk_expiry(data, "aws-prod", WARNING_DAYS, NOW_TS)
-        self.assertIsNone(result)
-
-    def test_returns_none_when_no_ignore_entry(self):
-        """check_dot_snyk_expiry does not apply when there is no .snyk ignore entry."""
-        result = find_expiring_vulns.check_dot_snyk_expiry(
-            _high_vuln_no_ignore(), "aws-prod", WARNING_DAYS, NOW_TS)
+        result = find_expiring_vulns.dot_snyk_result(data, "aws-prod", NOW_TS)
         self.assertIsNone(result)
 
 
-class TestCheckRegoLimit(unittest.TestCase):
+class TestRegoResult(unittest.TestCase):
 
-    def test_returns_result_when_age_approaching_limit(self):
-        """High vuln 4 days old against a 7-day limit has 3 days remaining."""
-        data = _high_vuln_no_ignore(first_seen_ts=NOW_TS - 4 * 86400)
-        result = find_expiring_vulns.check_rego_limit(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
+    def test_c7f2a304(self):
+        """Returns a result dict when age is within the severity limit."""
+        data = _high_vuln_no_ignore(first_seen_ts=NOW_TS - 1 * 86400)
+        result = find_expiring_vulns.rego_result(data, "aws-prod", NOW_TS, PROD_MAX_DAYS)
         self.assertIsNotNone(result)
         self.assertEqual(result["mechanism"], "rego_limit")
-        self.assertAlmostEqual(result["days_remaining"], 3.0, places=5)
-        self.assertEqual(result["limit_days"], 7)
+        self.assertAlmostEqual(result["days_remaining"], 1.0, places=5)
+        self.assertAlmostEqual(result["age_days"], 1.0, places=5)
+        self.assertEqual(result["limit_days"], 2)
+        self.assertEqual(result["artifact"], "creator")
+        self.assertIsNone(result["ignore_expires"])
 
-    def test_returns_none_when_age_far_from_limit(self):
-        """Low vuln 1 day old against a 90-day limit is not close enough to warn."""
+    def test_c7f2a305(self):
+        """Returns None when a .snyk ignore entry exists (dot_snyk_result handles it)."""
         data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS - 1 * 86400),
-                "severity": "low",
-                "trail_name": "creator-low-SNYK-GOLANG-NETHTTP-3321444"}
-        result = find_expiring_vulns.check_rego_limit(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
-        self.assertIsNone(result)
-
-    def test_returns_none_when_limit_already_exceeded(self):
-        """High vuln 10 days old against a 7-day limit is already non-compliant."""
-        data = _high_vuln_no_ignore(first_seen_ts=NOW_TS - 10 * 86400)
-        result = find_expiring_vulns.check_rego_limit(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
-        self.assertIsNone(result)
-
-    def test_returns_none_when_ignore_entry_exists(self):
-        """check_rego_limit does not apply when a .snyk ignore entry exists (check_dot_snyk_expiry handles it)."""
-        data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS - 4 * 86400),
                 "ignore_expires_exists": True,
                 "ignore_expires_ts": NOW_TS + 3 * 86400}
-        result = find_expiring_vulns.check_rego_limit(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
+        result = find_expiring_vulns.rego_result(data, "aws-prod", NOW_TS, PROD_MAX_DAYS)
         self.assertIsNone(result)
 
-    def test_returns_none_for_critical_in_beta_where_limit_is_zero(self):
-        """Critical vulns in aws-beta have a 0-day limit so days_remaining is always negative."""
-        data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS - 1),
+    def test_c7f2a306(self):
+        """Returns None when the severity limit is zero (critical in aws-prod)."""
+        data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS),
                 "severity": "critical",
                 "trail_name": "creator-critical-SNYK-GOLANG-NETHTTP-3321444"}
-        result = find_expiring_vulns.check_rego_limit(
-            data, "aws-beta", WARNING_DAYS, NOW_TS, BETA_MAX_DAYS)
+        result = find_expiring_vulns.rego_result(data, "aws-prod", NOW_TS, PROD_MAX_DAYS)
         self.assertIsNone(result)
 
-
-class TestNextUpCandidates(unittest.TestCase):
-
-    def test_b4e91c01(self):
-        """Dot-snyk ignore 10 days out (outside 7-day window) is a next_up candidate."""
-        data = {**_high_vuln_no_ignore(),
-                "ignore_expires_exists": True,
-                "ignore_expires_ts": NOW_TS + 10 * 86400,
-                "ignore_expires": "2025-06-11 00:00:00+00:00"}
-        candidates = find_expiring_vulns._next_up_candidates(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
-        self.assertEqual(len(candidates), 1)
-        self.assertAlmostEqual(candidates[0]["days_remaining"], 10.0, places=5)
-        self.assertEqual(candidates[0]["mechanism"], "dot_snyk_expiry")
-        self.assertEqual(candidates[0]["artifact"], "creator")
-
-    def test_b4e91c02(self):
-        """Dot-snyk ignore within the warning window is not a next_up candidate."""
-        data = {**_high_vuln_no_ignore(),
-                "ignore_expires_exists": True,
-                "ignore_expires_ts": NOW_TS + 3 * 86400,
-                "ignore_expires": "2025-06-04 00:00:00+00:00"}
-        candidates = find_expiring_vulns._next_up_candidates(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
-        self.assertEqual(candidates, [])
-
-    def test_b4e91c03(self):
-        """Rego-limited medium vuln 1 day old against a 30-day limit (29 days remaining) is a next_up candidate."""
-        data = {**_high_vuln_no_ignore(first_seen_ts=NOW_TS - 1 * 86400),
-                "severity": "medium",
-                "trail_name": "creator-medium-SNYK-GOLANG-NETHTTP-3321444"}
-        candidates = find_expiring_vulns._next_up_candidates(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
-        self.assertEqual(len(candidates), 1)
-        self.assertAlmostEqual(candidates[0]["days_remaining"], 29.0, places=5)
-        self.assertEqual(candidates[0]["mechanism"], "rego_limit")
-        self.assertEqual(candidates[0]["artifact"], "creator")
-
-    def test_b4e91c04(self):
-        """Rego-limited vuln already within the warning window is not a next_up candidate."""
-        data = _high_vuln_no_ignore(first_seen_ts=NOW_TS - 4 * 86400)
-        candidates = find_expiring_vulns._next_up_candidates(
-            data, "aws-prod", WARNING_DAYS, NOW_TS, PROD_MAX_DAYS)
-        self.assertEqual(candidates, [])
+    def test_c7f2a307(self):
+        """Returns None when the vuln age has exceeded the severity limit."""
+        data = _high_vuln_no_ignore(first_seen_ts=NOW_TS - 3 * 86400)
+        result = find_expiring_vulns.rego_result(data, "aws-prod", NOW_TS, PROD_MAX_DAYS)
+        self.assertIsNone(result)
 
 
 if __name__ == "__main__":
