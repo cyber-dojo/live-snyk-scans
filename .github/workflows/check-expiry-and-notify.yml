@@ -12,12 +12,6 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
-  push:
-    branches: [main]
-    paths:
-      - snyk-vuln-compliance.rego
-      - rego.params.aws-beta.json
-      - rego.params.aws-prod.json
 
 env:
   KOSLI_HOST:           ${{vars.KOSLI_HOST}}
