@@ -63,7 +63,7 @@ Example — `rego.params.aws-prod.json`:
         "critical": 0,
         "high":     2,
         "medium":   4,
-        "low":      6
+        "low":      10
     }
 }
 ```
