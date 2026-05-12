@@ -91,6 +91,7 @@ env:
 
   SNYK_POLICY_FILENAME: .snyk
   SNYK_SARIF_FILENAME:  snyk.container.test.json
+  SNYK_CAT_NAME:        single-snyk-vuln
 
   REGO_POLICY_FILENAME: snyk-vuln-compliance.rego
   REGO_POLICY_URL:      https://raw.githubusercontent.com/cyber-dojo/snyk-scanning/main/snyk-vuln-compliance.rego
@@ -99,40 +100,8 @@ env:
   REGO_PARAMS_URL:      https://raw.githubusercontent.com/cyber-dojo/snyk-scanning/main/rego.params.${{inputs.kosli_env}}.json
 
 jobs:
-  create-snyk-cat:
-    runs-on: ubuntu-latest
-    outputs:
-      name: ${{steps.create.outputs.name}}
-    steps:
-      - uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@v6
-        with:
-          repository: cyber-dojo/snyk-scanning
-          ref: main
-          fetch-depth: 1
-
-      - name: Setup Kosli CLI
-        uses: kosli-dev/setup-cli-action@v3
-        with:
-          version: ${{vars.KOSLI_CLI_VERSION}}
-
-      - name: Create custom-attestation-type
-        id: create
-        run: |
-          name=single-snyk-vuln
-          kosli create attestation-type \
-            ${name} \
-            --schema single-snyk-vuln.schema.json \
-            --jq 'true'
-          echo "name=${name}" >> ${GITHUB_OUTPUT}
-
-
   find-snyk-vulns:
     runs-on: ubuntu-latest
-    needs: [create-snyk-cat]
     outputs:
       fingerprint: ${{steps.set-fingerprint.outputs.fingerprint}}
       vulns: ${{steps.set-vulns.outputs.vulns}}
@@ -170,6 +139,12 @@ jobs:
         uses: kosli-dev/setup-cli-action@v3
         with:
           version: ${{vars.KOSLI_CLI_VERSION}}
+
+      - name: Create custom-attestation-type
+        run:
+          kosli create attestation-type ${SNYK_CAT_NAME}
+            --schema single-snyk-vuln.schema.json
+            --jq 'true'
 
       - name: Set output fingerprint
         id: set-fingerprint
@@ -284,7 +259,7 @@ jobs:
 
 
   attest-individual-snyk-vulns:
-    needs: [create-snyk-cat, find-snyk-vulns]
+    needs: [find-snyk-vulns]
     if: needs.find-snyk-vulns.outputs.vulns != '[]'
     runs-on: ubuntu-latest
     env:
@@ -341,7 +316,7 @@ jobs:
             --annotate snyk_URL=${{matrix.vuln_url}}
             --attestation-data ${VULN_FILENAME}
             --name snyk
-            --type ${{needs.create-snyk-cat.outputs.name}}
+            --type ${SNYK_CAT_NAME}
 
       - name: Evaluate trail and add to vuln data
         run: |
