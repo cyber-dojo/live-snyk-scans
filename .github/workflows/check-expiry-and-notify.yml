@@ -1,29 +1,16 @@
 name: Check Expiry and Notify
 
 on:
-  workflow_dispatch:
-    inputs:
-      kosli_env:
-        required: true
-        type: choice
-        options:
-          - aws-beta
-          - aws-prod
   workflow_call:
     inputs:
       kosli_env:
         required: true
         type: string
     secrets:
-      KOSLI_API_TOKEN:
-        required: true
       SLACK_WEBHOOK_URL:
         required: true
 
 env:
-  KOSLI_HOST:           ${{vars.KOSLI_HOST}}
-  KOSLI_ORG:            ${{vars.KOSLI_ORG}}
-  KOSLI_API_TOKEN:      ${{secrets.KOSLI_API_TOKEN}}
   GITHUB_RUN_URL:       https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}
   RESPONSE_GUIDE_URL:   https://github.com/${{github.repository}}/blob/main/docs/expiry-response.md
 
@@ -33,15 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup Kosli CLI
-        uses: kosli-dev/setup-cli-action@v3
+      - name: Download vuln files from this run
+        uses: actions/download-artifact@v8
         with:
-          version: ${{vars.KOSLI_CLI_VERSION}}
+          pattern: vuln-*.json
+          merge-multiple: true
+          path: vulns
 
       - name: Find vulns
         run: |
           RESULT=$(./bin/find_expiring_vulns.py \
-            --envs ${{ inputs.kosli_env }})
+            --env ${{ inputs.kosli_env }} \
+            --vuln-dir vulns)
           {
             echo "VULNS_JSON<<EOF"
             echo "${RESULT}" | jq --compact-output '.vulns'

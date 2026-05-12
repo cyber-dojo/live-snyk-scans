@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Find Snyk vulnerabilities that have not yet caused non-compliance."""
+"""Read vuln-*.json files and print as JSON those still within their compliance window, sorted by days_remaining ascending."""
 
 import argparse
+import glob
 import json
+import os
 import re
-import subprocess
 import sys
 import time
 
@@ -15,40 +16,6 @@ def extract_artifact_name(trail_name):
     if match:
         return trail_name[:match.start()]
     return trail_name
-
-
-def kosli_list_trails(flow, page, page_limit):
-    """Call kosli list trails and return the parsed JSON response."""
-    result = subprocess.run(
-        [
-            "kosli", "list", "trails",
-            "--flow", flow,
-            "--page", str(page),
-            "--page-limit", str(page_limit),
-            "--output", "json",
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return json.loads(result.stdout)
-
-
-def kosli_get_attestation_data(flow, trail_name):
-    """Call kosli get attestation snyk and return the attestation_data dict."""
-    result = subprocess.run(
-        [
-            "kosli", "get", "attestation", "snyk",
-            "--flow", flow,
-            "--trail", trail_name,
-            "--output", "json",
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    items = json.loads(result.stdout)
-    return items[0]["attestation_data"]
 
 
 def dot_snyk_result(data, env, now_ts):
@@ -100,63 +67,75 @@ def rego_result(data, env, now_ts, max_days):
     }
 
 
-def find_vulns_for_env(env, now_ts, cutoff_ts):
-    """Return all currently-compliant vulns sorted by days_remaining for a single environment."""
-    params_file = f"rego.params.{env}.json"
+_EXAMPLE = """
+example output (2 vulns, sorted by days_remaining ascending):
+
+  {
+    "vulns": [
+      {
+        "env": "aws-beta",
+        "trail_name": "creator-low-SNYK-ALPINE322-NGHTTP2-16426989",
+        "full_id": "SNYK-ALPINE322-NGHTTP2-16426989",
+        "severity": "low",
+        "vuln_url": "https://security.snyk.io/vuln/SNYK-ALPINE322-NGHTTP2-16426989",
+        "mechanism": "rego_limit",
+        "days_remaining": 4.84,
+        "ignore_expires": null,
+        "age_days": 5.16,
+        "limit_days": 10,
+        "artifact": "creator"
+      },
+      {
+        "env": "aws-beta",
+        "trail_name": "runner-high-SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157",
+        "full_id": "SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157",
+        "severity": "high",
+        "vuln_url": "https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157",
+        "mechanism": "dot_snyk_expiry",
+        "days_remaining": 19.80,
+        "ignore_expires": "2026-06-01 10:53:10.182000+00:00",
+        "age_days": null,
+        "limit_days": null,
+        "artifact": "runner"
+      }
+    ]
+  }
+"""
+
+
+def main():
+    """Parse args, read vuln JSON files from this run, print sorted JSON to stdout."""
+    parser = argparse.ArgumentParser(
+        description="Read vuln-*.json files and print as JSON those still within their compliance window, sorted by days_remaining ascending.",
+        epilog=_EXAMPLE,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--env", required=True,
+                        help="Environment name, e.g. aws-beta")
+    parser.add_argument("--vuln-dir", required=True,
+                        help="Directory to read vuln-*.json files from")
+    args = parser.parse_args()
+
+    params_file = f"rego.params.{args.env}.json"
     with open(params_file) as f:
         params = json.load(f)
     max_days = params["max_days_by_severity"]
 
-    flow = f"snyk-{env}-per-vuln"
+    now_ts = time.time()
     vulns = []
-    page = 1
 
-    while True:
-        response = kosli_list_trails(flow, page, 200)
-        trails = response.get("data", [])
-        if not trails:
-            break
-
-        for trail in trails:
-            if trail["last_modified_at"] < cutoff_ts:
-                continue
-            data = kosli_get_attestation_data(flow, trail["name"])
-            result = dot_snyk_result(data, env, now_ts)
-            if result:
-                vulns.append(result)
-            result = rego_result(data, env, now_ts, max_days)
-            if result:
-                vulns.append(result)
-
-        oldest_ts = min(t["last_modified_at"] for t in trails)
-        if oldest_ts < cutoff_ts:
-            break
-        pagination = response.get("pagination", {})
-        if page >= pagination.get("page_count", 1):
-            break
-        page += 1
+    for path in sorted(glob.glob(os.path.join(args.vuln_dir, "vuln-*.json"))):
+        with open(path) as f:
+            data = json.load(f)
+        result = dot_snyk_result(data, args.env, now_ts)
+        if result:
+            vulns.append(result)
+        result = rego_result(data, args.env, now_ts, max_days)
+        if result:
+            vulns.append(result)
 
     vulns.sort(key=lambda v: v["days_remaining"])
-    return vulns
-
-
-def main():
-    """Parse args, find all currently-compliant vulns, print JSON to stdout."""
-    parser = argparse.ArgumentParser(description="Find Snyk vulns with time remaining before non-compliance.")
-    parser.add_argument("--envs", required=True,
-                        help="Comma-separated list of environments, e.g. aws-beta,aws-prod")
-    args = parser.parse_args()
-
-    now_ts = time.time()
-    cutoff_ts = now_ts - 48 * 3600
-    envs = [e.strip() for e in args.envs.split(",")]
-
-    all_vulns = []
-    for env in envs:
-        all_vulns.extend(find_vulns_for_env(env, now_ts, cutoff_ts))
-
-    all_vulns.sort(key=lambda v: v["days_remaining"])
-    print(json.dumps({"vulns": all_vulns}))
+    print(json.dumps({"vulns": vulns}))
     sys.exit(0)
 
 

@@ -79,7 +79,6 @@ jobs:
     with:
       kosli_env: ${{needs.setup-flow.outputs.kosli_env}}
     secrets:
-      KOSLI_API_TOKEN:   ${{secrets.KOSLI_API_TOKEN}}
       SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
 
 

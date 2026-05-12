@@ -1,28 +1,18 @@
 #!/usr/bin/env python3
-"""Print a Markdown summary of tracked Snyk vulnerabilities for the GitHub step summary."""
+"""Read a JSON array of vulns and print a Markdown step summary with one table per Snyk severity level, sorted by days_remaining ascending."""
 
 import argparse
 import json
-import re
 import sys
 from datetime import date, timedelta
 
 
-SEVERITY_ORDER = ["critical", "high", "medium", "low"]
+SEVERITY_ORDER = ["low", "medium", "high", "critical"]
 
 
-def extract_artifact_name(trail_name):
-    """Extract artifact name by taking the trail_name segment before the first -severity- part."""
-    match = re.search(r'-(critical|high|medium|low)-', trail_name)
-    if match:
-        return trail_name[:match.start()]
-    return trail_name
-
-
-def severity_sort_key(vuln):
-    """Return a sort tuple (severity_rank, days_remaining) for ordering rows in a table."""
-    rank = SEVERITY_ORDER.index(vuln["severity"]) if vuln["severity"] in SEVERITY_ORDER else 99
-    return (rank, vuln["days_remaining"])
+def mechanism_label(mechanism):
+    """Return a short display label for the mechanism."""
+    return "rego" if mechanism == "rego_limit" else ".snyk"
 
 
 def max_expiry_line(env, today_str):
@@ -34,40 +24,76 @@ def max_expiry_line(env, today_str):
     return f"Maximum .snyk ignore expiry: {max_date}T00:00:00.000Z ({max_days} days from today)"
 
 
+def format_severity_table(severity, vulns):
+    """Return a list of Markdown lines for one severity's table, sorted by days_remaining."""
+    sev_vulns = sorted(
+        [v for v in vulns if v["severity"] == severity],
+        key=lambda v: v["days_remaining"],
+    )
+    lines = [f"### {severity.capitalize()} (Count={len(sev_vulns)})", ""]
+    if not sev_vulns:
+        lines.append("No vulnerabilities.")
+    else:
+        lines.append("| Artifact | Days remaining | Mechanism | Vuln ID |")
+        lines.append("|----------|----------------|-----------|---------|")
+        for v in sev_vulns:
+            days = int(round(v["days_remaining"]))
+            mech = mechanism_label(v["mechanism"])
+            link = f"[{v['full_id']}]({v['vuln_url']})"
+            lines.append(f"| {v['artifact']} | {days} | {mech} | {link} |")
+    lines.append("")
+    return lines
+
+
 def format_env_section(env_label, vulns, expiry_line):
     """Return a list of Markdown lines for one environment's section."""
-    if not vulns:
-        return [f"## {env_label} (Snyk vulns tracked: Count=0)", "", "No Snyk vulnerabilities :-)"]
-
     lines = [f"## {env_label} (Snyk vulns tracked: Count={len(vulns)})", ""]
-    lines.append(expiry_line)
-    lines.append("")
-
-    artifacts = {}
-    for v in vulns:
-        artifact = extract_artifact_name(v["trail_name"])
-        artifacts.setdefault(artifact, []).append(v)
-
-    for artifact in sorted(artifacts):
-        artifact_vulns = sorted(artifacts[artifact], key=severity_sort_key)
-        lines.append(f"### {artifact} (Count={len(artifact_vulns)})")
+    if vulns:
+        lines.append(expiry_line)
         lines.append("")
-        lines.append("| Level | Days remaining | Mechanism | Vuln ID |")
-        lines.append("|-------|----------------|-----------|---------|")
-        for v in artifact_vulns:
-            days = int(round(v["days_remaining"]))
-            link = f"[{v['full_id']}]({v['vuln_url']})"
-            lines.append(f"| {v['severity']} | {days} | {v['mechanism']} | {link} |")
-        lines.append("")
-
+    for severity in SEVERITY_ORDER:
+        lines.extend(format_severity_table(severity, vulns))
     return lines
+
+
+_EXAMPLE = """
+example output:
+
+  ## aws-beta (Snyk vulns tracked: Count=2)
+
+  Maximum .snyk ignore expiry: 2026-06-11T00:00:00.000Z (30 days from today)
+
+  ### Low (Count=1)
+
+  | Artifact | Days remaining | Mechanism | Vuln ID |
+  |----------|----------------|-----------|---------|
+  | creator | 5 | rego | [SNYK-ALPINE322-NGHTTP2-16426989](https://security.snyk.io/vuln/SNYK-ALPINE322-NGHTTP2-16426989) |
+
+  ### Medium (Count=0)
+
+  No vulnerabilities.
+
+  ### High (Count=1)
+
+  | Artifact | Days remaining | Mechanism | Vuln ID |
+  |----------|----------------|-----------|---------|
+  | runner | 20 | .snyk | [SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157) |
+
+  ### Critical (Count=0)
+
+  No vulnerabilities.
+"""
 
 
 def main():
     """Parse --env and --vulns JSON array and print a Markdown step summary to stdout."""
-    parser = argparse.ArgumentParser(description="Print Markdown vuln summary.")
+    parser = argparse.ArgumentParser(
+        description="Read a JSON array of vulns and print a Markdown step summary with one table per Snyk severity level, sorted by days_remaining ascending.",
+        epilog=_EXAMPLE,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument("--env",   required=True, help="Environment name, e.g. aws-beta")
-    parser.add_argument("--vulns", required=True, help="JSON array of tracked vulns for the environment")
+    parser.add_argument("--vulns", required=True, help="JSON array of vuln objects as output by find_expiring_vulns.py")
     parser.add_argument("--today", default=date.today().isoformat(),
                         help="Today's date as YYYY-MM-DD (default: system date)")
     args = parser.parse_args()
