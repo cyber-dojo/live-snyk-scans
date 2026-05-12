@@ -72,3 +72,21 @@ jobs:
       snyk_token:        ${{secrets.SNYK_TOKEN}}
       kosli_api_token:   ${{secrets.KOSLI_API_TOKEN}}
       slack_webhook_url: ${{secrets.SLACK_WEBHOOK_URL}}
+
+
+  notify-on-failure:
+    needs: [setup-flow, scan-aws-beta]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Send Slack failure notification
+        uses: ./.github/actions/send-slack-message
+        with:
+          slack_url: ${{secrets.SLACK_WEBHOOK_URL}}
+          message: "Snyk scan FAILED for ${{env.KOSLI_ENV}}.\nSee ${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}"
