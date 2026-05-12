@@ -3,7 +3,7 @@ A repo holding CI workflows to run Snyk container tests on the Docker images run
 [aws-prod](https://app.kosli.com/cyber-dojo/environments/aws-prod/events/) runtime environments.
 
 ## The main problems
-1. A snyk container scan produces a sarif output file, with ignored vulnreabilities from the .snyk policy file already filtered out. We'd prefer a complete picture of all the vulnerabilities.
+1. A snyk container scan produces a sarif output file, with ignored vulnerabilities from the .snyk policy file already filtered out. We'd prefer a complete picture of all the vulnerabilities.
 2. The `kosli attest snyk` command creates a non-compliant attestation for _any_ new attestation not in the .snyk file. There are fairly frequent bursts of new low-severity vulnerabilities and we would like to control whether these block the main development workflow.
 
 ## TL;DR of the solution
@@ -28,8 +28,11 @@ The inner trail-level attestations (one per Snyk vulnerability) _always_ take pl
 
 ### `aws-beta.yml` / `aws-prod.yml`
 
-Triggered daily at 01:00 UTC or manually via `workflow_dispatch`. Calls
-`env_snyk_test.yml` for the target environment.
+Triggered daily, manually via `workflow_dispatch`, or on a push
+to `main` that changes `snyk-vuln-compliance.rego` or the relevant
+`rego.params.{env}.json`. Calls `env_snyk_test.yml` for the target environment,
+then calls `check-expiry-and-notify.yml` to report on upcoming compliance
+expirations via Slack.
 
 | Workflow | Kosli flow (per-artifact) | Kosli flow (per-vuln) |
 |---|---|---|
@@ -78,6 +81,25 @@ Called by `aws-beta.yml` and `aws-prod.yml`. Queries Kosli for the artifacts cur
 |---|---|---|
 | `kosli_env` | yes | Name of the Kosli environment to scan |
 | `kosli_flow` | yes | Name of the Kosli flow to attest evidence in |
+
+### `check-expiry-and-notify.yml` (reusable)
+
+Called by `aws-beta.yml` and `aws-prod.yml` after the environment scan completes.
+Downloads all per-vulnerability artifact files produced during the current run,
+identifies the soonest-expiring vulnerability, and sends a Slack message
+summarising it. Also writes a step summary to the GitHub Actions run page.
+
+**Inputs**
+
+| Name | Required | Description |
+|---|---|---|
+| `kosli_env` | yes | Name of the Kosli environment that was scanned |
+
+**Secrets**
+
+| Name | Required | Description |
+|---|---|---|
+| `SLACK_WEBHOOK_URL` | yes | Slack incoming webhook URL |
 
 ### `artifact_snyk_test.yml` (reusable)
 
