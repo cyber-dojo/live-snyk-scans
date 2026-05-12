@@ -221,7 +221,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: ${{env.SNYK_SARIF_FILENAME}}
+          name: ${{inputs.repo_name}}-${{env.SNYK_SARIF_FILENAME}}
           path: ${{env.SNYK_SARIF_FILENAME}}
 
       - name: Get the real .snyk file
@@ -426,7 +426,7 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: ${{env.SNYK_SARIF_FILENAME}}
+          name: ${{inputs.repo_name}}-${{env.SNYK_SARIF_FILENAME}}
 
       - name: Set vuln output
         run: |
