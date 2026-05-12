@@ -69,13 +69,22 @@ jobs:
       kosli_env: ${{needs.setup-flow.outputs.kosli_env}}
       kosli_flow: ${{needs.setup-flow.outputs.kosli_flow}}
     secrets:
-      snyk_token:        ${{secrets.SNYK_TOKEN}}
-      kosli_api_token:   ${{secrets.KOSLI_API_TOKEN}}
-      slack_webhook_url: ${{secrets.SLACK_WEBHOOK_URL}}
+      snyk_token:      ${{secrets.SNYK_TOKEN}}
+      kosli_api_token: ${{secrets.KOSLI_API_TOKEN}}
+
+
+  notify-next-expiry:
+    needs: [setup-flow, scan-aws-beta]
+    uses: ./.github/workflows/check-expiry-and-notify.yml
+    with:
+      kosli_env: ${{needs.setup-flow.outputs.kosli_env}}
+    secrets:
+      KOSLI_API_TOKEN:   ${{secrets.KOSLI_API_TOKEN}}
+      SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
 
 
   notify-on-failure:
-    needs: [setup-flow, scan-aws-beta]
+    needs: [setup-flow, scan-aws-beta, notify-next-expiry]
     if: failure()
     runs-on: ubuntu-latest
     steps:
