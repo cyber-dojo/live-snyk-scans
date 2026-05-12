@@ -53,7 +53,9 @@ jobs:
               else
                 .vulns[0] as $v |
                 ($v.days_remaining | ceil) as $d |
-                "Next: \($v.full_id) (\($v.severity)) on \($v.artifact) will cause non-compliance in \($d) \(if $d == 1 then "day" else "days" end) (\(if $v.mechanism == "rego_limit" then "rego" else ".snyk" end))\nResponse guide: \(env.RESPONSE_GUIDE_URL)"
+                (if $d == 1 then "day" else "days" end) as $days |
+                (if $v.mechanism == "rego_limit" then "rego" else ".snyk" end) as $mech |
+                "Next: \($v.full_id) (\($v.severity)) on \($v.artifact) will cause non-compliance in \($d) \($days) (\($mech))"
               end'
             echo "EOF"
           } >> ${GITHUB_ENV}
@@ -62,7 +64,7 @@ jobs:
         uses: ./.github/actions/send-slack-message
         with:
           slack_url: ${{secrets.SLACK_WEBHOOK_URL}}
-          message: "${{ inputs.kosli_env }}: ${SLACK_MESSAGE}\nSee ${GITHUB_RUN_URL}"
+          message: "${{ inputs.kosli_env }}: ${SLACK_MESSAGE}\nSee ${GITHUB_RUN_URL}\nResponse guide: ${RESPONSE_GUIDE_URL}"
 
       - name: Send Slack -- workflow failure
         if: failure()
