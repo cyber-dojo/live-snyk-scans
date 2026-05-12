@@ -62,7 +62,7 @@ jobs:
         uses: ./.github/actions/send-slack-message
         with:
           slack_url: ${{secrets.SLACK_WEBHOOK_URL}}
-          message: "${{ inputs.kosli_env }}: ${SLACK_MESSAGE}"
+          message: "${{ inputs.kosli_env }}: ${SLACK_MESSAGE}\nSee ${GITHUB_RUN_URL}"
 
       - name: Send Slack -- workflow failure
         if: failure()
