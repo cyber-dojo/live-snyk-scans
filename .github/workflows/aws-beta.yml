@@ -2,8 +2,8 @@ name: Live Snyk Test aws-beta
 
 on:
   workflow_dispatch:
-  schedule: # At 01:00 UTC every day; cron delays of a few hours are not unusual in high load
-    - cron: '0 1 * * *'
+  schedule: # At 01:39 UTC every day; cron delays of a few hours are not unusual in high load
+    - cron: '39 1 * * *'
   push:
     branches: [main]
     paths:
