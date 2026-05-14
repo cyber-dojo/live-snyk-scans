@@ -50,6 +50,7 @@ Example step summary entry:
 
 Options:
 - Fix the underlying dependency (removes the vuln entirely)
-- Extend the expiry date in .snyk (if fixing is not yet feasible)
+- Extend the expiry date in .snyk (if fixing is not yet feasible; at most 30 days,
+  as set by max_ignore_expiry_days in the rego params files above)
 
-Relevant file: .snyk
+Relevant file: .snyk (in the relevant repo)
