@@ -41,11 +41,14 @@ jobs:
               if (.vulns | length) == 0
               then "No Snyk vulnerabilities :-)"
               else
-                .vulns[0] as $v |
-                ($v.days_remaining | ceil) as $d |
-                (if $d == 1 then "day" else "days" end) as $days |
-                (if $v.mechanism == "rego_limit" then "rego" else ".snyk" end) as $mech |
-                "Next: \($v.full_id) (\($v.severity)) on \($v.artifact) will cause non-compliance in \($d) \($days) (\($mech))"
+                .vulns[0]                         as $v         |
+                ($v.days_remaining | ceil)        as $d         |
+                "Next vuln: \($v.full_id)"        as $next_vuln |
+                "Severity: \($v.severity)"        as $severity  |
+                "Repo: \($v.artifact)"            as $repo      |
+                "Days till non-compliance: \($d)" as $days_till |
+                "Mechanism: \($v.mechanism)"      as $mechanism |
+                "\($next_vuln)\n\($severity)\n\($repo)\n\($days_till)\n\($mechanism)"
               end'
             echo "EOF"
           } >> ${GITHUB_ENV}
@@ -54,7 +57,7 @@ jobs:
         uses: ./.github/actions/send-slack-message
         with:
           slack_url: ${{secrets.SLACK_WEBHOOK_URL}}
-          message: "${{ inputs.kosli_env }}: ${SLACK_MESSAGE}\nSee ${GITHUB_RUN_URL}\nResponse guide: ${RESPONSE_GUIDE_URL}"
+          message: "Environment: ${{ inputs.kosli_env }}\n${SLACK_MESSAGE}\nSee: ${GITHUB_RUN_URL}\nResponse guide: ${RESPONSE_GUIDE_URL}"
 
       - name: Send Slack -- workflow failure
         if: failure()
