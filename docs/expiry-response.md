@@ -13,13 +13,13 @@ defined in the rego params for that environment.
 
 Example step summary entry:
 
-  | Level | Days remaining | Mechanism  | Vuln ID |
-  |-------|----------------|------------|---------|
-  | high  | 1              | rego_limit | [SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822](https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMMOBYSPDYSTREAMSPDY-16304822) |
+    | Level | Days remaining | Mechanism  | Vuln ID |
+    |-------|----------------|------------|---------|
+    | medium | 1              | rego_limit | [SNYK-GOLANG-GITHUBCOMSIGSTORETIMESTAMPAUTHORITYV2PKGVERIFICATION-16134930](https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMSIGSTORETIMESTAMPAUTHORITYV2PKGVERIFICATION-16134930) |
 
-  There is no .snyk ignore entry. The vuln has been open for 1 day
-  against a 2-day limit for high severity in aws-beta (2 - 1 = 1
-  day remaining).
+    There is no .snyk ignore entry. The vuln has been open for 3 days
+    against a 4-day limit for medium severity in aws-beta (4 - 3 = 1
+    day remaining).
 
 The rego expiry days cannot be extended. The countdown is based on
 when the vuln first appeared in the environment for the relevant repo,
@@ -41,12 +41,12 @@ The .snyk ignore entry for this vuln is about to expire.
 
 Example step summary entry:
 
-  | Level | Days remaining | Mechanism       | Vuln ID |
-  |-------|----------------|-----------------|---------|
-  | high  | 3              | dot_snyk_expiry | [SNYK-ALPINE322-ZLIB-16078399](https://security.snyk.io/vuln/SNYK-ALPINE322-ZLIB-16078399) |
+    | Level | Days remaining | Mechanism       | Vuln ID |
+    |-------|----------------|-----------------|---------|
+    | high  | 3              | dot_snyk_expiry | [SNYK-ALPINE322-ZLIB-16078399](https://security.snyk.io/vuln/SNYK-ALPINE322-ZLIB-16078399) |
 
-  The .snyk file contains an ignore entry for this vuln whose expiry
-  date is 3 days away.
+    The .snyk file contains an ignore entry for this vuln whose expiry
+    date is 3 days away.
 
 Options:
 - Fix the underlying dependency (removes the vuln entirely)
