@@ -13,13 +13,15 @@ defined in the rego params for that environment.
 
 Example step summary entry:
 
-    | Level | Days remaining | Mechanism  | Vuln ID |
-    |-------|----------------|------------|---------|
-    | medium | 1              | rego_limit | [SNYK-GOLANG-GITHUBCOMSIGSTORETIMESTAMPAUTHORITYV2PKGVERIFICATION-16134930](https://security.snyk.io/vuln/SNYK-GOLANG-GITHUBCOMSIGSTORETIMESTAMPAUTHORITYV2PKGVERIFICATION-16134930) |
+<pre>
+| Level  | Days remaining | Mechanism  | Vuln ID |
+|--------|----------------|------------|---------|
+| medium | 1              | rego_limit | SNYK-GOLANG-GITHUBCOMSIGSTORETIMESTAMPAUTHORITYV2PKGVERIFICATION-16134930 |
+</pre>
 
-    There is no .snyk ignore entry. The vuln has been open for 3 days
-    against a 4-day limit for medium severity in aws-beta (4 - 3 = 1
-    day remaining).
+This means there is no .snyk ignore entry. The vuln has been open for 3 days
+against a 4-day limit for medium severity in aws-beta (4 - 3 = 1
+day remaining).
 
 The rego expiry days cannot be extended. The countdown is based on
 when the vuln first appeared in the environment for the relevant repo,
@@ -41,16 +43,17 @@ The .snyk ignore entry for this vuln is about to expire.
 
 Example step summary entry:
 
-    | Level | Days remaining | Mechanism       | Vuln ID |
-    |-------|----------------|-----------------|---------|
-    | high  | 3              | dot_snyk_expiry | [SNYK-ALPINE322-ZLIB-16078399](https://security.snyk.io/vuln/SNYK-ALPINE322-ZLIB-16078399) |
+<pre>
+| Level | Days remaining | Mechanism       | Vuln ID |
+|-------|----------------|-----------------|---------|
+| high  | 3              | dot_snyk_expiry | SNYK-ALPINE322-ZLIB-16078399 |
+</pre>
 
-    The .snyk file contains an ignore entry for this vuln whose expiry
-    date is 3 days away.
+This means the .snyk file contains an ignore entry for this vuln whose expiry
+date is 3 days away.
 
 Options:
 - Fix the underlying dependency (removes the vuln entirely)
-- Extend the expiry date in .snyk (if fixing is not yet feasible; at most 30 days,
-  as set by max_ignore_expiry_days in the rego params files above)
+- Extend the expiry date in .snyk (if fixing is not yet feasible). You can extend by at most 30 days, as set by max_ignore_expiry_days in the rego params files above.
 
 Relevant file: .snyk (in the relevant repo)
