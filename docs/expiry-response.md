@@ -28,7 +28,7 @@ when the vuln first appeared in the environment for the relevant repo,
 not on any configurable date.
 
 Options:
-- Fix the underlying dependency (removes the vuln entirely)
+- Fix the underlying dependency and deploy (removes the vuln entirely)
 - Add an explicit .snyk ignore entry (shifts it to dot_snyk_expiry
   and buys more time)
 
@@ -53,7 +53,7 @@ This means the .snyk file contains an ignore entry for this vuln whose expiry
 date is 3 days away.
 
 Options:
-- Fix the underlying dependency (removes the vuln entirely)
+- Fix the underlying dependency and deploy (removes the vuln entirely)
 - Extend the expiry date in .snyk (if fixing is not yet feasible). You can extend by at most 30 days, as set by max_ignore_expiry_days in the rego params files above.
 
 Relevant file: .snyk (in the relevant repo)
