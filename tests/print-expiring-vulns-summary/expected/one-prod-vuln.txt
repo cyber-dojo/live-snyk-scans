@@ -2,8 +2,20 @@
 
 Maximum .snyk ignore expiry: 2025-07-01T00:00:00.000Z (30 days from today)
 
-### creator (Count=1)
+### Critical (Count=0)
 
-| Level | Days remaining | Mechanism | Vuln ID |
-|-------|----------------|-----------|---------|
-| high | 2 | rego_limit | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
+No vulnerabilities.
+
+### High (Count=1)
+
+| Artifact | Days remaining | Mechanism | Vuln ID |
+|----------|----------------|-----------|---------|
+| creator | 2 | rego | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
+
+### Medium (Count=0)
+
+No vulnerabilities.
+
+### Low (Count=0)
+
+No vulnerabilities.

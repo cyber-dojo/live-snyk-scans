@@ -2,10 +2,23 @@
 
 Maximum .snyk ignore expiry: 2025-07-01T00:00:00.000Z (30 days from today)
 
-### creator (Count=3)
+### Critical (Count=0)
 
-| Level | Days remaining | Mechanism | Vuln ID |
-|-------|----------------|-----------|---------|
-| high | 1 | dot_snyk_expiry | [SNYK-GOLANG-GOLANG-3208976](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANG-3208976) |
-| high | 5 | rego_limit | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
-| medium | 6 | rego_limit | [SNYK-GOLANG-GOLANGORGJWTV4-3180456](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGJWTV4-3180456) |
+No vulnerabilities.
+
+### High (Count=2)
+
+| Artifact | Days remaining | Mechanism | Vuln ID |
+|----------|----------------|-----------|---------|
+| creator | 1 | .snyk | [SNYK-GOLANG-GOLANG-3208976](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANG-3208976) |
+| creator | 5 | rego | [SNYK-GOLANG-NETHTTP-3321444](https://security.snyk.io/vuln/SNYK-GOLANG-NETHTTP-3321444) |
+
+### Medium (Count=1)
+
+| Artifact | Days remaining | Mechanism | Vuln ID |
+|----------|----------------|-----------|---------|
+| creator | 6 | rego | [SNYK-GOLANG-GOLANGORGJWTV4-3180456](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGJWTV4-3180456) |
+
+### Low (Count=0)
+
+No vulnerabilities.

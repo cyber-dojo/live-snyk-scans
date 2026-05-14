@@ -7,7 +7,7 @@ import sys
 from datetime import date, timedelta
 
 
-SEVERITY_ORDER = ["low", "medium", "high", "critical"]
+SEVERITY_ORDER = ["critical", "high", "medium", "low"]
 
 
 def mechanism_label(mechanism):
@@ -63,13 +63,7 @@ example output:
 
   Maximum .snyk ignore expiry: 2026-06-11T00:00:00.000Z (30 days from today)
 
-  ### Low (Count=1)
-
-  | Artifact | Days remaining | Mechanism | Vuln ID |
-  |----------|----------------|-----------|---------|
-  | creator | 5 | rego | [SNYK-ALPINE322-NGHTTP2-16426989](https://security.snyk.io/vuln/SNYK-ALPINE322-NGHTTP2-16426989) |
-
-  ### Medium (Count=0)
+  ### Critical (Count=0)
 
   No vulnerabilities.
 
@@ -79,9 +73,15 @@ example output:
   |----------|----------------|-----------|---------|
   | runner | 20 | .snyk | [SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXNETHTTP2-16535157) |
 
-  ### Critical (Count=0)
+  ### Medium (Count=0)
 
   No vulnerabilities.
+
+  ### Low (Count=1)
+
+  | Artifact | Days remaining | Mechanism | Vuln ID |
+  |----------|----------------|-----------|---------|
+  | creator | 5 | rego | [SNYK-ALPINE322-NGHTTP2-16426989](https://security.snyk.io/vuln/SNYK-ALPINE322-NGHTTP2-16426989) |
 """
 
 

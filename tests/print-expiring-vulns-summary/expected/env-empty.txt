@@ -1,3 +1,17 @@
 ## aws-beta (Snyk vulns tracked: Count=0)
 
-No Snyk vulnerabilities :-)
+### Critical (Count=0)
+
+No vulnerabilities.
+
+### High (Count=0)
+
+No vulnerabilities.
+
+### Medium (Count=0)
+
+No vulnerabilities.
+
+### Low (Count=0)
+
+No vulnerabilities.
