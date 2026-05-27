@@ -107,7 +107,7 @@ jobs:
       vulns: ${{steps.set-vulns.outputs.vulns}}
     permissions:
       id-token: write
-      contents: write
+      contents: read
     env:
       VULNS_FILENAME: vulns.json
       STALE_VULNS_FILENAME: stale_vulns.json
