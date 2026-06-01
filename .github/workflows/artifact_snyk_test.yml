@@ -287,15 +287,15 @@ jobs:
       - name: Add time vuln first seen in the repo
         run: |
           kosli create flow ${KOSLI_FLOW} \
-            --description "Individual Snyk vuln trails for ${{inputs.kosli_env}} artifacts"
+            --description "Individual Snyk vuln trails for ${{inputs.kosli_env}} artifacts" \
+            --use-empty-template
+
           WORKFLOW_URL="https://github.com/cyber-dojo/snyk-scanning/blob/main/.github/workflows/artifact_snyk_test.yml"
           kosli tag flow ${KOSLI_FLOW} \
             --set kind=run \
             --set ci=github \
             --set workflow_url="${WORKFLOW_URL}"
-          # Ensure trail has empty template regardless of flow history
-          echo "version: 1" > /tmp/empty-template.yml
-          kosli begin trail ${KOSLI_TRAIL} --template-file /tmp/empty-template.yml # idempotent
+
           kosli get trail ${KOSLI_TRAIL} --debug=false --output=json > trail.json
 
           FIRST_SEEN_TS="$(jq '.created_at' trail.json)"

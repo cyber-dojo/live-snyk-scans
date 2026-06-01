@@ -1,6 +1,6 @@
 A repo holding CI workflows to run Snyk container tests on the Docker images running in, or being deployed to, cyber-dojo's
-[aws-beta](https://app.kosli.com/cyber-dojo/environments/aws-beta/events/) and
-[aws-prod](https://app.kosli.com/cyber-dojo/environments/aws-prod/events/) runtime environments.
+[aws-beta](https://app.kosli.com/cyber-dojo/environments/aws-beta/) and
+[aws-prod](https://app.kosli.com/cyber-dojo/environments/aws-prod/) runtime environments.
 
 ## The main problems
 1. A snyk container scan produces a sarif output file, with ignored vulnerabilities from the .snyk policy file already filtered out. We'd prefer a complete picture of all the vulnerabilities.
