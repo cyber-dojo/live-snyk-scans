@@ -296,6 +296,7 @@ jobs:
             --set ci=github \
             --set workflow_url="${WORKFLOW_URL}"
 
+          kosli begin trail ${KOSLI_TRAIL}
           kosli get trail ${KOSLI_TRAIL} --debug=false --output=json > trail.json
 
           FIRST_SEEN_TS="$(jq '.created_at' trail.json)"
